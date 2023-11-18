@@ -1,0 +1,117 @@
+{
+  "iconDefinitions": {
+    "_file_markdown": {
+      "iconPath": "./icons/files/markdown.svg"
+    },
+    "_file_makefile": {
+      "iconPath": "./icons/files/makefile.svg"
+    },
+    "_file_html": {
+      "iconPath": "./icons/files/html.svg"
+    },
+    "_file_robot": {
+      "iconPath": "./icons/files/robot.svg"
+    },
+    "_file_git": {
+      "iconPath": "./icons/files/git.svg"
+    },
+    "_file_gitlab": {
+      "iconPath": "./icons/files/gitlab.svg"
+    },
+    "_file_xml": {
+      "iconPath": "./icons/files/xml.svg"
+    },
+    "_file_yaml": {
+      "iconPath": "./icons/files/yaml.svg"
+    },
+    "_file_angular_module": {
+      "iconPath": "./icons/files/angular_module_dart.svg"
+    },
+    "_file_angular_routing": {
+      "iconPath": "./icons/files/angular_routing.svg"
+    },
+    "_file_editorconfig": {
+      "iconPath": "./icons/files/editor_config.svg"
+    },
+    "_file_test_ts": {
+      "iconPath": "./icons/files/test_ts.svg"
+    },
+    "_file_browserlist": {
+      "iconPath": "./icons/files/browserlist.svg"
+    },
+    "_file_proxy": {
+      "iconPath": "./icons/files/proxy.svg"
+    },
+    "_file_package_lock": {
+      "iconPath": "./icons/files/package_lock.svg"
+    },
+    "_file_package": {
+      "iconPath": "./icons/files/package.svg"
+    },
+    "_file_karma": {
+      "iconPath": "./icons/files/karma.svg"
+    },
+    "_file_ts_official_json": {
+      "iconPath": "./icons/files/json_spec.svg"
+    },
+    "_file_ts_config_json": {
+      "iconPath": "./icons/files/config.svg"
+    },
+    "_file_ts_doc_json": {
+      "iconPath": "./icons/files/json.svg"
+    },
+    "_file_ts_spec_json": {
+      "iconPath": "./icons/files/json_schema.svg"
+    },
+    "_file_env_dev": {
+      "iconPath": "./icons/files/dollar1.svg"
+    },
+    "_file_env_prod": {
+      "iconPath": "./icons/files/dollar2.svg"
+    },
+    "_file_symfony_file": {
+      "iconPath": "./icons/files/symfony_file_2.svg"
+    },
+    "_file_composer_file": {
+      "iconPath": "./icons/files/composer_file.svg"
+    },
+    "_file_composer_lock": {
+      "iconPath": "./icons/files/composer_lock_3.svg"
+    }
+  },
+  "file": "_file_default",
+  "fileExtensions": {
+    "browserslistrc": "_file_browserlist",
+    "editorconfig":"_file_editorconfig",
+    "env": "_file_env_prod",
+    "gitignore": "_file_git",
+    "html": "_file_html",
+    "md": "_file_markdown",
+    "svelte": "_file_svelte",
+    "yaml":"_file_yaml",
+    "yml":"_file_gitlab"
+  },
+  "fileNames": {
+    "*module.ts": "_file_angular_module",
+    "*routing.module.ts": "_file_angular_routing",
+    "composer.json": "_file_composer_file",
+    "composer.lock": "_file_composer_lock",
+    "env.local": "_file_env_dev",
+    "environment.prod.ts": "_file_env_prod",
+    "environment.ts": "_file_env_dev",
+    "karma.conf.js": "_file_karma",
+    "makefile": "_file_makefile",
+    "package.json": "_file_package",
+    "package-lock.json": "_file_package_lock",
+    "proxy.conf.json": "_file_proxy",
+    "README.md": "_file_markdown",
+    "robots.txt": "_file_robot",
+    "sitemap.xml": "_file_xml",
+    "symfony.lock": "_file_symfony_file",
+    "test.ts": "_file_test_ts",
+    "tsconfig.json": "_file_ts_config_json",
+    "tsconfig.app.json": "_file_ts_official_json",
+    "tsconfig.doc.json": "_file_ts_doc_json",
+    "tsconfig.spec.json": "_file_ts_spec_json"
+  }
+}
