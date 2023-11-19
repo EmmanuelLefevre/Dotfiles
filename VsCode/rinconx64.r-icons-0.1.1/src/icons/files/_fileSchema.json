@@ -96,7 +96,7 @@
     "*routing.module.ts": "_file_angular_routing",
     "composer.json": "_file_composer_file",
     "composer.lock": "_file_composer_lock",
-    "env.local": "_file_env_dev",
+    ".env.local": "_file_env_dev",
     "environment.prod.ts": "_file_env_prod",
     "environment.ts": "_file_env_dev",
     "karma.conf.js": "_file_karma",
