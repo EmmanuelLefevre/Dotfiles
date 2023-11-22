@@ -77,6 +77,12 @@
     },
     "_file_composer_lock": {
       "iconPath": "./icons/files/composer_lock_3.svg"
+    },
+    "_file_txt": {
+      "iconPath": "./icons/files/text.svg"
+    },
+    "_file_properties": {
+      "iconPath": "./icons/files/sonar_2.svg"
     }
   },
   "file": "_file_default",
@@ -88,6 +94,8 @@
     "html": "_file_html",
     "md": "_file_markdown",
     "svelte": "_file_svelte",
+    "properties": "_file_properties",
+    "txt": "_file_txt",
     "yaml":"_file_yaml",
     "yml":"_file_gitlab"
   },
