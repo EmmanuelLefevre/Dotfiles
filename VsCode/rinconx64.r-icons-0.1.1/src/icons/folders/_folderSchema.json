@@ -33,24 +33,11 @@
       "iconPath": "./icons/folders/folder-config-open.svg"
     },
 
-    "_folder_lib": {
-      "iconPath": "./icons/folders/lib.svg"
+    "_folder_migrations": {
+      "iconPath": "./icons/folders/folder_migrations.svg"
     },
-    "_folder_lib_open": {
-      "iconPath": "./icons/folders/lib_open.svg"
-    },
-    "_folder_lib_light": {
-      "iconPath": "./icons/folders/lib_light.svg"
-    },
-    "_folder_lib_open_light": {
-      "iconPath": "./icons/folders/lib_open_light.svg"
-    },
-
-    "_folder_migration": {
-      "iconPath": "./icons/folders/folder_migration.svg"
-    },
-    "_folder_migration_open": {
-      "iconPath": "./icons/folders/folder_migration_open.svg"
+    "_folder_migrations_open": {
+      "iconPath": "./icons/folders/folder_migrations_open.svg"
     },
 
     "_folder_public": {
@@ -103,17 +90,17 @@
     },
 
     "_folder_services": {
-      "iconPath": "./icons/folders/folder-services.svg"
+      "iconPath": "./icons/folders/folder_services.svg"
     },
     "_folder_services_open": {
-      "iconPath": "./icons/folders/folder-services-open.svg"
+      "iconPath": "./icons/folders/folder_services_open.svg"
     },
 
-    "_folder_pipe_2": {
-      "iconPath": "./icons/folders/folder_pipe_2.svg"
+    "_folder_pipes": {
+      "iconPath": "./icons/folders/folder_pipes.svg"
     },
-    "_folder_pipe_2_open": {
-      "iconPath": "./icons/folders/folder_pipe_2_open.svg"
+    "_folder_pipes_open": {
+      "iconPath": "./icons/folders/folder_pipes_open.svg"
     },
 
     "_folder_interfaces_2": {
@@ -305,18 +292,130 @@
       "iconPath": "./icons/folders/folder_tests_open.svg"
     },
 
-    "_folder_bin": {
-      "iconPath": "./icons/folders/folder_vm.svg"
-    },
-    "_folder_bin_open": {
-      "iconPath": "./icons/folders/folder_vm_open.svg"
-    },
-
     "_folder_prod": {
       "iconPath": "./icons/folders/folder_prod.svg"
     },
     "_folder_prod_open": {
       "iconPath": "./icons/folders/folder_prod_open.svg"
+    },
+
+    "_folder_fixtures": {
+      "iconPath": "./icons/folders/folder_fixtures.svg"
+    },
+    "_folder_fixtures_open": {
+      "iconPath": "./icons/folders/folder_fixtures_open.svg"
+    },
+
+    "_folder_database_2": {
+      "iconPath": "./icons/folders/folder_database_2.svg"
+    },
+    "_folder_database_2_open": {
+      "iconPath": "./icons/folders/folder_database_2_open.svg"
+    },
+
+    "_folder_userdata": {
+      "iconPath": "./icons/folders/folder_userdata.svg"
+    },
+    "_folder_userdata_open": {
+      "iconPath": "./icons/folders/folder_userdata_open.svg"
+    },
+
+    "_folder_events": {
+      "iconPath": "./icons/folders/folder_events.svg"
+    },
+    "_folder_events_open": {
+      "iconPath": "./icons/folders/folder_events_open.svg"
+    },
+
+    "_folder_validators": {
+      "iconPath": "./icons/folders/folder_validators.svg"
+    },
+    "_folder_validators_open": {
+      "iconPath": "./icons/folders/folder_validators_open.svg"
+    },
+
+    "_folder_exceptions": {
+      "iconPath": "./icons/folders/folder_exceptions.svg"
+    },
+    "_folder_exceptions_open": {
+      "iconPath": "./icons/folders/folder_exceptions_open.svg"
+    },
+
+    "_folder_entity": {
+      "iconPath": "./icons/folders/folder_entity.svg"
+    },
+    "_folder_entity_open": {
+      "iconPath": "./icons/folders/folder_entity_open.svg"
+    },
+
+    "_folder_doctrine": {
+      "iconPath": "./icons/folders/folder_doctrine.svg"
+    },
+    "_folder_doctrine_open": {
+      "iconPath": "./icons/folders/folder_doctrine_open.svg"
+    },
+
+    "_folder_log": {
+      "iconPath": "./icons/folders/folder_log.svg"
+    },
+    "_folder_log_open": {
+      "iconPath": "./icons/folders/folder_log_open.svg"
+    },
+
+    "_folder_var": {
+      "iconPath": "./icons/folders/folder_var.svg"
+    },
+    "_folder_var_open": {
+      "iconPath": "./icons/folders/folder_var_open.svg"
+    },
+
+    "_folder_bin": {
+      "iconPath": "./icons/folders/folder_bin.svg"
+    },
+    "_folder_bin_open": {
+      "iconPath": "./icons/folders/folder_bin_open.svg"
+    },
+
+    "_folder_mail": {
+      "iconPath": "./icons/folders/folder_mail.svg"
+    },
+    "_folder_mail_open": {
+      "iconPath": "./icons/folders/folder_mail_open.svg"
+    },
+
+    "_folder_json": {
+      "iconPath": "./icons/folders/folder_json.svg"
+    },
+    "_folder_json_open": {
+      "iconPath": "./icons/folders/folder_json_open.svg"
+    },
+
+    "_folder_lib": {
+      "iconPath": "./icons/folders/folder_lib.svg"
+    },
+    "_folder_lib_open": {
+      "iconPath": "./icons/folders/folder_lib_open.svg"
+    },
+
+    "_folder_snackbar": {
+      "iconPath": "./icons/folders/folder_snackbar.svg"
+    },
+    "_folder_snackbar_open": {
+      "iconPath": "./icons/folders/folder_snackbar_open.svg"
+    },
+
+    "_folder_footer": {
+      "iconPath": "./icons/folders/folder_footer.svg"
+    },
+    "_folder_footer_open": {
+      "iconPath": "./icons/folders/folder_footer_open.svg"
+    },
+
+    "_folder_error": {
+      "iconPath": "./icons/folders/folder_error.svg"
+    },
+    "_folder_error_open": {
+      "iconPath": "./icons/folders/folder_error_open.svg"
     }
   },
 
@@ -324,8 +423,7 @@
   "folderExpanded": "_folder_default_open",
   "folderNames": {
     "config": "_folder_config",
-    "lib": "_folder_lib",
-    "migrations": "_folder_migration",
+    "migrations": "_folder_migrations",
     "public": "_folder_public",
     "components": "_folder_components",
     "_components": "_folder_sub_components",
@@ -336,8 +434,10 @@
     "src": "_folder_src",
     "_interfaces": "_folder_interfaces_2",
     "_services": "_folder_services",
+    "service": "_folder_services",
     "utils": "_folder_utils_2",
-    "pipes": "_folder_pipe_2",
+    "utility": "_folder_utils_2",
+    "pipes": "_folder_pipes",
     "guard": "_folder_guard_2",
     "middleware": "_folder_middleware",
     "auth": "_folder_secure_2",
@@ -366,13 +466,31 @@
     "vendor": "_folder_vendor",
     "controller": "_folder_controllers",
     "test": "_folder_tests",
-    "bin": "_folder_vm",
-    "prod": "_folder_prod"
+    "prod": "_folder_prod",
+    "datafixtures": "_folder_fixtures",
+    "repository": "_folder_database_2",
+    "eventsubscriber": "_folder_events",
+    "eventlistener": "_folder_events",
+    "validator": "_folder_validators",
+    "exception": "_folder_exceptions",
+    "datapersister": "_folder_userdata",
+    "dataprovider": "_folder_userdata",
+    "doctrine": "_folder_doctrine",
+    "log": "_folder_log",
+    "var": "_folder_var",
+    "bin": "_folder_bin",
+    "entity": "_folder_entity",
+    "mailing": "_folder_mail",
+    "json": "_folder_json",
+    "bundles": "_folder_lib",
+    "lib": "_folder_lib",
+    "snackbar": "_folder_snackbar",
+    "footer": "_folder_footer",
+    "error": "_folder_error"
   },
   "folderNamesExpanded": {
     "config": "_folder_config_open",
-    "lib": "_folder_lib_open",
-    "migrations": "_folder_migration_open",
+    "migrations": "_folder_migrations_open",
     "public": "_folder_public_open",
     "components": "_folder_components_open",
     "_components": "_folder_sub_components_open",
@@ -383,8 +501,10 @@
     "src": "_folder_src_open",
     "_interfaces": "_folder_interfaces_2_open",
     "utils": "_folder_utils_2_open",
+    "utility": "_folder_utils_2_open",
     "_services": "_folder_services_open",
-    "pipes": "_folder_pipe_2_open",
+    "service": "_folder_services_open",
+    "pipes": "_folder_pipes_open",
     "guard": "_folder_guard_2_open",
     "middleware": "_folder_middleware_open",
     "auth": "_folder_secure_2",
@@ -413,7 +533,26 @@
     "vendor": "_folder_vendor_open",
     "controller": "_folder_controllers_open",
     "test": "_folder_tests_open",
-    "bin": "_folder_vm_open",
-    "prod": "_folder_prod_open"
+    "prod": "_folder_prod_open",
+    "datafixtures": "_folder_fixtures_open",
+    "repository": "_folder_database_2_open",
+    "eventsubscriber": "_folder_events_open",
+    "eventlistener": "_folder_events_open",
+    "validator": "_folder_validators_open",
+    "exception": "_folder_exceptions_open",
+    "datapersister": "_folder_userdata_open",
+    "dataprovider": "_folder_userdata_open",
+    "doctrine": "_folder_doctrine_open",
+    "log": "_folder_log_open",
+    "var": "_folder_var_open",
+    "bin": "_folder_bin_open",
+    "entity": "_folder_entity_open",
+    "mailing": "_folder_mail_open",
+    "json": "_folder_json_open",
+    "bundles": "_folder_lib_open",
+    "lib": "_folder_lib_open",
+    "snackbar": "_folder_snackbar_open",
+    "footer": "_folder_footer_open",
+    "error": "_folder_error_open"
   }
 }
