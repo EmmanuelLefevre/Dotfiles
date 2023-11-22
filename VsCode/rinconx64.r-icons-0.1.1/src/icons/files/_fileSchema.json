@@ -27,9 +27,6 @@
     "_file_angular_module": {
       "iconPath": "./icons/files/angular_module_dart.svg"
     },
-    "_file_angular_routing": {
-      "iconPath": "./icons/files/angular_routing.svg"
-    },
     "_file_editorconfig": {
       "iconPath": "./icons/files/editor_config.svg"
     },
@@ -83,37 +80,68 @@
     },
     "_file_properties": {
       "iconPath": "./icons/files/sonar_2.svg"
+    },
+    "_file_angular_resolver": {
+      "iconPath": "./icons/files/angular_resolver.svg"
+    },
+    "_file_angular_component": {
+      "iconPath": "./icons/files/angular_component.svg"
+    },
+    "_file_angular_service": {
+      "iconPath": "./icons/files/angular_service.svg"
+    },
+    "_file_angular_guard": {
+      "iconPath": "./icons/files/angular_guard.svg"
+    },
+    "_file_angular_interceptor": {
+      "iconPath": "./icons/files/angular_interceptor.svg"
+    },
+    "_file_angular_pipe": {
+      "iconPath": "./icons/files/angular_pipe.svg"
+    },
+    "_file_angular_directive": {
+      "iconPath": "./icons/files/angular_directive.svg"
+    },
+    "_file_main_ts": {
+      "iconPath": "./icons/files/file_main_ts.svg"
     }
   },
   "file": "_file_default",
   "fileExtensions": {
     "browserslistrc": "_file_browserlist",
+    "component.ts": "_file_angular_component",
+    "composer.lock": "_file_composer_lock",
+    "directive.ts": "_file_angular_directive",
     "editorconfig":"_file_editorconfig",
     "env": "_file_env_prod",
     "gitignore": "_file_git",
+    "environment.ts": "_file_env_dev",
+    "guard.ts": "_file_angular_guard",
     "html": "_file_html",
     "md": "_file_markdown",
+    "module.ts": "_file_angular_module",
+    "resolver.ts": "_file_angular_resolver",
     "svelte": "_file_svelte",
+    "package-lock.json": "_file_package_lock",
+    "pipe.ts": "_file_angular_pipe",
     "properties": "_file_properties",
+    "sitemap.xml": "_file_xml",
+    "service.ts": "_file_angular_service",
     "txt": "_file_txt",
     "yaml":"_file_yaml",
     "yml":"_file_gitlab"
   },
   "fileNames": {
-    "*module.ts": "_file_angular_module",
-    "*routing.module.ts": "_file_angular_routing",
     "composer.json": "_file_composer_file",
-    "composer.lock": "_file_composer_lock",
     ".env.local": "_file_env_dev",
     "environment.prod.ts": "_file_env_prod",
-    "environment.ts": "_file_env_dev",
     "karma.conf.js": "_file_karma",
+    "interceptor.ts": "_file_angular_interceptor",
     "makefile": "_file_makefile",
+    "main.ts": "_file_main_ts",
     "package.json": "_file_package",
-    "package-lock.json": "_file_package_lock",
     "proxy.conf.json": "_file_proxy",
     "robots.txt": "_file_robot",
-    "sitemap.xml": "_file_xml",
     "symfony.lock": "_file_symfony_file",
     "test.ts": "_file_test_ts",
     "tsconfig.json": "_file_ts_config_json",
