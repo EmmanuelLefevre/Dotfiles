@@ -115,7 +115,6 @@
     "editorconfig":"_file_editorconfig",
     "env": "_file_env_prod",
     "gitignore": "_file_git",
-    "environment.ts": "_file_env_dev",
     "guard.ts": "_file_angular_guard",
     "html": "_file_html",
     "md": "_file_markdown",
@@ -134,6 +133,7 @@
   "fileNames": {
     "composer.json": "_file_composer_file",
     ".env.local": "_file_env_dev",
+    "environment.ts": "_file_env_dev",
     "environment.prod.ts": "_file_env_prod",
     "karma.conf.js": "_file_karma",
     "interceptor.ts": "_file_angular_interceptor",
