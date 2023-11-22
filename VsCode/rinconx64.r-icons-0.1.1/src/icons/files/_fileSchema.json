@@ -112,7 +112,6 @@
     "package.json": "_file_package",
     "package-lock.json": "_file_package_lock",
     "proxy.conf.json": "_file_proxy",
-    "README.md": "_file_markdown",
     "robots.txt": "_file_robot",
     "sitemap.xml": "_file_xml",
     "symfony.lock": "_file_symfony_file",
