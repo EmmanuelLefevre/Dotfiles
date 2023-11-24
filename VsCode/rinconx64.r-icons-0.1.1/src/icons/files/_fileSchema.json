@@ -110,6 +110,15 @@
     },
     "_file_arduino": {
       "iconPath": "./icons/files/arduino.svg"
+    },
+    "_file_apache": {
+      "iconPath": "./icons/files/apache.svg"
+    },
+    "_file_dockerfile": {
+      "iconPath": "./icons/files/dockerfile_2.svg"
+    },
+    "_file_docker_compose": {
+      "iconPath": "./icons/files/docker_compose.svg"
     }
   },
   "file": "_file_default",
@@ -138,10 +147,12 @@
     "service.ts": "_file_angular_service",
     "txt": "_file_txt",
     "yaml":"_file_yaml",
-    "yml":"_file_gitlab"
+    "yml": "_file_docker_compose"
   },
   "fileNames": {
+    "apache.conf": "_file_apache",
     "composer.json": "_file_composer_file",
+    "dockerfile": "_file_dockerfile",
     ".env.local": "_file_env_dev",
     "environment.ts": "_file_env_dev",
     "environment.prod.ts": "_file_env_prod",
