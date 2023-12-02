@@ -9,6 +9,7 @@
   "editor.scrollbar.horizontalScrollbarSize": 15,
   "editor.scrollbar.verticalScrollbarSize": 1,
   "files.autoSave": "afterDelay",
+  "files.eol": "\n",
   "git.confirmSync": false,
   "gitblame.inlineMessageFormat": "blame ${author.name} (${time.ago})",
   "gitblame.statusBarMessageFormat": "${author.name} (${time.ago})",
