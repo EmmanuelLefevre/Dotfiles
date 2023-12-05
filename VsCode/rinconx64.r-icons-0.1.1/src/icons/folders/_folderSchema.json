@@ -547,7 +547,7 @@
     "assets": "_folder_assets_open",
     "fonts": "_folder_fonts_open",
     "img": "_folder_fonts_open",
-    "scss": "_folder_fonts_sass",
+    "scss": "_folder_sass_open",
     "home": "_folder_home_open",
     "pwa": "_folder_api_pwa_open",
     "api": "_folder_api_pwa_open",
