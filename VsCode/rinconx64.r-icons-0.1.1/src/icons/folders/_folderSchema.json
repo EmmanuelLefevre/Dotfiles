@@ -423,6 +423,13 @@
     },
     "_folder_docker_open": {
       "iconPath": "./icons/folders/folder_docker_open.svg"
+    },
+
+    "_folder_layout": {
+      "iconPath": "./icons/folders/folder_layout.svg"
+    },
+    "_folder_layout_open": {
+      "iconPath": "./icons/folders/folder_layout_open.svg"
     }
   },
 
@@ -503,7 +510,8 @@
     "snackbar": "_folder_snackbar",
     "footer": "_folder_footer",
     "error": "_folder_error",
-    "docker": "_folder_docker"
+    "docker": "_folder_docker",
+    "layouts": "_folder_layout"
   },
   "folderNamesExpanded": {
     "config": "_folder_config_open",
@@ -580,6 +588,7 @@
     "snackbar": "_folder_snackbar_open",
     "footer": "_folder_footer_open",
     "error": "_folder_error_open",
-    "docker": "_folder_docker_open"
+    "docker": "_folder_docker_open",
+    "layouts": "_folder_layout_open"
   }
 }
