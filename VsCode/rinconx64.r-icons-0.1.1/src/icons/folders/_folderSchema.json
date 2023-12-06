@@ -430,6 +430,13 @@
     },
     "_folder_layout_open": {
       "iconPath": "./icons/folders/folder_layout_open.svg"
+    },
+
+    "_folder_css": {
+      "iconPath": "./icons/folders/folder_css.svg"
+    },
+    "_folder_css_open": {
+      "iconPath": "./icons/folders/folder_css_open.svg"
     }
   },
 
@@ -472,6 +479,7 @@
     "fonts": "_folder_fonts",
     "img": "_folder_images",
     "scss": "_folder_sass",
+    "css": "_folder_css",
     "home": "_folder_home",
     "pwa": "_folder_api_pwa",
     "api": "_folder_api_pwa_open",
@@ -552,6 +560,7 @@
     "fonts": "_folder_fonts_open",
     "img": "_folder_fonts_open",
     "scss": "_folder_sass_open",
+    "css": "_folder_css_open",
     "home": "_folder_home_open",
     "pwa": "_folder_api_pwa_open",
     "api": "_folder_api_pwa_open",
