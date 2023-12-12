@@ -1,0 +1,171 @@
+{
+  "iconDefinitions": {
+    "_file_markdown": {
+      "iconPath": "./icons/files/markdown.svg"
+    },
+    "_file_makefile": {
+      "iconPath": "./icons/files/makefile.svg"
+    },
+    "_file_html": {
+      "iconPath": "./icons/files/html.svg"
+    },
+    "_file_robot": {
+      "iconPath": "./icons/files/robot.svg"
+    },
+    "_file_git": {
+      "iconPath": "./icons/files/git.svg"
+    },
+    "_file_gitlab": {
+      "iconPath": "./icons/files/gitlab.svg"
+    },
+    "_file_xml": {
+      "iconPath": "./icons/files/xml.svg"
+    },
+    "_file_yaml": {
+      "iconPath": "./icons/files/yaml.svg"
+    },
+    "_file_angular_module": {
+      "iconPath": "./icons/files/angular_module_dart.svg"
+    },
+    "_file_editorconfig": {
+      "iconPath": "./icons/files/editor_config.svg"
+    },
+    "_file_test_ts": {
+      "iconPath": "./icons/files/test_ts.svg"
+    },
+    "_file_browserlist": {
+      "iconPath": "./icons/files/browserlist.svg"
+    },
+    "_file_proxy": {
+      "iconPath": "./icons/files/proxy.svg"
+    },
+    "_file_package_lock": {
+      "iconPath": "./icons/files/package_lock.svg"
+    },
+    "_file_package": {
+      "iconPath": "./icons/files/package.svg"
+    },
+    "_file_karma": {
+      "iconPath": "./icons/files/karma.svg"
+    },
+    "_file_ts_official_json": {
+      "iconPath": "./icons/files/json_spec.svg"
+    },
+    "_file_ts_config_json": {
+      "iconPath": "./icons/files/config.svg"
+    },
+    "_file_ts_doc_json": {
+      "iconPath": "./icons/files/json.svg"
+    },
+    "_file_ts_spec_json": {
+      "iconPath": "./icons/files/json_schema.svg"
+    },
+    "_file_env_dev": {
+      "iconPath": "./icons/files/dollar1.svg"
+    },
+    "_file_env_prod": {
+      "iconPath": "./icons/files/dollar2.svg"
+    },
+    "_file_symfony_file": {
+      "iconPath": "./icons/files/symfony_file_2.svg"
+    },
+    "_file_composer_file": {
+      "iconPath": "./icons/files/composer_file.svg"
+    },
+    "_file_composer_lock": {
+      "iconPath": "./icons/files/composer_lock_3.svg"
+    },
+    "_file_txt": {
+      "iconPath": "./icons/files/text.svg"
+    },
+    "_file_properties": {
+      "iconPath": "./icons/files/sonar_2.svg"
+    },
+    "_file_angular_resolver": {
+      "iconPath": "./icons/files/angular_resolver.svg"
+    },
+    "_file_angular_component": {
+      "iconPath": "./icons/files/angular_component.svg"
+    },
+    "_file_angular_service": {
+      "iconPath": "./icons/files/angular_service.svg"
+    },
+    "_file_angular_guard": {
+      "iconPath": "./icons/files/angular_guard.svg"
+    },
+    "_file_angular_interceptor": {
+      "iconPath": "./icons/files/angular_interceptor.svg"
+    },
+    "_file_angular_pipe": {
+      "iconPath": "./icons/files/angular_pipe.svg"
+    },
+    "_file_angular_directive": {
+      "iconPath": "./icons/files/angular_directive.svg"
+    },
+    "_file_main_ts": {
+      "iconPath": "./icons/files/file_main_ts.svg"
+    },
+    "_file_css3": {
+      "iconPath": "./icons/files/css3.svg"
+    },
+    "_file_arduino": {
+      "iconPath": "./icons/files/arduino.svg"
+    },
+    "_file_apache": {
+      "iconPath": "./icons/files/apache.svg"
+    },
+    "_file_dockerfile": {
+      "iconPath": "./icons/files/dockerfile_2.svg"
+    },
+    "_file_docker_compose": {
+      "iconPath": "./icons/files/docker_compose.svg"
+    }
+  },
+  "file": "_file_default",
+  "fileExtensions": {
+    "browserslistrc": "_file_browserlist",
+    "css": "_file_css3",
+    "component.ts": "_file_angular_component",
+    "composer.lock": "_file_composer_lock",
+    "directive.ts": "_file_angular_directive",
+    "editorconfig":"_file_editorconfig",
+    "env": "_file_env_prod",
+    "gitignore": "_file_git",
+    "guard.ts": "_file_angular_guard",
+    "html": "_file_html",
+    "ino": "_file_arduino",
+    "interceptor.ts": "_file_angular_interceptor",
+    "karma.conf.js": "_file_karma",
+    "md": "_file_markdown",
+    "module.ts": "_file_angular_module",
+    "resolver.ts": "_file_angular_resolver",
+    "svelte": "_file_svelte",
+    "package-lock.json": "_file_package_lock",
+    "pipe.ts": "_file_angular_pipe",
+    "properties": "_file_properties",
+    "sitemap.xml": "_file_xml",
+    "service.ts": "_file_angular_service",
+    "txt": "_file_txt",
+    "yaml":"_file_yaml",
+    "yml": "_file_docker_compose"
+  },
+  "fileNames": {
+    "apache.conf": "_file_apache",
+    "composer.json": "_file_composer_file",
+    "dockerfile": "_file_dockerfile",
+    ".env.local": "_file_env_dev",
+    "environment.ts": "_file_env_dev",
+    "environment.prod.ts": "_file_env_prod",
+    "makefile": "_file_makefile",
+    "main.ts": "_file_main_ts",
+    "package.json": "_file_package",
+    "proxy.conf.json": "_file_proxy",
+    "robots.txt": "_file_robot",
+    "symfony.lock": "_file_symfony_file",
+    "test.ts": "_file_test_ts",
+    "tsconfig.json": "_file_ts_config_json",
+    "tsconfig.app.json": "_file_ts_official_json",
+    "tsconfig.doc.json": "_file_ts_doc_json",
+    "tsconfig.spec.json": "_file_ts_spec_json"
+  }
+}
