@@ -122,6 +122,9 @@
     },
     "_file_nvmrc": {
       "iconPath": "./icons/files/nvmrc.svg"
+    },
+    "_file_swagger": {
+      "iconPath": "./icons/files/swagger.svg"
     }
   },
   "file": "_file_default",
@@ -165,6 +168,7 @@
     "package.json": "_file_package",
     "proxy.conf.json": "_file_proxy",
     "robots.txt": "_file_robot",
+    "swagger.js": "_file_swagger",
     "symfony.lock": "_file_symfony_file",
     "test.ts": "_file_test_ts",
     "tsconfig.json": "_file_ts_config_json",
