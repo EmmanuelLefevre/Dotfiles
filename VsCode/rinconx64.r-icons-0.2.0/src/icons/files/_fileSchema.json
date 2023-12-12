@@ -119,6 +119,9 @@
     },
     "_file_docker_compose": {
       "iconPath": "./icons/files/docker_compose.svg"
+    },
+    "_file_nvmrc": {
+      "iconPath": "./icons/files/nvmrc.svg"
     }
   },
   "file": "_file_default",
@@ -147,7 +150,8 @@
     "service.ts": "_file_angular_service",
     "txt": "_file_txt",
     "yaml":"_file_yaml",
-    "yml": "_file_docker_compose"
+    "yml": "_file_docker_compose",
+    "nvmrc": "_file_nvmrc"
   },
   "fileNames": {
     "apache.conf": "_file_apache",
