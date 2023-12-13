@@ -437,6 +437,13 @@
     },
     "_folder_css_open": {
       "iconPath": "./icons/folders/folder_css_open.svg"
+    },
+
+    "_folder_validation": {
+      "iconPath": "./icons/folders/folder_validation.svg"
+    },
+    "_folder_validation_open": {
+      "iconPath": "./icons/folders/folder_validation_open.svg"
     }
   },
 
@@ -460,6 +467,7 @@
     "_services": "_folder_services",
     "service": "_folder_services",
     "utils": "_folder_utils_2",
+    "_utils": "_folder_utils_2",
     "utility": "_folder_utils_2",
     "pipes": "_folder_pipes",
     "guard": "_folder_guard_2",
@@ -502,6 +510,8 @@
     "repository": "_folder_database_2",
     "eventsubscriber": "_folder_events",
     "eventlistener": "_folder_events",
+    "validaion": "_folder_validation",
+    "_validation": "_folder_validation",
     "validators": "_folder_validators",
     "_validators": "_folder_validators",
     "exception": "_folder_exceptions",
@@ -521,6 +531,7 @@
     "snackbar": "_folder_snackbar",
     "footer": "_folder_footer",
     "error": "_folder_error",
+    "_errors": "_folder_error",
     "docker": "_folder_docker",
     "layouts": "_folder_layout"
   },
@@ -540,6 +551,7 @@
     "interfaces": "_folder_interfaces_2_open",
     "models": "_folder_interfaces_2_open",
     "utils": "_folder_utils_2_open",
+    "_utils": "_folder_utils_2_open",
     "utility": "_folder_utils_2_open",
     "_services": "_folder_services_open",
     "service": "_folder_services_open",
@@ -584,6 +596,8 @@
     "repository": "_folder_database_2_open",
     "eventsubscriber": "_folder_events_open",
     "eventlistener": "_folder_events_open",
+    "validaion": "_folder_validation_open",
+    "_validation": "_folder_validation_open",
     "validators": "_folder_validators_open",
     "_validators": "_folder_validators_open",
     "exception": "_folder_exceptions_open",
@@ -603,6 +617,7 @@
     "snackbar": "_folder_snackbar_open",
     "footer": "_folder_footer_open",
     "error": "_folder_error_open",
+    "_errors": "_folder_error_open",
     "docker": "_folder_docker_open",
     "layouts": "_folder_layout_open"
   }
