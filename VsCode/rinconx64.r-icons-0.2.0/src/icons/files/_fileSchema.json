@@ -125,6 +125,9 @@
     },
     "_file_swagger": {
       "iconPath": "./icons/files/swagger.svg"
+    },
+    "_file_postman": {
+      "iconPath": "./icons/files/postman.svg"
     }
   },
   "file": "_file_default",
@@ -174,6 +177,7 @@
     "tsconfig.json": "_file_ts_config_json",
     "tsconfig.app.json": "_file_ts_official_json",
     "tsconfig.doc.json": "_file_ts_doc_json",
-    "tsconfig.spec.json": "_file_ts_spec_json"
+    "tsconfig.spec.json": "_file_ts_spec_json",
+    "postman_collection.json": "_file_postman"
   }
 }
