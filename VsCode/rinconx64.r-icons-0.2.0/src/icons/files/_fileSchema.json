@@ -78,7 +78,7 @@
     "_file_txt": {
       "iconPath": "./icons/files/text.svg"
     },
-    "_file_properties": {
+    "_file_sonar": {
       "iconPath": "./icons/files/sonar_2.svg"
     },
     "_file_angular_resolver": {
@@ -151,7 +151,7 @@
     "svelte": "_file_svelte",
     "package-lock.json": "_file_package_lock",
     "pipe.ts": "_file_angular_pipe",
-    "properties": "_file_properties",
+    "sh": "_file_sonar",
     "sitemap.xml": "_file_xml",
     "service.ts": "_file_angular_service",
     "txt": "_file_txt",
