@@ -154,6 +154,7 @@
     "svelte": "_file_svelte",
     "package-lock.json": "_file_package_lock",
     "pipe.ts": "_file_angular_pipe",
+    "postman_collection.json": "_file_postman",
     "sh": "_file_sonar",
     "properties": "_file_sonar_properties",
     "sitemap.xml": "_file_xml",
@@ -181,7 +182,6 @@
     "tsconfig.json": "_file_ts_config_json",
     "tsconfig.app.json": "_file_ts_official_json",
     "tsconfig.doc.json": "_file_ts_doc_json",
-    "tsconfig.spec.json": "_file_ts_spec_json",
-    "postman_collection.json": "_file_postman"
+    "tsconfig.spec.json": "_file_ts_spec_json"
   }
 }
