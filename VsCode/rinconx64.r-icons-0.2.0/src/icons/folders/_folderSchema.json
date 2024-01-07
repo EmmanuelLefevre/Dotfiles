@@ -163,7 +163,7 @@
       "iconPath": "./icons/folders/folder_docs_2.svg"
     },
     "_folder_docs_open": {
-      "iconPath": "./icons/folders/folder_docs__2open.svg"
+      "iconPath": "./icons/folders/folder_docs_2_open.svg"
     },
 
     "_folder_modules": {
@@ -444,6 +444,20 @@
     },
     "_folder_validation_open": {
       "iconPath": "./icons/folders/folder_validation_open.svg"
+    },
+
+    "_folder_github": {
+      "iconPath": "./icons/folders/folder_github.svg"
+    },
+    "_folder_github_open": {
+      "iconPath": "./icons/folders/folder_github_open.svg"
+    },
+
+    "_folder_workflow": {
+      "iconPath": "./icons/folders/folder_workflow.svg"
+    },
+    "_folder_workflow_open": {
+      "iconPath": "./icons/folders/folder_workflow_open.svg"
     }
   },
 
@@ -535,7 +549,9 @@
     "error": "_folder_error",
     "_errors": "_folder_error",
     "docker": "_folder_docker",
-    "layouts": "_folder_layout"
+    "layouts": "_folder_layout",
+    "github": "_folder_github",
+    "workflows": "_folder_workflow"
   },
   "folderNamesExpanded": {
     "config": "_folder_config_open",
@@ -623,6 +639,8 @@
     "error": "_folder_error_open",
     "_errors": "_folder_error_open",
     "docker": "_folder_docker_open",
-    "layouts": "_folder_layout_open"
+    "layouts": "_folder_layout_open",
+    "github": "_folder_github_open",
+    "workflows": "_folder_workflow_open"
   }
 }
