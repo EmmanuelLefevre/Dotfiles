@@ -154,6 +154,6 @@
     "titleBar.activeForeground": "#8b8787",
     "titleBar.inactiveBackground": "#0153528e",
     "titleBar.inactiveForeground": "#8b8787",
-    "titleBar.border": "#a002028e",
+    "titleBar.border": "#a002028e"
   }
 }
