@@ -1,10 +1,10 @@
 {
     "$help": "https://aka.ms/terminal-documentation",
     "$schema": "https://aka.ms/terminal-profiles-schema",
-    "actions": 
+    "actions":
     [
         {
-            "command": 
+            "command":
             {
                 "action": "copy",
                 "singleLine": false
@@ -16,111 +16,106 @@
             "keys": "ctrl+v"
         },
         {
-            "command": 
+            "command": "find",
+            "keys": "ctrl+shift+f"
+        },
+        {
+            "command":
             {
                 "action": "splitPane",
                 "split": "auto",
                 "splitMode": "duplicate"
             },
             "keys": "alt+shift+d"
-        },
-        {
-            "command": "find",
-            "keys": "ctrl+shift+f"
         }
     ],
     "copyFormatting": "none",
     "copyOnSelect": false,
     "defaultProfile": "{574e775e-4f2a-5b96-ac1e-a2962a402336}",
-    "initialRows": 40,
-    "newTabMenu": 
+    "newTabMenu":
     [
         {
             "type": "remainingProfiles"
         }
     ],
-    "profiles": 
+    "profiles":
     {
-        "defaults": 
+        "defaults":
         {
             "colorScheme": "Blue Matrix",
-            "font": 
+            "font":
             {
                 "face": "FiraCode Nerd Font"
             }
         },
-        "list": 
+        "list":
         [
             {
-                "backgroundImage": "C:\\Users\\Darka\\Pictures\\Background\\Bg_11.png",
+                "backgroundImage": "C:\\Users\\darka\\Pictures\\Backgrounds\\PowerShell_bg_7.png",
+                "colorScheme": "Blue Matrix",
+                "guid": "{574e775e-4f2a-5b96-ac1e-a2962a402336}",
+                "hidden": false,
+                "name": "PowerShell",
+                "source": "Windows.Terminal.PowershellCore",
+                "tabTitle": "PowerShell"
+            },
+            {
+                "backgroundImage": "C:\\Users\\darka\\Pictures\\Backgrounds\\Git_bg_6.jpg",
+                "colorScheme": "MonaLisa",
+                "commandline": "C:\\Program Files\\Git\\bin\\bash.exe",
+                "guid": "{a1f5cc93-dd7c-42c4-a4e7-650572e4c481}",
+                "hidden": false,
+                "icon": "C:\\Program Files\\Git\\mingw64\\share\\git\\git-for-windows.ico",
+                "name": "Git Bash",
+                "startingDirectory": "C:\\Users\\darka\\Desktop\\Projets",
+                "tabTitle": "Git Bash"
+            },
+            {
+                "backgroundImage": "C:\\Users\\darka\\Pictures\\Backgrounds\\ubuntu.jpg",
+                "backgroundImageStretchMode": "uniformToFill",
+                "colorScheme": "SeaShells",
+                "cursorShape": "bar",
+                "font":
+                {
+                    "size": 12.0
+                },
+                "guid": "{d8e96812-b789-5068-a5ae-10b2fb53e95f}",
+                "hidden": false,
+                "name": "Ubuntu 24.04.1 LTS",
+                "source": "CanonicalGroupLimited.Ubuntu24.04LTS_79rhkp1fndgsc"
+            },
+            {
+                "backgroundImage": "C:\\Users\\darka\\Pictures\\Backgrounds\\Bg_11.png",
                 "colorScheme": "Cyberdyne",
                 "commandline": "%SystemRoot%\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
                 "elevate": false,
                 "guid": "{61c54bbd-c2c6-5271-96e7-009a87ff44bf}",
                 "hidden": false,
-                "name": "Windows PowerShell"
+                "name": "Windows PowerShell",
+                "tabTitle": "Windows PowerShell"
             },
             {
                 "commandline": "%SystemRoot%\\System32\\cmd.exe",
                 "guid": "{0caa0dad-35be-5f56-a8ff-afceeeaa6101}",
                 "hidden": false,
-                "name": "Invite de commandes"
+                "name": "Invite de commandes",
+                "tabTitle": "Command Invit"
             },
             {
-                "backgroundImage": "C:\\Users\\Darka\\Pictures\\Background\\PowerShell_bg_7.png",
-                "colorScheme": "Blue Matrix",
-                "guid": "{574e775e-4f2a-5b96-ac1e-a2962a402336}",
-                "hidden": false,
-                "name": "PowerShell",
-                "source": "Windows.Terminal.PowershellCore"
-            },
-            {
-                "backgroundImage": "C:\\Users\\Darka\\Pictures\\Background\\debian_bg_6.jpg",
-                "backgroundImageStretchMode": "uniformToFill",
-                "colorScheme": "Cyberdyne",
-                "guid": "{58ad8b0c-3ef8-5f4d-bc6f-13e4c00f2530}",
-                "hidden": false,
-                "name": "Debian",
-                "source": "Windows.Terminal.Wsl"
-            },
-            {
-                "font": 
-                {
-                    "face": "FiraCode Nerd Font"
-                },
                 "guid": "{b453ae62-4e3d-5e58-b989-0a998ec441b8}",
                 "hidden": false,
                 "name": "Azure Cloud Shell",
                 "source": "Windows.Terminal.Azure"
             },
             {
-                "guid": "{58843475-85bf-5414-8ef4-f331fa3f65cd}",
-                "hidden": false,
-                "name": "Developer Command Prompt for VS 2017",
-                "source": "Windows.Terminal.VisualStudio"
-            },
-            {
-                "backgroundImage": "C:\\Users\\Darka\\Pictures\\Background\\Ubuntu_bg_8.jpg",
-                "colorScheme": "Aurora",
-                "cursorShape": "bar",
-                "guid": "{d7b20cea-47a9-518c-95a4-c8bd91e2e1c6}",
-                "hidden": false,
-                "name": "Ubuntu 22.04.2 LTS",
-                "source": "CanonicalGroupLimited.Ubuntu22.04LTS_79rhkp1fndgsc"
-            },
-            {
-                "backgroundImage": "C:\\Users\\Darka\\Pictures\\Background\\Git_bg_6.jpg",
-                "colorScheme": "MonaLisa",
-                "commandline": "C:\\Program Files\\Git\\bin\\bash.exe",
-                "guid": "{1af56895-8a00-415c-a258-e260abf5df3c}",
-                "hidden": false,
-                "icon": "C:\\Program Files\\Git\\mingw64\\share\\git\\git-for-windows.ico",
-                "name": "Git Bash",
-                "startingDirectory": "C:\\Users\\Darka"
+                "guid": "{963ff2f7-6aed-5ce3-9d91-90d99571f53a}",
+                "hidden": true,
+                "name": "Ubuntu-24.04",
+                "source": "Windows.Terminal.Wsl"
             }
         ]
     },
-    "schemes": 
+    "schemes":
     [
         {
             "background": "#090300",
@@ -1884,7 +1879,7 @@
             "brightYellow": "#FDD39F",
             "cursorColor": "#FCA02F",
             "cyan": "#50A3B5",
-            "foreground": "#DEB88D",
+            "foreground": "#DE7426",
             "green": "#027C9B",
             "name": "SeaShells",
             "purple": "#68D4F1",
@@ -2416,6 +2411,52 @@
             "foreground": "#FFFFFF",
             "green": "#26A269",
             "name": "Ubuntu-22.04-ColorScheme",
+            "purple": "#881798",
+            "red": "#C21A23",
+            "selectionBackground": "#FFFFFF",
+            "white": "#CCCCCC",
+            "yellow": "#A2734C"
+        },
+        {
+            "background": "#300A24",
+            "black": "#171421",
+            "blue": "#0037DA",
+            "brightBlack": "#767676",
+            "brightBlue": "#08458F",
+            "brightCyan": "#2C9FB3",
+            "brightGreen": "#26A269",
+            "brightPurple": "#A347BA",
+            "brightRed": "#C01C28",
+            "brightWhite": "#F2F2F2",
+            "brightYellow": "#A2734C",
+            "cursorColor": "#FFFFFF",
+            "cyan": "#3A96DD",
+            "foreground": "#FFFFFF",
+            "green": "#26A269",
+            "name": "Ubuntu-24.04-ColorScheme",
+            "purple": "#881798",
+            "red": "#C21A23",
+            "selectionBackground": "#FFFFFF",
+            "white": "#CCCCCC",
+            "yellow": "#A2734C"
+        },
+        {
+            "background": "#300A24",
+            "black": "#171421",
+            "blue": "#0037DA",
+            "brightBlack": "#767676",
+            "brightBlue": "#08458F",
+            "brightCyan": "#2C9FB3",
+            "brightGreen": "#26A269",
+            "brightPurple": "#A347BA",
+            "brightRed": "#C01C28",
+            "brightWhite": "#F2F2F2",
+            "brightYellow": "#A2734C",
+            "cursorColor": "#FFFFFF",
+            "cyan": "#3A96DD",
+            "foreground": "#FFFFFF",
+            "green": "#26A269",
+            "name": "Ubuntu-ColorScheme",
             "purple": "#881798",
             "red": "#C21A23",
             "selectionBackground": "#FFFFFF",
@@ -3135,7 +3176,5 @@
             "white": "#ABABAB",
             "yellow": "#CCCCCC"
         }
-    ],
-    "theme": "legacyDark",
-    "themes": []
+    ]
 }
