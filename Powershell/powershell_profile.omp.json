@@ -1,5 +1,4 @@
 {
-  "$schema": "https://raw.githubusercontent.com/JanDeDobbeleer/oh-my-posh/main/themes/schema.json",
   "blocks": [
     {
       "alignment": "left",
@@ -47,17 +46,17 @@
           "type": "sysinfo"
         },
         {
-          "background": "#575656",
-          "foreground": "#d6deeb",
+          "type": "executiontime",
+          "style": "diamond",
           "leading_diamond": "",
+          "trailing_diamond": "",
+          "foreground": "#d6deeb",
+          "background": "#575656",
           "properties": {
             "style": "roundrock",
             "threshold": 0
           },
-          "style": "diamond",
-          "template": " {{ .FormattedMs }} ",
-          "trailing_diamond": "",
-          "type": "executiontime"
+          "template": " \ueba2 {{ .FormattedMs }}\u2800"
         }
       ],
       "type": "prompt"
@@ -66,9 +65,12 @@
       "alignment": "right",
       "segments": [
         {
-          "background": "#17D7A0",
-          "foreground": "#011627",
+          "type": "git",
+          "style": "diamond",
           "leading_diamond": "",
+          "trailing_diamond": "<transparent,#17D7A0></>",
+          "foreground": "#011627",
+          "background": "#17D7A0",
           "properties": {
             "branch_icon": " ",
             "fetch_stash_count": true,
@@ -76,19 +78,68 @@
             "fetch_upstream_icon": true,
             "fetch_worktree_count": true
           },
-          "style": "diamond",
-          "template": " {{ .UpstreamIcon }}{{ .HEAD }}{{if .BranchStatus }} {{ .BranchStatus }}{{ end }}{{ if .Working.Changed }}  {{ .Working.String }}{{ end }}{{ if and (.Working.Changed) (.Staging.Changed) }} |{{ end }}{{ if .Staging.Changed }}  {{ .Staging.String }}{{ end }}{{ if gt .StashCount 0 }}  {{ .StashCount }}{{ end }} ",
-          "trailing_diamond": "<transparent,#17D7A0></>",
-          "type": "git"
+          "template": " {{ .UpstreamIcon }}{{ .HEAD }}{{if .BranchStatus }} {{ .BranchStatus }}{{ end }}{{ if .Working.Changed }}  {{ .Working.String }}{{ end }}{{ if and (.Working.Changed) (.Staging.Changed) }} |{{ end }}{{ if .Staging.Changed }}  {{ .Staging.String }}{{ end }}{{ if gt .StashCount 0 }}  {{ .StashCount }}{{ end }} "
         },
         {
-          "background": "#028a87",
-          "foreground": "#011627",
-          "leading_diamond": "",
+          "type": "node",
           "style": "diamond",
-          "template": " \ue641 {{ .CurrentDate | date .Format }} ",
-          "trailing_diamond": "\ue0b4",
-          "type": "time"
+          "leading_diamond": "",
+          "trailing_diamond": "<transparent,#303030></>",
+          "foreground": "#3C873A",
+          "background": "#303030",
+          "template": " \ued44  {{ if .PackageManagerIcon }}{{ .PackageManagerIcon }} {{ end }}{{ .Full }} "
+        },
+        {
+          "type": "angular",
+          "style": "diamond",
+          "leading_diamond": "",
+          "trailing_diamond": "<transparent,#ffffff></>",
+          "foreground": "#ce092f",
+          "background": "#ffffff",
+          "template": " \ue753 {{ if .Error }}{{ .Error }}{{ else }}{{ .Full }}{{ end }} "
+        },
+        {
+          "type": "php",
+          "style": "diamond",
+          "leading_diamond": "",
+          "trailing_diamond": "<transparent,#09f8f4></>",
+          "foreground": "#011627",
+          "background": "#09f8f4",
+          "template": " \ue608 {{ if .Error }}{{ .Error }}{{ else }}{{ .Full }}{{ end }} "
+        },
+        {
+          "type": "java",
+          "style": "diamond",
+          "leading_diamond": "",
+          "trailing_diamond": "<transparent,#0e8ac8></>",
+          "foreground": "#ffffff",
+          "background": "#0e8ac8",
+          "template": "\ue738 {{ if .Error }}{{ .Error }}{{ else }}{{ .Full }}{{ end }}"
+        },
+        {
+          "type": "dotnet",
+          "style": "diamond",
+          "leading_diamond": "",
+          "trailing_diamond": "<transparent,#0e0e0e></>",
+          "foreground": "#0d6da8",
+          "background": "#0e0e0e",
+          "template": "\ue77f {{ if .Unsupported }}\uf071{{ else }}{{ .Full }}{{ end }}"
+        },
+        {
+          "type": "battery",
+          "style": "diamond",
+          "leading_diamond": "",
+          "trailing_diamond": "",
+          "foreground": "#011627",
+          "background": "#028a87",
+          "invert_powerline": true,
+          "powerline_symbol": "\ue0b2",
+          "properties": {
+            "charged_icon": "\uf240 ",
+            "charging_icon": "\uf1e6 ",
+            "discharging_icon": "\ue234 "
+          },
+          "template": " {{ if not .Error }}{{ .Icon }}{{ .Percentage }}{{ end }}{{ .Error }}\uf295 "
         }
       ],
       "type": "prompt"
@@ -98,6 +149,7 @@
       "newline": true,
       "segments": [
         {
+          "foreground": "#ffffff",
           "style": "plain",
           "template": "╭─",
           "type": "text"
@@ -109,11 +161,6 @@
           "style": "plain",
           "template": " ♥ {{ .CurrentDate | date .Format }} |",
           "type": "time"
-        },
-        {
-          "style": "plain",
-          "template": "  ",
-          "type": "root"
         },
         {
           "properties": {
@@ -133,11 +180,19 @@
       "newline": true,
       "segments": [
         {
+          "foreground": "#028a87",
+          "style": "plain",
+          "template": "\u2570\u2500",
+          "type": "text"
+        },
+        {
+          "foreground": "#028a87",
+          "foreground_templates": ["{{ if gt .Code 0 }}#ef5350{{ end }}"],
           "properties": {
             "always_enabled": true
           },
           "style": "plain",
-          "template": "╰─ ",
+          "template": "\ue285\ueab6 ",
           "type": "status"
         }
       ],
