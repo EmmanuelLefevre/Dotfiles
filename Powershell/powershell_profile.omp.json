@@ -65,6 +65,51 @@
       "alignment": "right",
       "segments": [
         {
+          "type": "node",
+          "foreground": "#3C873A",
+          "properties": {
+            "fetch_version": true
+          },
+          "style": "powerline",
+          "template": " \ued44 {{ if .PackageManagerIcon }}{{ .PackageManagerIcon }} {{ end }}{{ .Full }} "
+        },
+        {
+          "type": "angular",
+          "foreground": "#ce092f",
+          "properties": {
+            "fetch_version": true
+          },
+          "style": "powerline",
+          "template": "<#028a87> \u007C </>\ue753</> {{ if .Error }}{{ .Error }}{{ else }}{{ .Full }}{{ end }} "
+        },
+        {
+          "type": "php",
+          "foreground": "#011627",
+          "properties": {
+            "fetch_version": true
+          },
+          "style": "powerline",
+          "template": " \ue608 {{ if .Error }}{{ .Error }}{{ else }}{{ .Full }}{{ end }} "
+        },
+        {
+          "type": "dotnet",
+          "foreground": "#0d6da8",
+          "properties": {
+            "fetch_version": true
+          },
+          "style": "powerline",
+          "template": " \ue77f {{ if .Unsupported }}\uf071{{ else }}{{ .Full }}{{ end }} "
+        },
+        {
+          "type": "java",
+          "foreground": "#ffffff",
+          "properties": {
+            "fetch_version": true
+          },
+          "style": "powerline",
+          "template": " \ue738 {{ if .Error }}{{ .Error }}{{ else }}{{ .Full }}{{ end }} "
+        },
+        {
           "type": "git",
           "style": "diamond",
           "leading_diamond": "",
@@ -81,51 +126,6 @@
           "template": " {{ .UpstreamIcon }}{{ .HEAD }}{{if .BranchStatus }} {{ .BranchStatus }}{{ end }}{{ if .Working.Changed }}  {{ .Working.String }}{{ end }}{{ if and (.Working.Changed) (.Staging.Changed) }} |{{ end }}{{ if .Staging.Changed }}  {{ .Staging.String }}{{ end }}{{ if gt .StashCount 0 }}  {{ .StashCount }}{{ end }} "
         },
         {
-          "type": "node",
-          "style": "diamond",
-          "leading_diamond": "",
-          "trailing_diamond": "<transparent,#303030></>",
-          "foreground": "#3C873A",
-          "background": "#303030",
-          "template": " \ued44  {{ if .PackageManagerIcon }}{{ .PackageManagerIcon }} {{ end }}{{ .Full }} "
-        },
-        {
-          "type": "angular",
-          "style": "diamond",
-          "leading_diamond": "",
-          "trailing_diamond": "<transparent,#ffffff></>",
-          "foreground": "#ce092f",
-          "background": "#ffffff",
-          "template": " \ue753 {{ if .Error }}{{ .Error }}{{ else }}{{ .Full }}{{ end }} "
-        },
-        {
-          "type": "php",
-          "style": "diamond",
-          "leading_diamond": "",
-          "trailing_diamond": "<transparent,#09f8f4></>",
-          "foreground": "#011627",
-          "background": "#09f8f4",
-          "template": " \ue608 {{ if .Error }}{{ .Error }}{{ else }}{{ .Full }}{{ end }} "
-        },
-        {
-          "type": "java",
-          "style": "diamond",
-          "leading_diamond": "",
-          "trailing_diamond": "<transparent,#0e8ac8></>",
-          "foreground": "#ffffff",
-          "background": "#0e8ac8",
-          "template": "\ue738 {{ if .Error }}{{ .Error }}{{ else }}{{ .Full }}{{ end }}"
-        },
-        {
-          "type": "dotnet",
-          "style": "diamond",
-          "leading_diamond": "",
-          "trailing_diamond": "<transparent,#0e0e0e></>",
-          "foreground": "#0d6da8",
-          "background": "#0e0e0e",
-          "template": "\ue77f {{ if .Unsupported }}\uf071{{ else }}{{ .Full }}{{ end }}"
-        },
-        {
           "type": "battery",
           "style": "diamond",
           "leading_diamond": "",
@@ -135,11 +135,19 @@
           "invert_powerline": true,
           "powerline_symbol": "\ue0b2",
           "properties": {
-            "charged_icon": "\uf240 ",
-            "charging_icon": "\uf1e6 ",
-            "discharging_icon": "\ue234 "
+            "charged_icon": "  ",
+            "charging_icon": "󱊥 ",
+            "discharging_icon": "  "
           },
-          "template": " {{ if not .Error }}{{ .Icon }}{{ .Percentage }}{{ end }}{{ .Error }}\uf295 "
+          "background_templates": [
+            "{{if eq \"Charging\" .State.String}}#22fa1f{{end}}",
+            "{{if eq \"Discharging\" .State.String}}#ff5722{{end}}",
+            "{{if eq \"Full\" .State.String}}#40c4ff{{end}}"
+          ],
+          "foreground_templates": [
+            "{{if and (eq \"Discharging\" .State.String) (lt .Percentage 20)}}#ffffff{{end}}"
+          ],
+          "template": " {{ if not .Error }}{{ .Icon }}{{ .Percentage }}{{ end }} "
         }
       ],
       "type": "prompt"
@@ -159,17 +167,18 @@
             "time_format": "15:04"
           },
           "style": "plain",
-          "template": " ♥ {{ .CurrentDate | date .Format }} |",
+          "template": " 󰂧 {{ .CurrentDate | date .Format }} |",
           "type": "time"
         },
         {
           "properties": {
-            "folder_icon": " ",
-            "folder_separator_icon": "  ",
-            "home_icon": " "
+            "home_icon": " ",
+            "folder_separator_icon": " <#028a87></><#ffffff>  </>",
+            "style": "agnoster_full"
           },
-          "style": "plain",
-          "template": " {{ .Path }} ",
+          "style": "diamond",
+          "template": " {{ .Path }}",
+          "trailing_diamond": "<#ffffff></>",
           "type": "path"
         }
       ],
@@ -182,7 +191,7 @@
         {
           "foreground": "#028a87",
           "style": "plain",
-          "template": "\u2570\u2500",
+          "template": "╰\u2500",
           "type": "text"
         },
         {
@@ -192,7 +201,7 @@
             "always_enabled": true
           },
           "style": "plain",
-          "template": "\ue285\ueab6 ",
+          "template": "{{ if gt .Code 0 }}  {{ end }}\ue285\ueab6 ",
           "type": "status"
         }
       ],
