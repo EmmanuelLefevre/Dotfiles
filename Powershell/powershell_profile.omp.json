@@ -71,7 +71,7 @@
             "fetch_version": true
           },
           "style": "powerline",
-          "template": " \ued44 {{ if .PackageManagerIcon }}{{ .PackageManagerIcon }} {{ end }}{{ .Full }} "
+          "template": " \ued44  {{ if .PackageManagerIcon }}{{ .PackageManagerIcon }} {{ end }}{{ .Full }}"
         },
         {
           "type": "angular",
@@ -147,7 +147,7 @@
           "foreground_templates": [
             "{{if and (eq \"Discharging\" .State.String) (lt .Percentage 20)}}#ffffff{{end}}"
           ],
-          "template": " {{ if not .Error }}{{ .Icon }}{{ .Percentage }}{{ end }} "
+          "template": " {{ if not .Error }}{{ .Icon }}{{ .Percentage }}{{ end }}{{ .Error }} "
         }
       ],
       "type": "prompt"
