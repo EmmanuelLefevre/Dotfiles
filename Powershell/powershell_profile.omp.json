@@ -140,14 +140,16 @@
             "discharging_icon": "  "
           },
           "background_templates": [
-            "{{if eq \"Charging\" .State.String}}#22fa1f{{end}}",
-            "{{if eq \"Discharging\" .State.String}}#ff5722{{end}}",
-            "{{if eq \"Full\" .State.String}}#40c4ff{{end}}"
+            "{{if eq \"Charging\" .State.String}}#40c4ff{{end}}",
+            "{{if and (eq \"Charged\" .State.String) (ge .Percentage 90)}}#00f826{{end}}",
+            "{{if and (eq \"Charged\" .State.String) (lt .Percentage 90) (ge .Percentage 20)}}#028a87{{end}}",
+            "{{if and (eq \"Discharging\" .State.String) (lt .Percentage 20) (ge .Percentage 10)}}#ff9003{{end}}",
+            "{{if and (eq \"Discharging\" .State.String) (lt .Percentage 10)}}#ff4545{{end}}"
           ],
           "foreground_templates": [
             "{{if and (eq \"Discharging\" .State.String) (lt .Percentage 20)}}#ffffff{{end}}"
           ],
-          "template": " {{ if not .Error }}{{ .Icon }}{{ .Percentage }}{{ end }}{{ .Error }} "
+          "template": " {{ if not .Error }}{{ if eq .State.String \"Charging\" }}󱊥 {{ else if eq .State.String \"Full\" }} {{ else if lt .Percentage 20 }} {{ else }}󰄌 {{ end }}{{ .Percentage }}{{ end }}{{ .Error }} "
         }
       ],
       "type": "prompt"
