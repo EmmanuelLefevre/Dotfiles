@@ -179,7 +179,7 @@
           "properties": {
             "style": "agnoster_full",
             "home_icon": " ",
-            "folder_separator_icon": " <#028a87></><#ffffff>  </>"
+            "folder_separator_icon": "<#028a87> </>"
           },
           "template": " {{ .Path }}"
         }
