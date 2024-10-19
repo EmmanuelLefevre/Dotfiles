@@ -1,2 +1,4 @@
-# eval "$(oh-my-posh init bash --config ~/AppData/Local/Programs/oh-my-posh/themes/agnoster.omp.json)"
-eval "$(oh-my-posh init bash --config 'https://raw.githubusercontent.com/JanDeDobbeleer/oh-my-posh/main/themes/schema.omp.json')"
+# NON INTERACTIVE LOGIN SHELL
+
+## Profil loaded in VSCode
+eval "$(oh-my-posh init bash --config 'C:\Users\Darka\Documents\GitBash\gitbash_profile_darka.omp.json')"
