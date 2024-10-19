@@ -6,44 +6,44 @@
       "segments": [
         {
           "type": "root",
+          "style": "diamond",
           "foreground": "#ff0000",
           "background": "#ffffff",
-          "style": "diamond",
           "leading_diamond": "",
           "template": "  ",
-          "trailing_diamond": "<transparent,#FEF5ED></>"
+          "trailing_diamond": "<transparent,#ffffff></>"
         },
         {
+          "type": "os",
+          "style": "diamond",
           "background": "#028a87",
           "foreground": "#011627",
           "leading_diamond": "",
+          "trailing_diamond": "<transparent,#028a87></>",
           "properties": {
             "macos": " ",
             "ubuntu": " ",
             "windows": " "
           },
-          "style": "diamond",
-          "template": " {{ if .WSL }}WSL at {{ end }}{{.Icon}}",
-          "trailing_diamond": "<transparent,#028a87></>",
-          "type": "os"
+          "template": " {{ if .WSL }}WSL at {{ end }}{{.Icon}}"
         },
         {
-          "background": "#FEF5ED",
+          "type": "shell",
+          "style": "diamond",
+          "background": "#ffffff",
           "foreground": "#028a87",
           "leading_diamond": "",
-          "style": "diamond",
           "template": " {{ .Name }}",
-          "trailing_diamond": "<transparent,#FEF5ED></>",
-          "type": "shell"
+          "trailing_diamond": "<transparent,#ffffff></>"
         },
         {
+          "type": "sysinfo",
+          "style": "diamond",
           "background": "#028a87",
           "foreground": "#011627",
           "leading_diamond": "",
-          "style": "diamond",
-          "template": " MEM: {{ round .PhysicalPercentUsed .Precision }}% | {{ (div ((sub .PhysicalTotalMemory .PhysicalAvailableMemory)|float64) 1073741824.0) }}/{{ (div .PhysicalTotalMemory 1073741824.0) }}GB  ",
           "trailing_diamond": "<transparent,#028a87></>",
-          "type": "sysinfo"
+          "template": " MEM: {{ round .PhysicalPercentUsed .Precision }}% | {{ (div ((sub .PhysicalTotalMemory .PhysicalAvailableMemory)|float64) 1073741824.0) }}/{{ (div .PhysicalTotalMemory 1073741824.0) }}GB  "
         },
         {
           "type": "executiontime",
@@ -66,56 +66,56 @@
       "segments": [
         {
           "type": "node",
+          "style": "powerline",
           "foreground": "#3C873A",
           "properties": {
             "fetch_version": true
           },
-          "style": "powerline",
           "template": " \ued44  {{ if .PackageManagerIcon }}{{ .PackageManagerIcon }} {{ end }}{{ .Full }}"
         },
         {
           "type": "angular",
+          "style": "powerline",
           "foreground": "#ce092f",
           "properties": {
             "fetch_version": true
           },
-          "style": "powerline",
           "template": "<#028a87> \u007C </>\ue753</> {{ if .Error }}{{ .Error }}{{ else }}{{ .Full }}{{ end }} "
         },
         {
           "type": "php",
+          "style": "powerline",
           "foreground": "#011627",
           "properties": {
             "fetch_version": true
           },
-          "style": "powerline",
           "template": " \ue608 {{ if .Error }}{{ .Error }}{{ else }}{{ .Full }}{{ end }} "
         },
         {
           "type": "dotnet",
+          "style": "powerline",
           "foreground": "#0d6da8",
           "properties": {
             "fetch_version": true
           },
-          "style": "powerline",
           "template": " \ue77f {{ if .Unsupported }}\uf071{{ else }}{{ .Full }}{{ end }} "
         },
         {
           "type": "java",
+          "style": "powerline",
           "foreground": "#ffffff",
           "properties": {
             "fetch_version": true
           },
-          "style": "powerline",
           "template": " \ue738 {{ if .Error }}{{ .Error }}{{ else }}{{ .Full }}{{ end }} "
         },
         {
           "type": "git",
           "style": "diamond",
-          "leading_diamond": "",
-          "trailing_diamond": "<transparent,#17D7A0></>",
           "foreground": "#011627",
           "background": "#17D7A0",
+          "leading_diamond": "",
+          "trailing_diamond": "<transparent,#17D7A0></>",
           "properties": {
             "branch_icon": " ",
             "fetch_stash_count": true,
@@ -128,10 +128,10 @@
         {
           "type": "battery",
           "style": "diamond",
-          "leading_diamond": "",
-          "trailing_diamond": "",
           "foreground": "#011627",
           "background": "#028a87",
+          "leading_diamond": "",
+          "trailing_diamond": "",
           "invert_powerline": true,
           "powerline_symbol": "\ue0b2",
           "properties": {
@@ -159,29 +159,29 @@
       "newline": true,
       "segments": [
         {
-          "foreground": "#ffffff",
+          "type": "text",
           "style": "plain",
-          "template": "╭─",
-          "type": "text"
+          "foreground": "#ffffff",
+          "template": "╭─"
         },
         {
+          "type": "time",
+          "style": "plain",
           "properties": {
             "time_format": "15:04"
           },
-          "style": "plain",
-          "template": " 󰂧 {{ .CurrentDate | date .Format }} |",
-          "type": "time"
+          "template": " 󰂧 {{ .CurrentDate | date .Format }} |"
         },
         {
-          "properties": {
-            "home_icon": " ",
-            "folder_separator_icon": " <#028a87></><#ffffff>  </>",
-            "style": "agnoster_full"
-          },
+          "type": "path",
           "style": "diamond",
-          "template": " {{ .Path }}",
           "trailing_diamond": "<#ffffff></>",
-          "type": "path"
+          "properties": {
+            "style": "agnoster_full",
+            "home_icon": " ",
+            "folder_separator_icon": " <#028a87></><#ffffff>  </>"
+          },
+          "template": " {{ .Path }}"
         }
       ],
       "type": "prompt"
@@ -191,20 +191,20 @@
       "newline": true,
       "segments": [
         {
-          "foreground": "#028a87",
+          "type": "text",
           "style": "plain",
-          "template": "╰\u2500",
-          "type": "text"
+          "foreground": "#028a87",
+          "template": "╰\u2500"
         },
         {
+          "type": "status",
+          "style": "plain",
           "foreground": "#028a87",
           "foreground_templates": ["{{ if gt .Code 0 }}#ef5350{{ end }}"],
           "properties": {
             "always_enabled": true
           },
-          "style": "plain",
-          "template": "{{ if gt .Code 0 }}  {{ end }}\ue285\ueab6 ",
-          "type": "status"
+          "template": "{{ if gt .Code 0 }}  {{ end }}\ue285\ueab6 "
         }
       ],
       "type": "prompt"
