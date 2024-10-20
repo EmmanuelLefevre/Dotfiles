@@ -68,19 +68,34 @@
         },
         {
           "type": "git",
-          "style": "diamond",
-          "foreground": "#011627",
-          "background": "#17D7A0",
-          "leading_diamond": "<transparent,#17D7A0></>",
-          "trailing_diamond": "",
+          "style": "powerline",
+          "foreground": "#193549",
+          "powerline_symbol": "",
+          "background_templates": [
+            "{{ if or (eq .Ref \"master\") (eq .Ref \"main\") }}#b431de{{ end }}",
+            "{{ if eq .Ref \"dev\" }}#17d7d7{{ end }}",
+            "{{ if contains .Ref \"feature\" }}#17D7A0{{ end }}",
+            "{{ if or (.Working.Changed) (.Staging.Changed) }}#FFEB3B{{ end }}",
+            "{{ if and (gt .Ahead 0) (gt .Behind 0) }}#FFCC80{{ end }}",
+            "{{ if gt .Ahead 0 }}#B388FF{{ end }}",
+            "{{ if gt .Behind 0 }}#B388FB{{ end }}"
+          ],
+          "template": " {{ .UpstreamIcon }}{{ .HEAD }}{{ if .BranchStatus }} {{ .BranchStatus }}{{ end }}{{ if .Working.Changed }}  {{ .Working.String }}{{ end }}{{ if and (.Working.Changed) (.Staging.Changed) }} |{{ end }}{{ if .Staging.Changed }}  {{ .Staging.String }}{{ end }}{{ if gt .StashCount 0 }}  {{ .StashCount }}{{ end }} ",
           "properties": {
             "branch_icon": " ",
             "fetch_stash_count": true,
             "fetch_status": true,
             "fetch_upstream_icon": true,
-            "fetch_worktree_count": true
-          },
-          "template": " {{ .UpstreamIcon }}{{ .HEAD }}{{if .BranchStatus }} {{ .BranchStatus }}{{ end }}{{ if .Working.Changed }}  {{ .Working.String }}{{ end }}{{ if and (.Working.Changed) (.Staging.Changed) }} |{{ end }}{{ if .Staging.Changed }}  {{ .Staging.String }}{{ end }}{{ if gt .StashCount 0 }}  {{ .StashCount }}{{ end }} "
+            "fetch_worktree_count": true,
+            "untracked_modes": {
+              "/Users/user/Projects/oh-my-posh/": "no"
+            },
+            "source": "cli",
+            "mapped_branches": {
+              "feat/*": "🚀 ",
+              "bug/*": "🐛 "
+            }
+          }
         }
       ],
       "type": "prompt"
