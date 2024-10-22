@@ -1,5 +1,5 @@
 # Load PowerShell Profile
-. "$HOME\Documents\PowerShell\Microsoft.PowerShell_profile.ps1"
+. "$env:USERPROFILE\Documents\PowerShell\Microsoft.PowerShell_profile.ps1"
 
 # Call function
 git_pull
