@@ -4,6 +4,6 @@
 # Call function
 git_pull
 
-# Keep window open
+# Close terminal
 Write-Host ""
-Read-Host -Prompt "Press Enter to close"
+Read-Host -Prompt "Press Enter to close... "
