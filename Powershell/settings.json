@@ -193,7 +193,7 @@
         {
             "background": "#101116",
             "black": "#626262",
-            "blue": "#FED300",
+            "blue": "#81007F",
             "brightBlack": "#8F8F8F",
             "brightBlue": "#F92883",
             "brightCyan": "#E6E7FE",
@@ -205,7 +205,7 @@
             "cursorColor": "#81007F",
             "cyan": "#D1D1FE",
             "foreground": "#81007F",
-            "green": "#383737",
+            "green": "#000000",
             "name": "Laser",
             "purple": "#FF90FE",
             "red": "#FF8373",
