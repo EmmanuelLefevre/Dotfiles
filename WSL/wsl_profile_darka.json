@@ -166,7 +166,11 @@
             "style": "agnoster_short",
             "max_depth": 5,
             "home_icon": " ",
-            "folder_separator_icon": "<#81007F> </>"
+            "folder_separator_icon": "<#81007F> </>",
+            "mapped_locations_enabled": true,
+            "mapped_locations": {
+              "/mnt/c/Users/Darka": "Darka"
+            }
           },
           "template": " {{ .Path }}"
         }

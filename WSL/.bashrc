@@ -120,3 +120,5 @@ fi
 # Add posh theme path
 export PATH="$HOME/.local/bin:$PATH"
 eval "$(oh-my-posh init bash --config '/home/darkazarh/poshtheme/wsl_profile_darka.json')"
+# Open WSL terminal in your user Windows folder
+cd /mnt/c/Users/Darka
