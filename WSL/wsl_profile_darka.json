@@ -7,7 +7,7 @@
         {
           "type": "os",
           "style": "diamond",
-          "background": "#f4ab10",
+          "background": "#81007F",
           "foreground": "#ffffff",
           "leading_diamond": "",
           "properties": {
@@ -33,14 +33,14 @@
           "type": "shell",
           "style": "powerline",
           "background": "#ffffff",
-          "foreground": "#f4ab10",
+          "foreground": "#81007F",
           "powerline_symbol": "",
           "template": "  {{ .Name }}"
         },
         {
           "type": "session",
           "style": "powerline",
-          "background": "#f4ab10",
+          "background": "#81007F",
           "foreground": "#ffffff",
           "powerline_symbol": "",
           "template": " {{ .UserName }} "
@@ -49,7 +49,7 @@
           "type": "executiontime",
           "style": "powerline",
           "background": "#ffffff",
-          "foreground": "#f4ab10",
+          "foreground": "#81007F",
           "powerline_symbol": "",
           "properties": {
             "style": "roundrock",
@@ -97,7 +97,7 @@
         {
           "type": "battery",
           "style": "diamond",
-          "foreground": "#f4ab10",
+          "foreground": "#81007F",
           "background": "#ffffff",
           "leading_diamond": "",
           "trailing_diamond": "",
@@ -125,7 +125,7 @@
           "style": "powerline",
           "powerline_symbol": "",
           "foreground": "#ffffff",
-          "background": "#f4ab10",
+          "background": "#81007F",
           "template": "   {{ round .PhysicalPercentUsed .Precision }}% ({{ (div ((sub .PhysicalTotalMemory .PhysicalFreeMemory)|float64) 1073741824.0) }}/{{ (div .PhysicalTotalMemory 1073741824.0) }}GB)"
         },
         {
@@ -152,7 +152,7 @@
         {
           "type": "time",
           "style": "plain",
-          "foreground": "#f4ab10",
+          "foreground": "#81007F",
           "properties": {
             "time_format": "15:04"
           },
@@ -166,7 +166,7 @@
             "style": "agnoster_short",
             "max_depth": 5,
             "home_icon": " ",
-            "folder_separator_icon": "<#f4ab10> </>"
+            "folder_separator_icon": "<#81007F> </>"
           },
           "template": " {{ .Path }}"
         }
@@ -180,13 +180,13 @@
         {
           "type": "text",
           "style": "plain",
-          "foreground": "#f4ab10",
+          "foreground": "#81007F",
           "template": "╰\u2500"
         },
         {
           "type": "status",
           "style": "plain",
-          "foreground": "#f4ab10",
+          "foreground": "#81007F",
           "foreground_templates": ["{{ if gt .Code 0 }}#fc0c07{{ end }}"],
           "properties": {
             "always_enabled": true
