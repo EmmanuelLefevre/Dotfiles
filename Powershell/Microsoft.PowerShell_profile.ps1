@@ -209,6 +209,8 @@ function go {
   # List of valid options and their corresponding paths
   $validOptions = @(
     @{ Name = "aw";        Path = "$HOME\Desktop\Projets\ArtiWave" },
+    @{ Name = "cours";     Path = "$HOME\Desktop\Cours" },
+    @{ Name = "docs";      Path = "$HOME\Documents\Documentations" },
     @{ Name = "dwld";      Path = "$HOME\Downloads" },
     @{ Name = "eg";        Path = "$HOME\Desktop\Projets\EasyGarden" },
     @{ Name = "el";        Path = "$HOME\Desktop\Projets\EmmanuelLefevre" },
@@ -216,6 +218,7 @@ function go {
     @{ Name = "nvim";      Path = "$HOME\AppData\Local\nvim" },
     @{ Name = "profile";   Path = "$HOME\Documents\PowerShell" },
     @{ Name = "projets";   Path = "$HOME\Desktop\Projets" },
+    @{ Name = "settings";  Path = "$HOME\Desktop\Settings" },
     @{ Name = "help";      Path = "Available paths" }
   )
 
@@ -228,6 +231,12 @@ function go {
   Switch ($location) {
     "aw" {
       Set-Location -Path "$HOME\Desktop\Projets\ArtiWave"
+    }
+    "cours" {
+      Set-Location -Path "$HOME\Desktop\Cours"
+    }
+    "docs" {
+      Set-Location -Path "$HOME\Documents\Documentations"
     }
     "dwld" {
       Set-Location -Path "$HOME\Downloads"
@@ -249,6 +258,9 @@ function go {
     }
     "projets" {
       Set-Location -Path "$HOME\Desktop\Projets"
+    }
+    "settings" {
+      Set-Location -Path "$HOME\Desktop\Settings"
     }
     "help" {
       # Create a table of valid options
@@ -481,6 +493,7 @@ function Get-RepositoriesInfo {
 
   # Dictionary containing local repositories path
   $repos = @{
+    "Cours"                 = "$env:USERPROFILE\Desktop\Cours"
     "Documentations"        = "$env:USERPROFILE\Documents\Documentations"
     "EmmanuelLefevre"       = "$env:USERPROFILE\Desktop\Projets\EmmanuelLefevre"
     "IAmEmmanuelLefevre"    = "$env:USERPROFILE\Desktop\Projets\IAmEmmanuelLefevre"
