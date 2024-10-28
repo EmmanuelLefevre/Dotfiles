@@ -489,7 +489,7 @@ function Get-RepositoriesInfo {
   $gitHubToken = "<YOUR PERSONAL TOKEN>"
 
   # Array to define the order of repositories
-  $reposOrder = @("Cours, Documentations", "EmmanuelLefevre", "IAmEmmanuelLefevre", "Schemas", "Settings", "Soutenances")
+  $reposOrder = @("Cours", "Documentations", "EmmanuelLefevre", "IAmEmmanuelLefevre", "Schemas", "Settings", "Soutenances")
 
   # Dictionary containing local repositories path
   $repos = @{
