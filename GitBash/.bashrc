@@ -3,14 +3,15 @@
 ## Profil loaded in Powershell
 eval "$(oh-my-posh init bash --config "$HOME\Documents\GitBash\gitbash_profile_darka.json")"
 
+#############################################################################################
+
 # ALIAS
-## Open connection
-alias o_ssh='ssh -T git@github.com'
-## Close connection
-alias c_ssh='exit'
+## Test GitHub SSH connection
+alias ssh='ssh -T git@github.com'
 
 #############################################################################################
 
+# UTILITIES
 # Base path
 BASE_PATH="C:/Users/Darka"
 
@@ -19,8 +20,9 @@ DEFAULT_COMMIT_MESSAGE="maj"
 
 # ANSI colors
 BLUE='\033[0;34m'
+CYAN='\033[36m'
 MAGENTA='\033[0;35m'
-RED='\033[1;31m'
+RED='\033[31m'
 NC='\033[0m'
 
 # Local repositories dictionary
@@ -33,9 +35,31 @@ LocalRepos["schemas"]="$BASE_PATH/Desktop/Schemas"
 LocalRepos["settings"]="$BASE_PATH/Desktop/Settings"
 LocalRepos["soutenances"]="$BASE_PATH/Desktop/Soutenances"
 
+#############################################################################################
+
 # FUNCTIONS
+# Help
+help() {
+  echo -e "${BLUE}| Commande | Description                                         |${NC}"
+  echo    "|----------|-----------------------------------------------------|"
+  echo    "| push     | Automatic commit message push                       |"
+  echo    "| go       | Jump to a specific directory                        |"
+  echo -e "| ssh      | Test GitHub SSH connection                          |\n"
+}
+
 ## Automatic commit message push with directory navigation
 push() {
+  # If first argument is "help", display available options
+  if [[ $1 == "help" ]]; then
+    echo -e "\n${BLUE}| Option          | Path                                               |${NC}"
+    echo    "|-----------------|----------------------------------------------------|"
+    for repo in $(printf "%s\n" "${!LocalRepos[@]}" | sort); do
+      printf "| %-15s | %-50s |\n" "$repo" "${LocalRepos[$repo]}"
+    done
+    echo
+    return
+  fi
+
   local repo_name=$1
   # Use DEFAULT_COMMIT_MESSAGE if none is provided
   local commit_message=${2:-$DEFAULT_COMMIT_MESSAGE}
@@ -48,7 +72,7 @@ push() {
     git add .
     git commit -m "$commit_message"
     git push
-    echo -e "${BLUE}$formatted_repo_name${NC} has been successfully updated 🤙"
+    echo -e "${CYAN}$formatted_repo_name${NC} has been successfully updated 🤙"
   else
     echo -e "⚠️ Error: local repository ${RED}$formatted_repo_name${NC} not found! ⚠️"
   fi
@@ -71,6 +95,17 @@ go() {
     ["settings"]="$BASE_PATH/Desktop/Settings"
     ["soutenances"]="$BASE_PATH/Desktop/Soutenances"
   )
+
+  # If first argument is "help", display available options
+  if [[ $1 == "help" ]]; then
+    echo -e "\n${BLUE}| Option         | Path                                               |${NC}"
+    echo    "|----------------|----------------------------------------------------|"
+    for key in $(printf "%s\n" "${!PATHS[@]}" | sort); do
+      printf "| %-14s | %-50s |\n" "$key" "${PATHS[$key]}"
+    done
+    echo
+    return
+  fi
 
   # Checks if the argument is a valid key
   if [[ -n "${PATHS[$1]}" ]]; then
