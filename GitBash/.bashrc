@@ -25,13 +25,13 @@ NC='\033[0m'
 
 # Local repositories dictionary
 declare -A LocalRepos
-LocalRepos["Cours"]="$BASE_PATH/Desktop/Cours"
-LocalRepos["Docs"]="$BASE_PATH/Documents/Documentations"
-LocalRepos["Portfolio"]="$BASE_PATH/Desktop/Projets/IAmEmmanuelLefevre"
-LocalRepos["Profile"]="$BASE_PATH/Desktop/Projets/EmmanuelLefevre"
-LocalRepos["Schemas"]="$BASE_PATH/Desktop/Schemas"
-LocalRepos["Settings"]="$BASE_PATH/Desktop/Settings"
-LocalRepos["Soutenances"]="$BASE_PATH/Desktop/Soutenances"
+LocalRepos["cours"]="$BASE_PATH/Desktop/Cours"
+LocalRepos["docs"]="$BASE_PATH/Documents/Documentations"
+LocalRepos["portfolio"]="$BASE_PATH/Desktop/Projets/IAmEmmanuelLefevre"
+LocalRepos["profile"]="$BASE_PATH/Desktop/Projets/EmmanuelLefevre"
+LocalRepos["schemas"]="$BASE_PATH/Desktop/Schemas"
+LocalRepos["settings"]="$BASE_PATH/Desktop/Settings"
+LocalRepos["soutenances"]="$BASE_PATH/Desktop/Soutenances"
 
 # FUNCTIONS
 ## Automatic commit message push with directory navigation
@@ -40,14 +40,17 @@ push() {
   # Use DEFAULT_COMMIT_MESSAGE if none is provided
   local commit_message=${2:-$DEFAULT_COMMIT_MESSAGE}
 
+  # Display repoName in PascalCase
+  local formatted_repo_name="${repo_name^}"
+
   if [ -n "${LocalRepos[$repo_name]}" ]; then
     cd "${LocalRepos[$repo_name]}"
     git add .
     git commit -m "$commit_message"
     git push
-    echo -e "${BLUE}$repo_name${NC} has been successfully updated 🤙"
+    echo -e "${BLUE}$$formatted_repo_name${NC} has been successfully updated 🤙"
   else
-    echo -e "⚠️ Error: local repository ${RED}$repo_name${NC} not found! ⚠️"
+    echo -e "⚠️ Error: local repository ${RED}$$formatted_repo_name${NC} not found! ⚠️"
   fi
 }
 
