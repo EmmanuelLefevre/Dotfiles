@@ -44,9 +44,9 @@ push() {
     git add .
     git commit -m "$commit_message"
     git push
-    echo "${MAGENTA}$repo_name${NC} has been successfully updated 🤙"
+    echo -e "${MAGENTA}$repo_name${NC} has been successfully updated 🤙"
   else
-    echo "⚠️ Error: local repository ${RED}$repo_name${NC} not found! ⚠️"
+    echo -e "⚠️ Error: local repository ${RED}$repo_name${NC} not found! ⚠️"
   fi
 }
 
