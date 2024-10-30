@@ -17,6 +17,11 @@ BASE_PATH="C:/Users/Darka"
 # Default commit message
 DEFAULT_COMMIT_MESSAGE="maj"
 
+# ANSI colors
+MAGENTA='\033[0;35m'
+RED='\033[0;31m'
+NC='\033[0m'
+
 # Local repositories dictionary
 declare -A LocalRepos
 LocalRepos["cours"]="$BASE_PATH/Desktop/Cours"
@@ -39,9 +44,9 @@ push() {
     git add .
     git commit -m "$commit_message"
     git push
-    echo "'$repo_name' has been successfully updated 🤙"
+    echo "${MAGENTA}$repo_name${NC} has been successfully updated 🤙"
   else
-    echo "⚠️ Error : local repository ${[$repo_name]} not found! ⚠️"
+    echo "⚠️ Error: local repository ${RED}$repo_name${NC} not found! ⚠️"
   fi
 }
 
