@@ -48,9 +48,9 @@ push() {
     git add .
     git commit -m "$commit_message"
     git push
-    echo -e "${BLUE}$$formatted_repo_name${NC} has been successfully updated 🤙"
+    echo -e "${BLUE}$formatted_repo_name${NC} has been successfully updated 🤙"
   else
-    echo -e "⚠️ Error: local repository ${RED}$$formatted_repo_name${NC} not found! ⚠️"
+    echo -e "⚠️ Error: local repository ${RED}$formatted_repo_name${NC} not found! ⚠️"
   fi
 }
 
