@@ -19,18 +19,18 @@ DEFAULT_COMMIT_MESSAGE="maj"
 
 # ANSI colors
 MAGENTA='\033[0;35m'
-RED='\033[0;31m'
+RED='\033[1;31m'
 NC='\033[0m'
 
 # Local repositories dictionary
 declare -A LocalRepos
-LocalRepos["cours"]="$BASE_PATH/Desktop/Cours"
-LocalRepos["docs"]="$BASE_PATH/Documents/Documentations"
-LocalRepos["portfolio"]="$BASE_PATH/Desktop/Projets/IAmEmmanuelLefevre"
-LocalRepos["profile"]="$BASE_PATH/Desktop/Projets/EmmanuelLefevre"
-LocalRepos["schemas"]="$BASE_PATH/Desktop/Schemas"
-LocalRepos["settings"]="$BASE_PATH/Desktop/Settings"
-LocalRepos["soutenances"]="$BASE_PATH/Desktop/Soutenances"
+LocalRepos["Cours"]="$BASE_PATH/Desktop/Cours"
+LocalRepos["Docs"]="$BASE_PATH/Documents/Documentations"
+LocalRepos["Portfolio"]="$BASE_PATH/Desktop/Projets/IAmEmmanuelLefevre"
+LocalRepos["Profile"]="$BASE_PATH/Desktop/Projets/EmmanuelLefevre"
+LocalRepos["Schemas"]="$BASE_PATH/Desktop/Schemas"
+LocalRepos["Settings"]="$BASE_PATH/Desktop/Settings"
+LocalRepos["Soutenances"]="$BASE_PATH/Desktop/Soutenances"
 
 # FUNCTIONS
 ## Automatic commit message push with directory navigation
