@@ -9,9 +9,43 @@ alias o_ssh='ssh -T git@github.com'
 ## Close connection
 alias c_ssh='exit'
 
-# FUNCTIONS
+#############################################################################################
+
+# Base path
 BASE_PATH="C:/Users/Darka"
 
+# Default commit message
+DEFAULT_COMMIT_MESSAGE="maj"
+
+# Local repositories dictionary
+declare -A LocalRepos
+LocalRepos["cours"]="$BASE_PATH/Desktop/Cours"
+LocalRepos["docs"]="$BASE_PATH/Documents/Documentations"
+LocalRepos["portfolio"]="$BASE_PATH/Desktop/Projets/IAmEmmanuelLefevre"
+LocalRepos["profile"]="$BASE_PATH/Desktop/Projets/EmmanuelLefevre"
+LocalRepos["schemas"]="$BASE_PATH/Desktop/Schemas"
+LocalRepos["settings"]="$BASE_PATH/Desktop/Settings"
+LocalRepos["soutenances"]="$BASE_PATH/Desktop/Soutenances"
+
+# FUNCTIONS
+## Automatic commit message push with directory navigation
+push() {
+  local repo_name=$1
+  # Use DEFAULT_COMMIT_MESSAGE if none is provided
+  local commit_message=${2:-$DEFAULT_COMMIT_MESSAGE}
+
+  if [ -n "${LocalRepos[$repo_name]}" ]; then
+    cd "${LocalRepos[$repo_name]}"
+    git add .
+    git commit -m "$commit_message"
+    git push
+    echo "'$repo_name' has been successfully updated 🤙"
+  else
+    echo "⚠️ Error : local repository ${[$repo_name]} not found! ⚠️"
+  fi
+}
+
+## Jump to a specific directory
 go() {
   # Dictionary definition of paths
   declare -A PATHS
