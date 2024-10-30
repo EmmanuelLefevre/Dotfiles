@@ -18,6 +18,7 @@ BASE_PATH="C:/Users/Darka"
 DEFAULT_COMMIT_MESSAGE="maj"
 
 # ANSI colors
+BLUE='\033[0;34m'
 MAGENTA='\033[0;35m'
 RED='\033[1;31m'
 NC='\033[0m'
@@ -44,7 +45,7 @@ push() {
     git add .
     git commit -m "$commit_message"
     git push
-    echo -e "${MAGENTA}$repo_name${NC} has been successfully updated 🤙"
+    echo -e "${BLUE}$repo_name${NC} has been successfully updated 🤙"
   else
     echo -e "⚠️ Error: local repository ${RED}$repo_name${NC} not found! ⚠️"
   fi
