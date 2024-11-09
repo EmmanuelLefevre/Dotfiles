@@ -489,17 +489,18 @@ function Get-RepositoriesInfo {
   $gitHubToken = "<YOUR PERSONAL TOKEN>"
 
   # Array to define the order of repositories
-  $reposOrder = @("Cours", "Documentations", "EmmanuelLefevre", "IAmEmmanuelLefevre", "Schemas", "Settings", "Soutenances")
+  $reposOrder = @("Cours", "DailyStreakAutomation", "Documentations", "EmmanuelLefevre", "IAmEmmanuelLefevre", "Schemas", "Settings", "Soutenances")
 
   # Dictionary containing local repositories path
   $repos = @{
-    "Cours"                 = "$env:USERPROFILE\Desktop\Cours"
-    "Documentations"        = "$env:USERPROFILE\Documents\Documentations"
-    "EmmanuelLefevre"       = "$env:USERPROFILE\Desktop\Projets\EmmanuelLefevre"
-    "IAmEmmanuelLefevre"    = "$env:USERPROFILE\Desktop\Projets\IAmEmmanuelLefevre"
-    "Schemas"               = "$env:USERPROFILE\Desktop\Schemas"
-    "Settings"              = "$env:USERPROFILE\Desktop\Settings"
-    "Soutenances"           = "$env:USERPROFILE\Desktop\Soutenances"
+    "Cours"                     = "$env:USERPROFILE\Desktop\Cours"
+    "DailyStreakAutomation"     = "$env:USERPROFILE\Desktop\DailyStreakAutomation"
+    "Documentations"            = "$env:USERPROFILE\Documents\Documentations"
+    "EmmanuelLefevre"           = "$env:USERPROFILE\Desktop\Projets\EmmanuelLefevre"
+    "IAmEmmanuelLefevre"        = "$env:USERPROFILE\Desktop\Projets\IAmEmmanuelLefevre"
+    "Schemas"                   = "$env:USERPROFILE\Desktop\Schemas"
+    "Settings"                  = "$env:USERPROFILE\Desktop\Settings"
+    "Soutenances"               = "$env:USERPROFILE\Desktop\Soutenances"
   }
 
   return @{
