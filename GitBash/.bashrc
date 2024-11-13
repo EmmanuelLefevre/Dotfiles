@@ -44,7 +44,13 @@ help() {
   echo    "|----------|-----------------------------------------------------|"
   echo    "| push     | Automatic commit message push                       |"
   echo    "| go       | Jump to a specific directory                        |"
-  echo -e "| ssh      | Test GitHub SSH connection                          |\n"
+  echo    "| ssh      | Test GitHub SSH connection                          |"
+  echo -e "| z        | Go back in the tree                                 |\n"
+}
+
+## Go back in the tree
+z() {
+  cd ..
 }
 
 ## Automatic commit message push with directory navigation

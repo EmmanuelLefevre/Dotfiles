@@ -178,6 +178,11 @@ function path {
   Write-Host $currentPath -ForegroundColor DarkMagenta
 }
 
+########## Go back in the tree ##########
+function z {
+  Set-Location ..
+}
+
 ########## Create a file ##########
 function touch {
   param (
@@ -460,6 +465,7 @@ function Get-GoalFunctionsDictionary {
     ssh_github = "Test GitHub SSH connection with GPG keys"
     touch = "Create a file"
     whereis = "Find path of a specified command/executable"
+    z = "Go back in the tree"
   }
   return $goalFunctions
 }
