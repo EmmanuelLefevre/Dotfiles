@@ -178,9 +178,30 @@ function path {
   Write-Host $currentPath -ForegroundColor DarkMagenta
 }
 
-########## Go back in the tree ##########
+########## Move quickly to a folder specified as a parameter ##########
+########## Or go up in tree if no paramater is specified ##########
 function z {
-  Set-Location ..
+  param (
+    [string]$folder
+  )
+
+  # Check if $folder parameter is specified
+  if (!$folder) {
+    Set-Location ..
+    return
+  }
+
+  # Resolve relative or absolute folder path
+  $path = Resolve-Path -Path $folder -ErrorAction SilentlyContinue
+
+  if ($path) {
+    Set-Location -Path $path
+  }
+  else {
+    Write-Host -NoNewline "⚠️ Folder " -ForegroundColor Red
+    Write-Host -NoNewline "$folder" -ForegroundColor Magenta
+    Write-Host " not found ⚠️" -ForegroundColor Red
+  }
 }
 
 ########## Create a file ##########
@@ -465,7 +486,7 @@ function Get-GoalFunctionsDictionary {
     ssh_github = "Test GitHub SSH connection with GPG keys"
     touch = "Create a file"
     whereis = "Find path of a specified command/executable"
-    z = "Go back in the tree"
+    z = "Quickly move to a specified folder or go up in the tree"
   }
   return $goalFunctions
 }
