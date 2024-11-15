@@ -178,14 +178,14 @@ function path {
   Write-Host $currentPath -ForegroundColor DarkMagenta
 }
 
-########## Move quickly to a folder specified as a parameter ##########
-########## Or go up in tree if no paramater is specified ##########
+########## Go to the specified folder ##########
+########## Or returns to parent directory if no paramater is specified ##########
 function z {
   param (
     [string]$folder
   )
 
-  # Check if $folder parameter is specified
+  # If no parameter is specified, returns to parent directory
   if (!$folder) {
     Set-Location ..
     return
@@ -486,7 +486,7 @@ function Get-GoalFunctionsDictionary {
     ssh_github = "Test GitHub SSH connection with GPG keys"
     touch = "Create a file"
     whereis = "Find path of a specified command/executable"
-    z = "Quickly move to a specified folder or go up in the tree"
+    z = "Go to the specified folder or returns to parent directory"
   }
   return $goalFunctions
 }
