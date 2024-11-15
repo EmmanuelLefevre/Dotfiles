@@ -486,7 +486,7 @@ function Get-GoalFunctionsDictionary {
     ssh_github = "Test GitHub SSH connection with GPG keys"
     touch = "Create a file"
     whereis = "Find path of a specified command/executable"
-    z = "Go to the specified folder or returns to parent directory"
+    z = "Go specified folder / returns parent directory"
   }
   return $goalFunctions
 }
