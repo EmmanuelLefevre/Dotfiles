@@ -1,31 +1,38 @@
 # INTERACTIVE LOGIN SHELL
 
-## Profil loaded in Powershell
+#---------------#
+# PROMPT THEMES #
+#---------------#
+########## Profil loaded in Powershell ##########
 eval "$(oh-my-posh init bash --config "$HOME\Documents\GitBash\gitbash_profile_darka.json")"
 
 #############################################################################################
 
-# ALIAS
-## Test GitHub SSH connection
+#---------#
+# ALIASES #
+#---------#
+########## Test GitHub SSH connection ##########
 alias ssh='ssh -T git@github.com'
 
 #############################################################################################
 
-# UTILITIES
-# Base path
-BASE_PATH="C:/Users/Darka"
+#-----------#
+# UTILITIES #
+#-----------#
+########## Base path ##########
+BASE_PATH="C:/Users/<USERNAME>"
 
-# Default commit message
+########## Default commit message ##########
 DEFAULT_COMMIT_MESSAGE="maj"
 
-# ANSI colors
+########## ANSI colors ##########
 BLUE='\033[0;34m'
 CYAN='\033[36m'
 MAGENTA='\033[0;35m'
 RED='\033[31m'
 NC='\033[0m'
 
-# Local repositories dictionary
+########## Local repositories dictionary ##########
 declare -A LocalRepos
 LocalRepos["cours"]="$BASE_PATH/Desktop/Cours"
 LocalRepos["docs"]="$BASE_PATH/Documents/Documentations"
@@ -37,23 +44,36 @@ LocalRepos["soutenances"]="$BASE_PATH/Desktop/Soutenances"
 
 #############################################################################################
 
-# FUNCTIONS
-# Help
+#-----------#
+# FUNCTIONS #
+#-----------#
+########## Help ##########
 help() {
   echo -e "${BLUE}| Commande | Description                                         |${NC}"
   echo    "|----------|-----------------------------------------------------|"
   echo    "| push     | Automatic commit message push                       |"
   echo    "| go       | Jump to a specific directory                        |"
   echo    "| ssh      | Test GitHub SSH connection                          |"
-  echo -e "| z        | Go back in the tree                                 |\n"
+  echo -e "| z        | Go specified folder / returns parent directory      |\n"
 }
 
-## Go back in the tree
+########## Navigate to the specified folder passed as a parameter ##########
+########## Or returns to parent directory if no paramater is specified ##########
 z() {
-  cd ..
+  if [ -z "$1" ]; then
+    # If no parameter is specified, returns to parent directory
+    cd ..
+  else
+    # If an argument is passed, go to the specified folder
+    if cd "$1" 2>/dev/null; then
+      :
+    else
+      echo "⚠️ Folder '$1' not found ⚠️"
+    fi
+  fi
 }
 
-## Automatic commit message push with directory navigation
+########## Automatic commit message push with directory navigation ##########
 push() {
   # If first argument is "help", display available options
   if [[ $1 == "help" ]]; then
@@ -84,7 +104,7 @@ push() {
   fi
 }
 
-## Jump to a specific directory
+########## Jump to a specific directory ##########
 go() {
   # Dictionary definition of paths
   declare -A PATHS
