@@ -178,7 +178,7 @@ function path {
   Write-Host $currentPath -ForegroundColor DarkMagenta
 }
 
-########## Go to the specified folder specified as parameter ##########
+########## Navigate to the specified folder passed as a parameter ##########
 ########## Or returns to parent directory if no paramater is specified ##########
 function z {
   param (
