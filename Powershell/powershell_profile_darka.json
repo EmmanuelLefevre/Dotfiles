@@ -85,7 +85,7 @@
         {
           "type": "php",
           "style": "powerline",
-          "foreground": "#011627",
+          "foreground": "#058af6",
           "properties": {
             "fetch_version": true
           },
