@@ -54,7 +54,7 @@ function help {
   # Check if any aliases were found and display them
   if ($sortedAliasArray.Count -gt 0) {
     # Display headers
-    Write-Host ("{0,-20} {1,-30} {2,-40}" -f "Alias", "Definition", "File Name") -ForegroundColor White -BackgroundColor DarkGray
+    Write-Host ("{0,-20} {1,-30} {2,-34}" -f "Alias", "Definition", "File Name") -ForegroundColor White -BackgroundColor DarkGray
 
     # Display each alias informations
     foreach ($alias in $sortedAliasArray) {
@@ -95,12 +95,12 @@ function custom_alias {
 
   if ($customAliases) {
     # Display headers
-    Write-Host ("{0,-10} {1,-20} {2,-40}" -f "Alias", "Command", "FileName") -ForegroundColor White -BackGroundColor DarkGray
+    Write-Host ("{0,-10} {1,-14} {2,-34}" -f "Alias", "Command", "FileName") -ForegroundColor White -BackGroundColor DarkGray
 
     # Display each alias informations
     foreach ($alias in $customAliases) {
       Write-Host -NoNewline ("{0,-11}" -f "$($alias.Name)") -ForegroundColor DarkCyan
-      Write-Host -NoNewline ("{0,-21}" -f "$($alias.Alias)") -ForegroundColor DarkMagenta
+      Write-Host -NoNewline ("{0,-15}" -f "$($alias.Alias)") -ForegroundColor DarkMagenta
       Write-Host ("{0,-40}" -f " $($alias.FileName)") -ForegroundColor Yellow
     }
     Write-Host ""
@@ -147,15 +147,13 @@ function custom_function {
 
   if ($sortedFunctions) {
     # Display headers
-    Write-Host ("{0,-18} {1,-50} {2,-50}" -f "Alias", "Definition", "FileName") -ForegroundColor White -BackGroundColor DarkGray
+    Write-Host ("{0,-18} {1,-50} {2,-34}" -f "Alias", "Definition", "FileName") -ForegroundColor White -BackGroundColor DarkGray
 
     # Display each function with informations
     foreach ($function in $sortedFunctions) {
       Write-Host -NoNewline ("{0,-19}" -f "$($function.Alias)") -ForegroundColor DarkCyan
-
       $goal = $goals[$function.Alias]
       Write-Host -NoNewline ("{0,-51}" -f "$goal") -ForegroundColor DarkMagenta
-
       Write-Host ("{0,-50}" -f " $($function.FileName)") -ForegroundColor Yellow
     }
     Write-Host ""
@@ -202,6 +200,12 @@ function z {
     Write-Host -NoNewline "$folder" -ForegroundColor Magenta
     Write-Host " not found ⚠️" -ForegroundColor Red
   }
+}
+
+########## Create containers and launch thems ##########
+function dc {
+  docker-compose up -d
+  docker ps
 }
 
 ########## Create a file ##########
@@ -479,6 +483,7 @@ function Get-GoalFunctionsDictionary {
     colors = "Display powershell colors in terminal"
     custom_alias = "Get custom aliases"
     custom_function  = "Get custom functions"
+    dc = "Create containers and launch thems"
     git_pull = "Update your local repositories"
     go = "Jump to a specific directory"
     help = "Get help"
