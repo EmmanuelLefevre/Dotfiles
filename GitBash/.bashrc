@@ -39,7 +39,7 @@ LocalRepos["docs"]="$BASE_PATH/Documents/Documentations"
 LocalRepos["portfolio"]="$BASE_PATH/Desktop/Projets/IAmEmmanuelLefevre"
 LocalRepos["profile"]="$BASE_PATH/Desktop/Projets/EmmanuelLefevre"
 LocalRepos["schemas"]="$BASE_PATH/Desktop/Schemas"
-LocalRepos["settings"]="$BASE_PATH/Desktop/Settings"
+LocalRepos["dotfiles"]="$BASE_PATH/Desktop/Dotfiles"
 LocalRepos["soutenances"]="$BASE_PATH/Desktop/Soutenances"
 
 #############################################################################################
@@ -118,7 +118,7 @@ go() {
     ["profile"]="$BASE_PATH/Desktop/Projets/EmmanuelLefevre"
     ["projets"]="$BASE_PATH/Desktop/Projets"
     ["schemas"]="$BASE_PATH/Desktop/Schemas"
-    ["settings"]="$BASE_PATH/Desktop/Settings"
+    ["dotfiles"]="$BASE_PATH/Desktop/Dotfiles"
     ["soutenances"]="$BASE_PATH/Desktop/Soutenances"
   )
 
