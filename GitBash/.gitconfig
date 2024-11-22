@@ -2,8 +2,6 @@
 	email = <YOUR_GITHUB_EMAIL>
 	name = <YOUR_GITHUB_USERNAME>
 [color]
-	current = green
-	remote = yellow
 	diff = auto
 	status = auto
 	autobranch = auto
