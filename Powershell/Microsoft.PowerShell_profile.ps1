@@ -248,7 +248,7 @@ function go {
     @{ Name = "nvim";      Path = "$HOME\AppData\Local\nvim" },
     @{ Name = "profile";   Path = "$HOME\Documents\PowerShell" },
     @{ Name = "projets";   Path = "$HOME\Desktop\Projets" },
-    @{ Name = "settings";  Path = "$HOME\Desktop\Settings" },
+    @{ Name = "dotfiles";  Path = "$HOME\Desktop\Dotfiles" },
     @{ Name = "help";      Path = "Available paths" }
   )
 
@@ -289,8 +289,8 @@ function go {
     "projets" {
       Set-Location -Path "$HOME\Desktop\Projets"
     }
-    "settings" {
-      Set-Location -Path "$HOME\Desktop\Settings"
+    "dotfiles" {
+      Set-Location -Path "$HOME\Desktop\Dotfiles"
     }
     "help" {
       # Create a table of valid options
@@ -521,7 +521,7 @@ function Get-RepositoriesInfo {
   $gitHubToken = "<YOUR PERSONAL TOKEN>"
 
   # Array to define the order of repositories
-  $reposOrder = @("Cours", "DailyPush", "Documentations", "EmmanuelLefevre", "IAmEmmanuelLefevre", "Schemas", "Settings", "Soutenances")
+  $reposOrder = @("Cours", "DailyPush", "Documentations", "EmmanuelLefevre", "IAmEmmanuelLefevre", "Schemas", "Dotfiles", "Soutenances")
 
   # Dictionary containing local repositories path
   $repos = @{
@@ -531,7 +531,7 @@ function Get-RepositoriesInfo {
     "EmmanuelLefevre"        = "$env:USERPROFILE\Desktop\Projets\EmmanuelLefevre"
     "IAmEmmanuelLefevre"     = "$env:USERPROFILE\Desktop\Projets\IAmEmmanuelLefevre"
     "Schemas"                = "$env:USERPROFILE\Desktop\Schemas"
-    "Settings"               = "$env:USERPROFILE\Desktop\Settings"
+    "Dotfiles"               = "$env:USERPROFILE\Desktop\Dotfiles"
     "Soutenances"            = "$env:USERPROFILE\Desktop\Soutenances"
   }
 
