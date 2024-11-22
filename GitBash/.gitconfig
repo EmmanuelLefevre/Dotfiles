@@ -1,16 +1,20 @@
 [user]
-email = <YOUR_GITHUB_EMAIL>
-name = <YOUR_GITHUB_USERNAME>
+	email = <YOUR_GITHUB_EMAIL>
+	name = <YOUR_GITHUB_USERNAME>
 [color]
-diff = auto
-status = auto
-autobranch = auto
+	current = green
+	remote = yellow
+	diff = auto
+	status = auto
+	autobranch = auto
 [alias]
-sw = switch
-ci = commit
-st = status
-mg = merge
-br = branch
-ch = checkout
+	sw = switch
+	ci = commit
+	st = status
+	mg = merge
+	br = branch
+	ck = checkout
+[init]
+	defaultBranch = main
 [core]
 	editor = \"C:\\Users\\<YOUR_USERNAME>\\AppData\\Local\\Programs\\Microsoft VS Code\\bin\\code\" --wait
