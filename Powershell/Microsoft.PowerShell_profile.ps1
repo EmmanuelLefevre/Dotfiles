@@ -529,7 +529,7 @@ function Get-RepositoriesInfo {
   $gitHubToken = "<YOUR PERSONAL TOKEN>"
 
   # Array to define the order of repositories
-  $reposOrder = @("ArtiWave", "Cours", "DailyPush", "Documentations", "Dotfiles", "EmmanuelLefevre", "GitHubProfileIcons", "GoogleSheets", "IAmEmmanuelLefevre", "MarkdownImg", "ReplicaMySQL", "Schemas", "Soutenances", "WeakAura")
+  $reposOrder = @("ArtiWave", "Cours", "DailyPush", "Documentations", "Dotfiles", "EmmanuelLefevre", "GitHubProfileIcons", "GoogleSheets", "IAmEmmanuelLefevre", "MarkdownImg", "ReplicaMySQL", "Schemas", "Soutenances")
 
   # Dictionary containing local repositories path
   $repos = @{
@@ -546,7 +546,6 @@ function Get-RepositoriesInfo {
     "ReplicaMySQL"           = "$env:USERPROFILE\Desktop\Projets\ReplicaMySQL"
     "Schemas"                = "$env:USERPROFILE\Desktop\Schemas"
     "Soutenances"            = "$env:USERPROFILE\Desktop\Soutenances"
-    "WeakAura"               = "$env:USERPROFILE\Documents\WeakAura"
   }
 
   return @{
