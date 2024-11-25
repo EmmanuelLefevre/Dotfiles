@@ -529,13 +529,14 @@ function Get-RepositoriesInfo {
   $gitHubToken = "<YOUR PERSONAL TOKEN>"
 
   # Array to define the order of repositories
-  $reposOrder = @("Cours", "DailyPush", "Documentations", "EmmanuelLefevre", "GitHubProfileIcons", "GoogleSheets", "IAmEmmanuelLefevre", "MarkdownImg", "ReplicaMySQL", "Schemas", "Dotfiles", "Soutenances", "WeakAura")
+  $reposOrder = @("Cours", "DailyPush", "Documentations", "Dotfiles", "EmmanuelLefevre", "GitHubProfileIcons", "GoogleSheets", "IAmEmmanuelLefevre", "MarkdownImg", "ReplicaMySQL", "Schemas", "Soutenances", "WeakAura")
 
   # Dictionary containing local repositories path
   $repos = @{
     "Cours"                  = "$env:USERPROFILE\Desktop\Cours"
     "DailyPush"              = "$env:USERPROFILE\Desktop\DailyPush"
     "Documentations"         = "$env:USERPROFILE\Documents\Documentations"
+    "Dotfiles"               = "$env:USERPROFILE\Desktop\Dotfiles"
     "EmmanuelLefevre"        = "$env:USERPROFILE\Desktop\Projets\EmmanuelLefevre"
     "GitHubProfileIcons"     = "$env:USERPROFILE\Pictures\GitHubProfileIcons"
     "GoogleSheets"           = "$env:USERPROFILE\Desktop\GoogleSheets"
@@ -543,7 +544,6 @@ function Get-RepositoriesInfo {
     "MarkdownImg"            = "$env:USERPROFILE\Desktop\MarkdownImg"
     "ReplicaMySQL"           = "$env:USERPROFILE\Desktop\Projets\ReplicaMySQL"
     "Schemas"                = "$env:USERPROFILE\Desktop\Schemas"
-    "Dotfiles"               = "$env:USERPROFILE\Desktop\Dotfiles"
     "Soutenances"            = "$env:USERPROFILE\Desktop\Soutenances"
     "WeakAura"               = "$env:USERPROFILE\Documents\WeakAura"
   }
