@@ -241,14 +241,16 @@ function go {
     @{ Name = "aw";        Path = "$HOME\Desktop\Projets\ArtiWave" },
     @{ Name = "cours";     Path = "$HOME\Desktop\Cours" },
     @{ Name = "docs";      Path = "$HOME\Documents\Documentations" },
+    @{ Name = "dotfiles";  Path = "$HOME\Desktop\Dotfiles" },
     @{ Name = "dwld";      Path = "$HOME\Downloads" },
     @{ Name = "eg";        Path = "$HOME\Desktop\Projets\EasyGarden" },
     @{ Name = "el";        Path = "$HOME\Desktop\Projets\EmmanuelLefevre" },
     @{ Name = "home";      Path = "$HOME" },
+    @{ Name = "mdimg";     Path = "$HOME\Desktop\MarkdownImg" },
     @{ Name = "nvim";      Path = "$HOME\AppData\Local\nvim" },
     @{ Name = "profile";   Path = "$HOME\Documents\PowerShell" },
     @{ Name = "projets";   Path = "$HOME\Desktop\Projets" },
-    @{ Name = "dotfiles";  Path = "$HOME\Desktop\Dotfiles" },
+    @{ Name = "replica";   Path = "$HOME\Desktop\Projets\ReplicaMysql" },
     @{ Name = "help";      Path = "Available paths" }
   )
 
@@ -268,6 +270,9 @@ function go {
     "docs" {
       Set-Location -Path "$HOME\Documents\Documentations"
     }
+    "dotfiles" {
+      Set-Location -Path "$HOME\Desktop\Dotfiles"
+    }
     "dwld" {
       Set-Location -Path "$HOME\Downloads"
     }
@@ -280,6 +285,9 @@ function go {
     "home" {
       Set-Location -Path "$HOME"
     }
+    "mdimg" {
+      Set-Location -Path "$HOME\Desktop\MarkdownImg"
+    }
     "nvim" {
       Set-Location -Path "$HOME\AppData\Local\nvim"
     }
@@ -289,8 +297,8 @@ function go {
     "projets" {
       Set-Location -Path "$HOME\Desktop\Projets"
     }
-    "dotfiles" {
-      Set-Location -Path "$HOME\Desktop\Dotfiles"
+    "replica" {
+      Set-Location -Path "$HOME\Desktop\Projets\ReplicaMySQL"
     }
     "help" {
       # Create a table of valid options
