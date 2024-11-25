@@ -36,10 +36,12 @@ NC='\033[0m'
 declare -A LocalRepos
 LocalRepos["cours"]="$BASE_PATH/Desktop/Cours"
 LocalRepos["docs"]="$BASE_PATH/Documents/Documentations"
+LocalRepos["dotfiles"]="$BASE_PATH/Desktop/Dotfiles"
+LocalRepos["mdimg"]="$BASE_PATH/Desktop/MarkdownImg"
 LocalRepos["portfolio"]="$BASE_PATH/Desktop/Projets/IAmEmmanuelLefevre"
 LocalRepos["profile"]="$BASE_PATH/Desktop/Projets/EmmanuelLefevre"
+LocalRepos["replica"]="$BASE_PATH/Desktop/Projets/ReplicaMySQL"
 LocalRepos["schemas"]="$BASE_PATH/Desktop/Schemas"
-LocalRepos["dotfiles"]="$BASE_PATH/Desktop/Dotfiles"
 LocalRepos["soutenances"]="$BASE_PATH/Desktop/Soutenances"
 
 #############################################################################################
@@ -112,13 +114,15 @@ go() {
     ["aw"]="$BASE_PATH/Desktop/Projets/ArtiWave"
     ["cours"]="$BASE_PATH/Desktop/Cours"
     ["docs"]="$BASE_PATH/Documents/Documentations"
+    ["dotfiles"]="$BASE_PATH/Desktop/Dotfiles"
     ["dwld"]="$BASE_PATH/Downloads"
     ["eg"]="$BASE_PATH/Desktop/Projets/EasyGarden"
+    ["mdimg"]="$BASE_PATH/Desktop/MarkdownImg"
     ["portfolio"]="$BASE_PATH/Desktop/Projets/IAmEmmanuelLefevre"
     ["profile"]="$BASE_PATH/Desktop/Projets/EmmanuelLefevre"
     ["projets"]="$BASE_PATH/Desktop/Projets"
+    ["replica"]="$BASE_PATH/Desktop/Projets/ReplicaMySQL"
     ["schemas"]="$BASE_PATH/Desktop/Schemas"
-    ["dotfiles"]="$BASE_PATH/Desktop/Dotfiles"
     ["soutenances"]="$BASE_PATH/Desktop/Soutenances"
   )
 
