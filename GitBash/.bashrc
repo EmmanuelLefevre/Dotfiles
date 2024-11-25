@@ -34,6 +34,7 @@ NC='\033[0m'
 
 ########## Local repositories dictionary ##########
 declare -A LocalRepos
+LocalRepos["aw"]="$BASE_PATH/Desktop/Projets/ArtiWave"
 LocalRepos["cours"]="$BASE_PATH/Desktop/Cours"
 LocalRepos["docs"]="$BASE_PATH/Documents/Documentations"
 LocalRepos["dotfiles"]="$BASE_PATH/Desktop/Dotfiles"
