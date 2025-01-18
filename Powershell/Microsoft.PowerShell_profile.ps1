@@ -529,13 +529,14 @@ function Get-RepositoriesInfo {
   $gitHubToken = "<YOUR PERSONAL TOKEN>"
 
   # Array to define the order of repositories
-  $reposOrder = @("ArtiWave", "Cours", "DailyPush", "Documentations", "Dotfiles", "EmmanuelLefevre", "GitHubProfileIcons", "GoogleSheets", "IAmEmmanuelLefevre", "MarkdownImg", "ReplicaMySQL", "Schemas", "ScrapMate", "Soutenances")
+  $reposOrder = @("ArtiWave", "Cours", "DailyPush", "DataScrub", "Documentations", "Dotfiles", "EmmanuelLefevre", "GitHubProfileIcons", "GoogleSheets", "IAmEmmanuelLefevre", "MarkdownImg", "ReplicaMySQL", "Schemas", "ScrapMate", "Soutenances")
 
   # Dictionary containing local repositories path
   $repos = @{
     "ArtiWave"               = "$env:USERPROFILE\Desktop\Projets\ArtiWave"
     "Cours"                  = "$env:USERPROFILE\Desktop\Cours"
     "DailyPush"              = "$env:USERPROFILE\Desktop\DailyPush"
+    "DataScrub"              = "$env:USERPROFILE\Desktop\Projets\DataScrub"
     "Documentations"         = "$env:USERPROFILE\Documents\Documentations"
     "Dotfiles"               = "$env:USERPROFILE\Desktop\Dotfiles"
     "EmmanuelLefevre"        = "$env:USERPROFILE\Desktop\Projets\EmmanuelLefevre"
