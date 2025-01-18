@@ -15,4 +15,5 @@
 [init]
 	defaultBranch = main
 [core]
+	autocrlf = true
 	editor = \"C:\\Users\\<YOUR_USERNAME>\\AppData\\Local\\Programs\\Microsoft VS Code\\bin\\code\" --wait
