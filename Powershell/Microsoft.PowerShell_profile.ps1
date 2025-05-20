@@ -202,10 +202,21 @@ function z {
   }
 }
 
-########## Create containers and launch thems ##########
+# Docker
 function dc {
-  docker-compose up -d
-  docker ps
+  docker-compose up --build
+}
+
+function dr {
+  docker rm -f $(docker ps -aq)
+  docker volume rm $(docker volume ls -q)
+  docker network prune -f
+  docker builder prune -af
+  docker rmi -f $(docker images -q)
+}
+
+function dl {
+  docker compose logs -f
 }
 
 ########## Create a file ##########
