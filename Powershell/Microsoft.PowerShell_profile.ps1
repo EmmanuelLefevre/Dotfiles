@@ -169,6 +169,11 @@ function custom_function {
 # FUNCTIONS #
 #-----------#
 
+########## Clear ##########
+function c {
+  clear
+}
+
 ########## Display the current directory path ##########
 function path {
   Write-Host ""
