@@ -3,6 +3,11 @@
 #---------------#
 oh-my-posh init pwsh --config "$env:USERPROFILE/Documents/PowerShell/powershell_profile_darka.json" | Invoke-Expression
 
+#-------------------------------#
+# USE SECURITY PROTOCOL TLS 1.2 #
+#-------------------------------#
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+
 #---------#
 # ALIASES #
 #---------#
@@ -60,7 +65,7 @@ function help {
     foreach ($alias in $sortedAliasArray) {
       Write-Host -NoNewline ("{0,-21}" -f "$($alias.Alias)") -ForegroundColor DarkCyan
       Write-Host -NoNewline ("{0,-31}" -f "$($alias.Definition)") -ForegroundColor DarkMagenta
-      Write-Host ("{0,-30}" -f " $($alias.FileName)") -ForegroundColor DarkDarkYellow
+      Write-Host ("{0,-30}" -f " $($alias.FileName)") -ForegroundColor DarkYellow
     }
     Write-Host ""
   }
@@ -377,40 +382,54 @@ function colors {
 }
 
 ########## Update your local repositories ##########
-function Show-LatestCommitMessage {
+function gpull {
+  [CmdletBinding()]
   param (
-    [string]$LocalBranch,
-    [string]$RemoteBranch
+    # Force repository information reloading
+    [switch]$RefreshCache
   )
 
-  # Get latest commit message
-  $latestCommitMessage = git log -1 --format="%s" "$LocalBranch..$RemoteBranch"
+  # If cache doesn't exist or if a refresh is forced
+  if (-not $Global:GPullCache -or $RefreshCache) {
+    Write-Host "🔄 Updating repositories informations... 🔄" -ForegroundColor Cyan
 
-  # Display it if it exists
-  if ($latestCommitMessage) {
-    Write-Host -NoNewline "Commit message : " -ForegroundColor Magenta
-    Write-Host "$latestCommitMessage" -ForegroundColor Cyan
+    # Function is called only once
+    $tempReposInfo = Get-RepositoriesInfo
+
+    # Validate result before caching it
+    $functionNameMessage = "in Get-RepositoriesInfo function"
+    if ($tempReposInfo -eq $null) {
+      Write-Host "⛔ Script stopped due to an invalid configuration $functionNameMessage ! ⛔" -ForegroundColor Red
+
+      # Exit function
+      return
+    }
+
+    # If everything is valid cache is created
+    $Global:GPullCache = @{
+      ReposInfo = $tempReposInfo
+    }
   }
-}
 
-function git_pull {
-  # Get local repositories information and their order
-  $reposInfo = Get-RepositoriesInfo
+  # Retrieve repositories information from cache
+  $reposInfo = $Global:GPullCache.ReposInfo
+
   $reposOrder = $reposInfo.Order
   $repos = $reposInfo.Paths
-  # Get GitHub username and token
   $username = $reposInfo.Username
   $token = $reposInfo.Token
 
   # Iterate over each repository in the defined order
   foreach ($repoName in $reposOrder) {
     $repoPath = $repos[$repoName]
-    if (Test-Path -Path $repoPath) {
+
+    if ($repoPath -and (Test-Path -Path $repoPath)) {
       # Change current directory to repository path
       Set-Location -Path $repoPath
 
-      # Show the name of the repository being updated
-      Write-Host -NoNewline "$repoName" -ForegroundColor Magenta
+      # Show repository name being updated
+      Write-Host "------------------------------------------------------------------------------" -ForegroundColor DarkYellow
+      Write-Host -NoNewline "$repoName" -ForegroundColor white -BackgroundColor DarkBlue
       Write-Host " is on update process 🚀" -ForegroundColor Green
 
       try {
@@ -418,59 +437,115 @@ function git_pull {
         $repoUrl = "https://api.github.com/repos/$username/$repoName"
         $response = Invoke-RestMethod -Uri $repoUrl -Method Get -Headers @{ Authorization = "Bearer $token" } -ErrorAction Stop
 
+        # Check local origin remote corresponds to expected repository
+        $localRemoteUrl = (git remote get-url origin 2>$null)
+        if (-not ($localRemoteUrl -match "$username/$repoName")) {
+          Write-Host -NoNewline "⚠️ Original local remote " -ForegroundColor Red
+          Write-Host -NoNewline "$localRemoteUrl" -ForegroundColor Magenta
+          Write-Host " doesn't match to expected GitHub repository ($username/$repoName). Repository ignored ! ⚠️" -ForegroundColor Red
+
+          # Move next repository
+          continue
+        }
+
         # Store original branch to return it later
         $originalBranch = git rev-parse --abbrev-ref HEAD
-        git fetch --prune
+
+        # Fetch latest remote changes
+        git fetch --prune --quiet
+
+        # Display date of last remote commit
+        Show-LastCommitDate
+
+        # Check if fetch worked (Git/SSH authentication)
+        if ($LASTEXITCODE -ne 0) {
+          Write-Host -NoNewline "⚠️ "
+          Write-Host -NoNewline ""Git Fetch" failed ! " -ForegroundColor Red
+          Write-Host "Check your Git access credentials (SSH keys/Credential Manager)... ⚠️" -ForegroundColor Red
+
+          $repoIsInSafeState = $false
+
+          # Move next repository
+          continue
+        }
 
         # Check for new remote branches
         $allRemoteRefs = git for-each-ref --format="%(refname:short)" refs/remotes | Where-Object { $_ -notmatch '/HEAD$' }
         $allLocalBranches = git for-each-ref --format="%(refname:short)" refs/heads
 
+        # List to store new branches to track
         $newBranchesToTrack = @()
+
+        # Find remote branches that aren't tracked locally
         foreach ($remoteRef in $allRemoteRefs) {
-          $localEquivalent = $remoteRef.Substring($remoteRef.IndexOf('/') + 1)
-          if ($localEquivalent -notin $allLocalBranches) {
-            $newBranchesToTrack += $remoteRef
+          if ($remoteRef -match '^[^/]+/(.+)$') {
+            $localEquivalent = $Matches[1]
+
+            # Ignore hotfix and release branches
+            $prefixesToIgnore = @('hotfix/', 'release/')
+            $shouldIgnore = $false
+
+            # Check each prefix to ignore
+            foreach ($prefix in $prefixesToIgnore) {
+              # Check if branch name begins with a prefix to ignore
+              if ($localEquivalent.StartsWith($prefix, [System.StringComparison]::OrdinalIgnoreCase)) {
+                $shouldIgnore = $true
+
+                # No point in continuing to search, exit loop
+                break
+              }
+            }
+
+            # If local branch doesn't exist and not ignored, add it to list
+            if (($localEquivalent -notin $allLocalBranches) -and (-not $shouldIgnore)) {
+              $newBranchesToTrack += $remoteRef
+            }
           }
         }
 
+        # Interactively track new remote branches
         if ($newBranchesToTrack) {
           foreach ($newBranchRef in $newBranchesToTrack) {
-            $localBranchName = $newBranchRef.Substring($newBranchRef.IndexOf('/') + 1)
+            $null = $newBranchRef -match '^[^/]+/(.+)$'
+            $localBranchName = $Matches[1]
 
-            Write-Host -NoNewline "❤️ New remote branches found =>" -ForegroundColor Blue
-            Write-Host -NoNewline "🦄 $newBranchesToTrack 🦄" -ForegroundColor DarkCyan
-            Write-Host " ❤️" -ForegroundColor Blue
+            Write-Host -NoNewline "❤️ New remote branches found ❤️ =>" -ForegroundColor Blue
+            Write-Host "🦄 $localBranchName 🦄" -ForegroundColor DarkCyan
 
+            # Show latest commit message
             $latestCommitMsg = git log -1 --format="%s" $newBranchRef
             if ($latestCommitMsg) {
               Write-Host -NoNewline "Commit message : " -ForegroundColor Magenta
               Write-Host "$latestCommitMsg" -ForegroundColor Cyan
             }
 
+            # Ask user
             Write-Host -NoNewline "Pull " -ForegroundColor Magenta
             Write-Host -NoNewline "$localBranchName" -ForegroundColor Red
-            Write-Host -NoNewline " ? (y/n): " -ForegroundColor Magenta
+            Write-Host -NoNewline " ? (Y/n): " -ForegroundColor Magenta
 
             $choice = Read-Host
-            if ($choice -match '^(y|yes)$') {
+            if ($choice -match '^(Y|y|yes|^)$') {
               Write-Host -NoNewline "⏳ Creating local branch " -ForegroundColor Magenta
               Write-Host "$localBranchName" -ForegroundColor Red
 
-              git branch --track $localBranchName $newBranchRef
+              # Create local branch tracking remote branch
+              git branch --track --quiet $localBranchName $newBranchRef
 
+              # Check if branch creation worked
               if ($LASTEXITCODE -eq 0) {
                 Write-Host -NoNewline "$localBranchName" -ForegroundColor Red
                 Write-Host " successfully pulled ✅" -ForegroundColor Green
               }
+              # If branch creation failed
               else {
                 Write-Host -NoNewline "$localBranchName" -ForegroundColor Red
-                Write-Host "⚠️ Pull failed ! ⚠️" -ForegroundColor Red
+                Write-Host "⚠️ New creation branch has failed ! ⚠️" -ForegroundColor Red
               }
             }
           }
 
-          Write-Host "---------------------------------" -ForegroundColor DarkYellow
+          Write-Host "------------------------------------------------------------------------------" -ForegroundColor White
         }
 
         # Find all local branches that have a remote upstream
@@ -481,23 +556,45 @@ function git_pull {
           }
         }
 
+        # If no branch has an upstream defined
         if (-not $branchesToUpdate) {
-          Write-Host "No local branches with remote tracking found." -ForegroundColor DarkYellow
+          Write-Host "ℹ️ No upstream defined ! Nothing to update or clean up for this repository ! ℹ️" -ForegroundColor DarkYellow
+
+          # Move next repository
+          continue
         }
+
+        # Defines priority branches in specific order
+        $mainBranchNames = @("main", "master")
+        $devBranchNames = @("dev", "develop")
+
+        # Create three lists to guarantee order
+        $mainBranches = $branchesToUpdate | Where-Object { $mainBranchNames -icontains $_.Local }
+        $devBranches = $branchesToUpdate | Where-Object { $devBranchNames -icontains $_.Local }
+
+        # Combines two priority lists into one for filtering
+        $allPriorityNames = $mainBranchNames + $devBranchNames
+        # Sort other branches in alphabetical order
+        $otherBranches = $branchesToUpdate | Where-Object { -not ($allPriorityNames -icontains $_.Local) } | Sort-Object Local
+
+        # Combine lists in the desired order
+        $sortedBranchesToUpdate = $mainBranches + $devBranches + $otherBranches
 
         # Track repository state
         $repoIsInSafeState = $true
-        # Variable for “Already updated” resume
+
+        # Track if any branch needed a pull
         $anyBranchNeededPull = $false
 
-        # Iterate over each branch found to PULL
-        foreach ($branch in $branchesToUpdate) {
-          Write-Host -NoNewline "Inspecting branch " -ForegroundColor Cyan
-          Write-Host -NoNewline "$($branch.Local)" -ForegroundColor Magenta
-          Write-Host " ..." -ForegroundColor Cyan
+        # Iterate over each branch found to pull updates from remote
+        foreach ($branch in $sortedBranchesToUpdate) {
+          # Checkout to branch
+          git checkout $branch.Local *> $null
 
-          # Checkout to the branch
-          git checkout $branch.Local > $null
+          Write-Host -NoNewline "Inspecting branch " -ForegroundColor Cyan
+          Write-Host "$($branch.Local)" -ForegroundColor Magenta
+
+          # Check if checkout worked
           if ($LASTEXITCODE -ne 0) {
             Write-Host "⚠️ "
             Write-Host -NoNewline "Could not checkout " -ForegroundColor Magenta
@@ -506,36 +603,74 @@ function git_pull {
 
             Write-Host -NoNewline "Blocked by local changes on " -ForegroundColor Magenta
             Write-Host -NoNewline "$originalBranch" -ForegroundColor Red
-            Write-Host ". Halting updates for this repo." -ForegroundColor Magenta
+            Write-Host ". Halting updates for this repo" -ForegroundColor Magenta
 
+            # Marks repository as an unstable state
             $repoIsInSafeState = $false
+
+            # Exit loop, no need to continue processing this repository
             break
           }
 
-          # Check for local (unstaged) changes
-          $diffOutput = git diff --name-only
-          if ($diffOutput) {
+          # Check for local (stagged/unstaged) changes
+          $unstagedChanges = git diff --name-only --quiet
+          $stagedChanges = git diff --cached --name-only --quiet
+
+          # If local changes, skip pull
+          if ($unstagedChanges -or $stagedChanges) {
             Write-Host -NoNewline "󰨈  Conflict detected on" -ForegroundColor Red
             Write-Host -NoNewline "$($branch.Local)" -ForegroundColor Magenta
             Write-Host -NoNewline " , this branch has local changes. Pull avoided... 󰨈" -ForegroundColor Red
             Write-Host "Affected files =>" -ForegroundColor DarkCyan
-            foreach ($file in $diffOutput) {
-              Write-Host " $file" -ForegroundColor DarkCyan
-            }
-            Write-Host "👻👻👻👻👻👻👻👻👻👻👻👻👻👻👻👻👻👻👻👻👻👻👻👻👻👻👻👻👻👻👻"
 
-            # Skip next branch
+            # List affected files
+            if ($unstagedChanges) {
+              Write-Host "Unstaged affected files =>" -ForegroundColor DarkCyan
+              foreach ($file in $unstagedChanges) {
+                Write-Host " $file" -ForegroundColor DarkCyan
+              }
+            }
+            # List staged files
+            if ($stagedChanges) {
+              Write-Host "Staged affected files =>" -ForegroundColor DarkCyan
+              foreach ($file in $stagedChanges) {
+                Write-Host " $file" -ForegroundColor DarkCyan
+              }
+            }
+            Write-Host "------------------------------------------------------------------------------" -ForegroundColor DarkYellow
+
+            # Skip to next branch
             continue
           }
 
-          # Check if branch is already updated
+          # Check if branch has local commits that doesn't exist on remote branch
+          $unpushedCommits = git log "@{u}..HEAD" --oneline -q 2>$null
+          if ($unpushedCommits) {
+            Write-Host -NoNewline "⚠️ Branch ahead => " -ForegroundColor Red
+            Write-Host -NoNewline "$($branch.Local)" -ForegroundColor Magenta
+            Write-Host " has unpushed commits. Pull avoided to prevent a merge ! ⚠️" -ForegroundColor Red
+            Write-Host "------------------------------------------------------------------------------" -ForegroundColor DarkYellow
+
+            # Skip to next branch
+            continue
+          }
+
+          # Compare local and remote commits
           $localCommit = git rev-parse $branch.Local
           $remoteCommit = (git rev-parse $branch.Remote -q 2>$null)
+          # If remote commit doesn't exist, skip branch
           if (-not $remoteCommit) {
+            # Skip to next branch
             continue
           }
 
+          # If commits are the same, branch is up to date
           if ($localCommit -eq $remoteCommit) {
+            Write-Host -NoNewline "$($branch.Local)" -ForegroundColor Red
+            Write-Host " is already updated ✅" -ForegroundColor Green
+            Write-Host "------------------------------------------------------------------------------" -ForegroundColor White
+
+            # Skip to next branch
             continue
           }
 
@@ -544,64 +679,88 @@ function git_pull {
 
           # Update branchs
           $pullSuccess = $false
+
+          # If main/master automatically pull it
           if ($branch.Local -eq "main" -or $branch.Local -eq "master") {
-            Write-Host "⏳ Updating main branch ..." -ForegroundColor Magenta
+            Write-Host "⏳ Updating main branch..." -ForegroundColor Magenta
 
-            Show-LatestCommitMessage -LocalBranch $branch.Local -RemoteBranch $branch.Remote
+            Show-LatestCommitMessage -LocalBranch $branch.Local -RemoteBranch $branch.Remote -HideHashes
 
             git pull
-            if ($LASTEXITCODE -eq 0) { $pullSuccess = $true }
+
+            # Check if pull worked
+            if ($LASTEXITCODE -eq 0) {
+              # Mark pull as successful
+              $pullSuccess = $true
+            }
           }
+          # If dev/develop automatically pull it
           elseif ($branch.Local -eq "dev" -or $branch.Local -eq "develop") {
-            Write-Host "⏳ Updating develop branch ..." -ForegroundColor Magenta
+            Write-Host "⏳ Updating develop branch..." -ForegroundColor Magenta
 
-            Show-LatestCommitMessage -LocalBranch $branch.Local -RemoteBranch $branch.Remote
+            Show-LatestCommitMessage -LocalBranch $branch.Local -RemoteBranch $branch.Remote -HideHashes
 
             git pull
-            if ($LASTEXITCODE -eq 0) { $pullSuccess = $true }
+
+            # Check if pull worked
+            if ($LASTEXITCODE -eq 0) {
+              # Mark pull as successful
+              $pullSuccess = $true
+            }
           }
+          # Ask user for other branches
           else {
-            # Ask user for other branches
             Write-Host -NoNewline "Branch " -ForegroundColor Magenta
             Write-Host -NoNewline "$($branch.Local)" -ForegroundColor Red
-            Write-Host " has updates." -ForegroundColor Magenta
+            Write-Host " has updates" -ForegroundColor Magenta
 
-            Show-LatestCommitMessage -LocalBranch $branch.Local -RemoteBranch $branch.Remote
+            Show-LatestCommitMessage -LocalBranch $branch.Local -RemoteBranch $branch.Remote -HideHashes
 
-            Write-Host -NoNewline "Pull ? (y/n): " -ForegroundColor Magenta
+            Write-Host -NoNewline "Pull ? (Y/n): " -ForegroundColor Magenta
 
             $choice = Read-Host
-            if ($choice -match '^(y|yes)$') {
+            if ($choice -match '^(Y|y|yes|^)$') {
               Write-Host -NoNewline "⏳ Updating " -ForegroundColor Magenta
               Write-Host -NoNewline "$($branch.Local)" -ForegroundColor Red
               Write-Host " ..." -ForegroundColor Magenta
+
               git pull
-              if ($LASTEXITCODE -eq 0) { $pullSuccess = $true }
+
+              # Check if pull worked
+              if ($LASTEXITCODE -eq 0) {
+                # Mark pull as successful
+                $pullSuccess = $true
+              }
             }
+            # If user refuses pull
             else {
               Write-Host -NoNewline "Skipping pull for " -ForegroundColor Magenta
               Write-Host -NoNewline "$($branch.Local)" -ForegroundColor Red
               Write-Host " ..." -ForegroundColor Magenta
+
+              Write-Host "------------------------------------------------------------------------------" -ForegroundColor White
+
+              # Reset pull success
               $pullSuccess = $null
             }
           }
 
-          # Check pull status
-          # For each updated branch
+          # Check pull status for each updated branch
           if ($pullSuccess -eq $true) {
             Write-Host -NoNewline "$($branch.Local)" -ForegroundColor Red
             Write-Host " successfully updated ✅" -ForegroundColor Green
-            Write-Host "--------------------------------------------------------------------" -ForegroundColor DarkYellow
+            Write-Host "------------------------------------------------------------------------------" -ForegroundColor White
           }
-          # For each branch not updated
+          # Check pull status for each not updated branch
           elseif ($pullSuccess -eq $false) {
             Write-Host "⚠️ "
             Write-Host -NoNewline "Error updating " -ForegroundColor Red
             Write-Host -NoNewline "$($branch.Local)" -ForegroundColor Magenta
             Write-Host -NoNewline " in " -ForegroundColor Red
-            Write-Host -NoNewline "$repoName" -ForegroundColor Magenta
+            Write-Host -NoNewline "$repoName" -ForegroundColor white -BackgroundColor DarkBlue
             Write-Host " ⚠️" -ForegroundColor Red
 
+            # Mark repository as not in a safe state
             $repoIsInSafeState = $false
 
             # Exit branch loop
@@ -609,116 +768,269 @@ function git_pull {
           }
         }
 
-        # Return to original branch if safe
-        if ($repoIsInSafeState) {
-          Write-Host -NoNewline "Returning to original branch " -ForegroundColor Magenta
-          Write-Host -NoNewline "$originalBranch" -ForegroundColor Red
-          Write-Host " ..." -ForegroundColor Magenta
-
-          git checkout $originalBranch > $null
-        }
-        else {
-          Write-Host "⚠️ Repo is in an unstable state. NOT returning to original branch ! ⚠️" -ForegroundColor Red
-          $originalBranch = git rev-parse --abbrev-ref HEAD
-        }
-
+        # If no branch needed pull
         if ($anyBranchNeededPull -eq $false) {
-          Write-Host -NoNewline "All branches already updated 🤙" -ForegroundColor Green
-          Write-Host "👻👻👻👻👻👻👻👻👻👻👻👻👻👻👻👻👻👻👻👻👻👻👻👻👻👻👻👻👻👻👻"
+          Write-Host "All branches already updated 🤙" -ForegroundColor Green
         }
+
+        # Track whether user's branch has been deleted
+        [bool]$originalBranchWasDeleted = $false
+
+        # Define protected branches
+        $protectedBranches = @("dev", "develop", "main", "master")
 
         # Interactive prune
-        $staleBranches = git branch -vv | Select-String -Pattern '\[.*: gone\]' | ForEach-Object {
+        $orphanedBranches = git branch -vv | Select-String -Pattern '\[.*: gone\]' | ForEach-Object {
           $line = $_.Line.Trim()
           if ($line -match '^\*?\s*([\S]+)') {
             $Matches[1]
           }
         }
 
-        if ($staleBranches) {
-          Write-Host "👉 Cleaning up obsolete local branches." -ForegroundColor DarkYellow
-          $protectedBranches = @("dev", "develop", "main", "master")
+        # Filter protected branches
+        $orphanedBranchesToClean = $orphanedBranches | Where-Object { -not ($protectedBranches -icontains $_) }
 
-          foreach ($stale in $staleBranches) {
-            # Do not delete current branch
-            if ($stale -eq $originalBranch) {
-              Write-Host -NoNewline "⚠️ Actual branch " -ForegroundColor Red
-              Write-Host -NoNewline "$stale" -ForegroundColor Magenta
-              Write-Host "is obsolete, but cannot be removed ! ⚠️" -ForegroundColor Red
-              continue
-            }
+        # Cleaning up orphaned branches
+        if ($orphanedBranchesToClean.Count -gt 0) {
+          Write-Host "🧹 Cleaning up orphaned local branches..." -ForegroundColor DarkYellow
 
-            # Do not delete protected branches
-            if ($protectedBranches -icontains $stale) {
-              Write-Host -NoNewline "⚠️ $stale" -ForegroundColor Magenta
-              Write-Host " is a protected branch so it couldn't be delete ! ⚠️" -ForegroundColor Red
-              continue
-            }
-
+          foreach ($orphaned in $orphanedBranchesToClean) {
             # Ask user
-            Write-Host -NoNewline "Do you want to delete the local branch " -ForegroundColor Magenta
-            Write-Host -NoNewline "$stale" -ForegroundColor Red
-            Write-Host " ? (y/n): " -ForegroundColor Magenta
+            Write-Host -NoNewline "Do you want to delete the orphaned local branch " -ForegroundColor Magenta
+            Write-Host -NoNewline "$orphaned" -ForegroundColor Red
+            Write-Host -NoNewline " ? (Y/n): " -ForegroundColor Magenta
 
             $choice = Read-Host
-            if ($choice -match '^(y|yes)$') {
+            if ($choice -match '^(Y|y|yes|^)$') {
               Write-Host -NoNewline "👉 Removal of " -ForegroundColor Magenta
-              Write-Host -NoNewline "$stale" -ForegroundColor Red
-              Write-Host " ..." -ForegroundColor Magenta
+              Write-Host -NoNewline "$orphaned" -ForegroundColor Red
+              Write-Host " branch..." -ForegroundColor Magenta
 
-              # Force removal
-              git branch -D $stale
+              # Secure removal
+              git branch -d $orphaned *> $null
+
+              # Check if deletion worked
               if ($LASTEXITCODE -eq 0) {
-                Write-Host -NoNewline "$stale" -ForegroundColor Red
+                Write-Host -NoNewline "$orphaned" -ForegroundColor Red
                 Write-Host " successfully deleted ✅" -ForegroundColor Green
+
+                if ($orphaned -eq $originalBranch) { $originalBranchWasDeleted = $true }
               }
+              # If deletion failed (probably unmerged changes)
               else {
-                Write-Host -NoNewline "⚠️ Failure to remove " -ForegroundColor Red
-                Write-Host -NoNewline "$stale" -ForegroundColor Magenta
-                Write-Host " ⚠️" -ForegroundColor Red
+                Write-Host -NoNewline "⚠️ Branch " -ForegroundColor Red
+                Write-Host -NoNewline "$orphaned" -ForegroundColor Magenta
+                Write-Host " contains unmerged changes ! ⚠️" -ForegroundColor Red
+
+                Write-Host -NoNewline "Force the deletion of " -ForegroundColor Magenta
+                Write-Host -NoNewline "$orphaned" -ForegroundColor Red
+                Write-Host -NoNewline " ? (Y/n): " -ForegroundColor Magenta
+
+                $forceChoice = Read-Host
+                if ($forceChoice -match '^(Y|y|yes|^)$') {
+                  # Forced removal
+                  git branch -D $orphaned *> $null
+
+                  # Check if forced deletion worked
+                  if ($LASTEXITCODE -eq 0) {
+                    Write-Host -NoNewline "$orphaned" -ForegroundColor Red
+                    Write-Host " successfully deleted ✅" -ForegroundColor Green
+
+                    # Mark original branch as deleted
+                    if ($orphaned -eq $originalBranch) {
+                      $originalBranchWasDeleted = $true
+                    }
+
+                    # Move to next orphaned branch
+                    continue
+                  }
+                  # If forced deletion failed
+                  else {
+                    Write-Host -NoNewline "⚠️ Unexpected error. Failure to remove " -ForegroundColor Red
+                    Write-Host "$orphaned ⚠️" -ForegroundColor Magenta
+                  }
+                }
+                # User refuses forced deletion
+                else {
+                  Write-Host -NoNewline "👍 Local branch  " -ForegroundColor Green
+                  Write-Host -NoNewline "$orphaned" -ForegroundColor Magenta
+                  Write-Host " kept 👍" -ForegroundColor Green
+                }
               }
-            }
-            else {
-              Write-Host -NoNewline "Local branch  " -ForegroundColor Green
-              Write-Host -NoNewline "$stale" -ForegroundColor Magenta
-              Write-Host " kept ✅" -ForegroundColor Green
             }
           }
         }
+
+        # Integration branches to check
+        $integrationBranches = @("main", "master", "develop", "dev")
+
+        # Use hash table to collect merged branches (avoids duplicates)
+        $allMergedBranches = @{}
+
+        foreach ($intBranch in $integrationBranches) {
+          # Check if integration branch exists locally
+          if (git branch --list $intBranch) {
+            # Get merged branches into this branch
+            $branchesMergedIntoThisOne = git branch --merged $intBranch | ForEach-Object { $_.Trim() }
+
+            # Add them to list
+            foreach ($branch in $branchesMergedIntoThisOne) {
+              $allMergedBranches[$branch] = $true
+            }
+          }
+        }
+
+        # Filter list to keep only branches that can be cleaned
+        $mergedBranchesToClean = $allMergedBranches.Keys | Where-Object {
+          ( $_ -ne $originalBranch ) -and ( -not ($protectedBranches -icontains $_) )
+        }
+
+        # Remove integration branches from list
+        if ($mergedBranchesToClean.Count -gt 0) {
+          # Cleaning up merged branches
+          Write-Host "🧹 Cleaning up branches that have already being merged..." -ForegroundColor DarkYellow
+
+          foreach ($merged in $mergedBranchesToClean.Keys) {
+            # Ask user
+            Write-Host -NoNewline "Branch " -ForegroundColor Magenta
+            Write-Host -NoNewline "$merged" -ForegroundColor Red
+            Write-Host -NoNewline " is already merged. Delete ? (Y/n): " -ForegroundColor Magenta
+
+            $choice = Read-Host
+            if ($choice -match '^(Y|y|yes|^)$') {
+              Write-Host -NoNewline "👉 Removal of " -ForegroundColor Magenta
+              Write-Host -NoNewline "$merged" -ForegroundColor Red
+              Write-Host " branch..." -ForegroundColor Magenta
+
+              # Secure removal (guaranteed to work because --merged)
+              git branch -d $merged *> $null
+
+              # Check if deletion worked
+              if ($LASTEXITCODE -eq 0) {
+                Write-Host -NoNewline "$merged" -ForegroundColor Red
+                Write-Host " successfully deleted ✅" -ForegroundColor Green
+
+                # Check if original branch has been deleted
+                if ($merged -eq $originalBranch) {
+                  # Mark original branch as deleted
+                  $originalBranchWasDeleted = $true
+                }
+              }
+              # If deletion failed
+              else {
+                Write-Host -NoNewline "⚠️ Unexpected error. Failure to remove " -ForegroundColor Red
+                Write-Host "$orphaned ⚠️" -ForegroundColor Magenta
+              }
+            }
+          }
+        }
+
+        # Check for unmerged commits between main and dev branches
+        # Check if main branch exists
+        $mainBranch = if (git branch --list main) { "main" } elseif (git branch --list master) { "master" } else { $null }
+        # Check if dev branch exists
+        $devBranch = if (git branch --list develop) { "develop" } elseif (git branch --list dev) { "dev" } else { $null }
+
+        # If both branches exist check for unmerged commits
+        if ($mainBranch -and $devBranch) {
+          # Check if there are any commits in 'dev' that are not in 'main'
+          $unmergedCommits = git log "$mainBranch..$devBranch" --oneline -q 2>$null
+
+          # If unmerged commits, notify the user
+          if ($unmergedCommits) {
+            Write-Host -NoNewline "ℹ️ $devBranch" -ForegroundColor Magenta
+            Write-Host -NoNewline " has commits that are not in " -ForegroundColor DarkYellow
+            Write-Host -NoNewline "$mainBranch" -ForegroundColor Magenta
+            Write-Host ". Think about merging ! ℹ️" -ForegroundColor DarkYellow
+          }
+        }
+
+        # Return to a safe branch
+        if ($repoIsInSafeState -eq $false) {
+          Write-Host "⚠️ Repo is in an unstable state. Can't returning on the branch where you were ! ⚠️" -ForegroundColor Red
+
+          # Store current branch
+          $originalBranch = git rev-parse --abbrev-ref HEAD
+        }
+
+        # Original branch has been deleted
+        elseif ($originalBranchWasDeleted -eq $true) {
+          Write-Host -NoNewline "⚡ Original branch " -ForegroundColor Magenta
+          Write-Host -NoNewline "$originalBranch" -ForegroundColor Red
+          Write-Host " has been deleted..." -ForegroundColor Magenta
+
+          # Move onto fallback branch
+          $fallbackBranch = if (git branch --list "develop") { "develop" } elseif (git branch --list "dev") { "dev" } elseif (git branch --list "main") { "main" } else { "master" }
+
+          Write-Host -NoNewline "😍 You have been moved to " -ForegroundColor DarkYellow
+          Write-Host -NoNewline "$fallbackBranch" -ForegroundColor Magenta
+          Write-Host " branch 😍" -ForegroundColor DarkYellow
+
+          git checkout $fallbackBranch *> $null
+        }
+        # Move onto original branch
+        else {
+          git checkout $originalBranch *> $null
+
+          Write-Host -NoNewline "👌 Place it back on the branch where you were => " -ForegroundColor Magenta
+          Write-Host "$originalBranch" -ForegroundColor Red
+        }
       }
       catch {
-        # Check if the error is related to the remote repository not existing
-        if ($_.Exception.Response.StatusCode -eq 404) {
+        # Check if error is related to server issues
+        if ($_.Exception.Response.StatusCode -ge 500) {
+          Write-Host -NoNewline "🔥 "
+          Write-Host -NoNewline "GitHub server error (" -ForegroundColor Red
+          Write-Host -NoNewline "$($_.Exception.Response.StatusCode)" -ForegroundColor Magenta
+          Write-Host "). GitHub's fault, not yours ! Try later... 🔥" -ForegroundColor Red
+        }
+
+        # Check if error is related to remote repository not existing
+        elseif ($_.Exception.Response.StatusCode -eq 404) {
           Write-Host -NoNewline "⚠️ "
           Write-Host -NoNewline "Remote repository " -ForegroundColor Red
-          Write-Host -NoNewline "$repoName" -ForegroundColor Magenta
+          Write-Host -NoNewline "$repoName" -ForegroundColor white -BackgroundColor DarkBlue
           Write-Host " doesn't exists ⚠️" -ForegroundColor Red
         }
-        # elseif ($responseBody.message -match "API rate limit exceeded") {
+
+        # Check if error is related to rate limiting
         elseif ($_.Exception.Response.StatusCode -eq 403) {
           Write-Host "󰊤 GitHub API rate limit exceeded! Try again later or authenticate to increase your rate limit. 󰊤" -ForegroundColor Red
         }
+
+        # Check if error is related to authentication
         elseif ($_.Exception.Response.StatusCode -eq 401) {
-          Write-Host "󰊤 Bad credentials! Check your personal token 󰊤" -ForegroundColor Red
+          Write-Host "󰊤 Check your personal token defined in your settings 󰊤" -ForegroundColor Red
         }
+
+        # Check for network issues (maybe no internet)
+        elseif ($null -eq $_.Exception.Response) {
+          Write-Host -NoNewline "💀 "
+          Write-Host -NoNewline "Network error for " -ForegroundColor Red
+          Write-Host -NoNewline "$repoName" -ForegroundColor White -BackgroundColor DarkBlue
+          Write-Host ". Unable to connect to GitHub, maybe chek your connection ! 💀" -ForegroundColor Red
+        }
+
+        # Other errors
         else {
           Write-Host -NoNewline "⚠️ An error occurred while updating "
-          Write-Host -NoNewline "$repoName" -ForegroundColor Magenta
+          Write-Host -NoNewline "$repoName" -ForegroundColor white -BackgroundColor DarkBlue
           Write-Host ": ${_} ⚠️" -ForegroundColor Red
         }
       }
 
       # Line separator after each repository processing
-      Write-Host "--------------------------------------------------------------------"
+      Write-Host "------------------------------------------------------------------------------" -ForegroundColor DarkYellow
 
       # Return to home directory
       Set-Location -Path $HOME
     }
+    # If repository path doesn't exist
     else {
       Write-Host -NoNewline "⚠️ Local repository " -ForegroundColor Red
-      Write-Host -NoNewline "$repoName" -ForegroundColor Magenta
+      Write-Host -NoNewline "$repoName" -ForegroundColor white -BackgroundColor DarkBlue
       Write-Host " doesn't exists ⚠️" -ForegroundColor Red
-      Write-Host "--------------------------------------------------------------------"
+      Write-Host "------------------------------------------------------------------------------" -ForegroundColor DarkYellow
     }
   }
 }
@@ -728,6 +1040,105 @@ function git_pull {
 #-------------------#
 # UTILITY FUNCTIONS #
 #-------------------#
+########## Show last commit date regardless of branch ##########
+function Show-LastCommitDate {
+  # Retrieves most recent remote branch and its date
+  $lastCommitInfo = git for-each-ref --sort=-committerdate refs/remotes --count=1 --format="%(refname:short) %(committerdate:iso-strict)" 2>$null
+
+  if ($lastCommitInfo) {
+    # Separate the chain into two
+    $parts = $lastCommitInfo -split ' ', 2
+
+    if ($parts.Length -eq 2) {
+      $branchName = $parts[0]
+      $dateString = $parts[1]
+
+      # Convert ISO string into [datetime] object
+      [datetime]$commitDate = $dateString
+
+      # Define culture on "en-US"
+      $culture = [System.Globalization.CultureInfo]'en-US'
+
+      # Format date (ex: Monday 13 September)
+      $formattedDate = $commitDate.ToString('dddd dd MMMM', $culture)
+
+      # Display formated message
+      Write-Host -NoNewline "📈 Last repository commit : " -ForegroundColor DarkYellow
+      Write-Host -NoNewline "$formattedDate" -ForegroundColor Cyan
+      Write-Host -NoNewline " on " -ForegroundColor DarkYellow
+      Write-Host "$branchName" -ForegroundColor Magenta
+    }
+  }
+}
+
+########## Get and show latest commit message ##########
+function Show-LatestCommitMessage {
+  param (
+    [string]$LocalBranch,
+    [string]$RemoteBranch,
+    [switch]$HideHashes
+  )
+
+  # Get HASH HEAD
+  $localHash  = git rev-parse $LocalBranch 2>$null
+  $remoteHash = git rev-parse $RemoteBranch 2>$null
+
+  # Check if references are valid
+  if (-not $localHash -or -not $remoteHash) {
+    Write-Host "⚠️ Unable to read local/remote references ! ⚠️" -ForegroundColor Red
+    return
+  }
+
+  # Divergence detection
+  $isLocalBehind  = git merge-base --is-ancestor $localHash $remoteHash 2>$null
+  $isRemoteBehind = git merge-base --is-ancestor $remoteHash $localHash 2>$null
+
+  # Complete divergence (push force detected)
+  if (-not $isLocalBehind -and -not $isRemoteBehind) {
+    Write-Host "⚠️ History rewritten or divergence detected... A pull can trigger a rebase or a reset ! ⚠️" -ForegroundColor Red
+  }
+
+  # Get new commits
+  $raw = git log --oneline --no-merges "$LocalBranch..$RemoteBranch" 2>$null
+
+  # Normalisation : string → array
+  $newCommits = @()
+  if ($raw) {
+    if ($raw -is [string]) { $newCommits = @($raw) }
+    else { $newCommits = $raw }
+  }
+
+  # If no commits
+  if ($newCommits.Count -eq 0) {
+    if ($isLocalBehind) {
+      Write-Host "ℹ️ Fast-forward possible (no visible commits) ℹ️" -ForegroundColor DarkYellow
+    }
+    else {
+      Write-Host "ℹ️ No commit visible, but a pull may be needed... ℹ️" -ForegroundColor DarkYellow
+    }
+    return
+  }
+
+  # Cleanup if HideHashes option is enabled → removes hash in front of message
+  if ($HideHashes) {
+    $newCommits = $newCommits | ForEach-Object {
+      ($_ -replace '^[0-9a-f]+\s+', '')
+    }
+  }
+
+  # One commit
+  if ($newCommits.Count -eq 1) {
+    Write-Host -NoNewline "Commit message : " -ForegroundColor Magenta
+    Write-Host ""$($newCommits[0])"" -ForegroundColor Cyan
+    return
+  }
+
+  # Several commits
+  Write-Host "New commits received :" -ForegroundColor Magenta
+  foreach ($commit in $newCommits) {
+    Write-Host ""$commit"" -ForegroundColor Cyan
+  }
+}
 
 ########## Dictionary of functions and their objectives ##########
 function Get-GoalFunctionsDictionary {
@@ -736,7 +1147,7 @@ function Get-GoalFunctionsDictionary {
     custom_alias = "Get custom aliases"
     custom_function  = "Get custom functions"
     dc = "Create containers and launch thems"
-    git_pull = "Update your local repositories"
+    gpull = "Update all your local repositories"
     go = "Jump to a specific directory"
     help = "Get help"
     path = "Display the current directory path"
@@ -773,12 +1184,46 @@ function Get-RepositoriesInfo {
   $gitHubToken = "<YOUR PERSONAL TOKEN>"
 
   # Array to define the order of repositories
-  $reposOrder = @("test")
+  $reposOrder = @("Test", "YRepo")
 
   # Dictionary containing local repositories path
   $repos = @{
-    "Test" = "$env:USERPROFILE\Desktop\Projets\Test"
+    "Test"                   = "$env:USERPROFILE\Desktop\Projets\Test"
+    "YRepo"                  = "$env:USERPROFILE\Desktop\Projets\YRepo"
   }
+
+  # Validations
+  $functionNameMessage = "in Get-RepositoriesInfo function"
+  # Username check
+  if (-not $gitHubUsername -or $gitHubUsername -match '^<YOUR GITHUB USERNAME>$') {
+    Write-Host "❌ GitHub username is missing or invalid ! ❌" -ForegroundColor Red
+    Write-Host "➡️ Specify your actual GitHub username $functionNameMessage" -ForegroundColor Yellow
+    return $null
+  }
+
+  # Token check
+  if (-not $gitHubToken -or $gitHubToken -match '^<YOUR PERSONAL TOKEN>$') {
+    Write-Host "❌ GitHub token is missing or invalid ! ❌" -ForegroundColor Red
+    Write-Host "➡️ Add a valid GitHub token $functionNameMessage" -ForegroundColor Yellow
+    return $null
+  }
+
+  # Array order check
+  if (-not $reposOrder -or $reposOrder.Count -eq 0) {
+    Write-Host "❌ Local array repo order is empty ! ❌" -ForegroundColor Red
+    Write-Host "➡️ Define at least one repository in the processing order $functionNameMessage" -ForegroundColor Yellow
+    return $null
+  }
+
+  # Path dictionary check
+  if (-not $repos -or $repos.Keys.Count -eq 0) {
+    Write-Host "❌ Local repository dictionary is empty ! ❌" -ForegroundColor Red
+    Write-Host "➡️ Ensure repository dictionary contains at least one reference with a valid path $functionNameMessage" -ForegroundColor Yellow
+    return $null
+  }
+
+  # All is fine
+  Write-Host "✔️ GitHub configuration and projects are validated ✔️" -ForegroundColor Green
 
   return @{
     Username = $gitHubUsername
