@@ -544,7 +544,7 @@ function gpull {
             }
           }
 
-          Write-Host "------------------------------------------------------------------------------" -ForegroundColor White
+          Write-Host "------------------------------------------------------------------------------" -ForegroundColor DarkGray
         }
 
         # Find all local branches that have a remote upstream
@@ -636,7 +636,7 @@ function gpull {
                 Write-Host " $file" -ForegroundColor DarkCyan
               }
             }
-            Write-Host "------------------------------------------------------------------------------" -ForegroundColor DarkYellow
+            Write-Host "------------------------------------------------------------------------------" -ForegroundColor DarkGray
 
             # Skip to next branch
             continue
@@ -648,7 +648,7 @@ function gpull {
             Write-Host -NoNewline "⚠️ Branch ahead => " -ForegroundColor Red
             Write-Host -NoNewline "$($branch.Local)" -ForegroundColor Magenta
             Write-Host " has unpushed commits. Pull avoided to prevent a merge ! ⚠️" -ForegroundColor Red
-            Write-Host "------------------------------------------------------------------------------" -ForegroundColor DarkYellow
+            Write-Host "------------------------------------------------------------------------------" -ForegroundColor DarkGray
 
             # Skip to next branch
             continue
@@ -667,7 +667,7 @@ function gpull {
           if ($localCommit -eq $remoteCommit) {
             Write-Host -NoNewline "$($branch.Local)" -ForegroundColor Red
             Write-Host " is already updated ✅" -ForegroundColor Green
-            Write-Host "------------------------------------------------------------------------------" -ForegroundColor White
+            Write-Host "------------------------------------------------------------------------------" -ForegroundColor DarkGray
 
             # Skip to next branch
             continue
@@ -737,7 +737,7 @@ function gpull {
               Write-Host -NoNewline "$($branch.Local)" -ForegroundColor Red
               Write-Host " ..." -ForegroundColor Magenta
 
-              Write-Host "------------------------------------------------------------------------------" -ForegroundColor White
+              Write-Host "------------------------------------------------------------------------------" -ForegroundColor DarkGray
 
               # Reset pull success
               $pullSuccess = $null
@@ -748,7 +748,7 @@ function gpull {
           if ($pullSuccess -eq $true) {
             Write-Host -NoNewline "$($branch.Local)" -ForegroundColor Red
             Write-Host " successfully updated ✅" -ForegroundColor Green
-            Write-Host "------------------------------------------------------------------------------" -ForegroundColor White
+            Write-Host "------------------------------------------------------------------------------" -ForegroundColor DarkGray
           }
           # Check pull status for each not updated branch
           elseif ($pullSuccess -eq $false) {
@@ -925,9 +925,9 @@ function gpull {
         }
 
         # Check for unmerged commits between main and dev branches
-        # Check if main branch exists
+        # If main branch exists
         $mainBranch = if (git branch --list main) { "main" } elseif (git branch --list master) { "master" } else { $null }
-        # Check if dev branch exists
+        # If dev branch exists
         $devBranch = if (git branch --list develop) { "develop" } elseif (git branch --list dev) { "dev" } else { $null }
 
         # If both branches exist check for unmerged commits
@@ -1046,7 +1046,9 @@ function gpull {
       }
 
       # Line separator after each repository processing
-      Write-Host "------------------------------------------------------------------------------" -ForegroundColor DarkYellow
+      Write-Host ""
+      Write-Host "------------------------------------------------------------------------------" -ForegroundColor DarkGray -BackgroundColor Gray
+      Write-Host ""
 
       # Return to home directory
       Set-Location -Path $HOME
@@ -1056,7 +1058,9 @@ function gpull {
       Write-Host -NoNewline "⚠️ Local repository " -ForegroundColor Red
       Write-Host -NoNewline "$repoName" -ForegroundColor white -BackgroundColor DarkBlue
       Write-Host " doesn't exists ⚠️" -ForegroundColor Red
-      Write-Host "------------------------------------------------------------------------------" -ForegroundColor DarkYellow
+      Write-Host ""
+      Write-Host "------------------------------------------------------------------------------" -ForegroundColor DarkGray -BackgroundColor Gray
+      Write-Host ""
     }
   }
 }
@@ -1093,6 +1097,7 @@ function Show-LastCommitDate {
       Write-Host -NoNewline "$formattedDate" -ForegroundColor Cyan
       Write-Host -NoNewline " on " -ForegroundColor DarkYellow
       Write-Host "$branchName" -ForegroundColor Magenta
+      Write-Host "------------------------------------------------------------------------------" -ForegroundColor DarkGray
     }
   }
 }
@@ -1250,7 +1255,8 @@ function Get-RepositoriesInfo {
 
   # All is fine
   Write-Host "✔️ GitHub configuration and projects are ok ✔️" -ForegroundColor Green
-  Write-Host "------------------------------------------------------------------------------" -ForegroundColor DarkYellow
+  Write-Host "------------------------------------------------------------------------------" -ForegroundColor DarkBlue
+  Write-Host ""
 
   return @{
     Username = $gitHubUsername
