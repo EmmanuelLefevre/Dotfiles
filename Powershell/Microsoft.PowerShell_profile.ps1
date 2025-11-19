@@ -568,9 +568,9 @@ function gpull {
         $mainBranchNames = @("main", "master")
         $devBranchNames = @("dev", "develop")
 
-        # Create three lists to guarantee order
-        $mainBranches = $branchesToUpdate | Where-Object { $mainBranchNames -icontains $_.Local }
-        $devBranches = $branchesToUpdate | Where-Object { $devBranchNames -icontains $_.Local }
+        # Create three lists to guarantee order (force an array)
+        $mainBranches = @($branchesToUpdate | Where-Object { $mainBranchNames -icontains $_.Local })
+        $devBranches = @($branchesToUpdate | Where-Object { $devBranchNames -icontains $_.Local })
 
         # Combines two priority lists into one for filtering
         $allPriorityNames = $mainBranchNames + $devBranchNames
