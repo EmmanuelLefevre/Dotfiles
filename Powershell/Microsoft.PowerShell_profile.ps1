@@ -428,7 +428,6 @@ function gpull {
       Set-Location -Path $repoPath
 
       # Show repository name being updated
-      Write-Host "------------------------------------------------------------------------------" -ForegroundColor DarkYellow
       Write-Host -NoNewline "$repoName" -ForegroundColor white -BackgroundColor DarkBlue
       Write-Host " is on update process 🚀" -ForegroundColor Green
 
@@ -977,45 +976,54 @@ function gpull {
         }
       }
       catch {
-        # Check if error is related to server issues
-        if ($_.Exception.Response.StatusCode -ge 500) {
-          Write-Host -NoNewline "🔥 "
-          Write-Host -NoNewline "GitHub server error (" -ForegroundColor Red
-          Write-Host -NoNewline "$($_.Exception.Response.StatusCode)" -ForegroundColor Magenta
-          Write-Host "). GitHub's fault, not yours ! Try later... 🔥" -ForegroundColor Red
-        }
+        # First, check if it's a web-related error (GitHub API)
+        if ($_.Exception -is [System.Net.WebException]) {
 
-        # Check if error is related to remote repository not existing
-        elseif ($_.Exception.Response.StatusCode -eq 404) {
-          Write-Host -NoNewline "⚠️ "
-          Write-Host -NoNewline "Remote repository " -ForegroundColor Red
-          Write-Host -NoNewline "$repoName" -ForegroundColor white -BackgroundColor DarkBlue
-          Write-Host " doesn't exists ⚠️" -ForegroundColor Red
-        }
+          # Server have responded with an error
+          if ($_.Exception.Response) {
+            $statusCode = [int]$_.Exception.Response.StatusCode
 
-        # Check if error is related to rate limiting
-        elseif ($_.Exception.Response.StatusCode -eq 403) {
-          Write-Host "󰊤 GitHub API rate limit exceeded! Try again later or authenticate to increase your rate limit. 󰊤" -ForegroundColor Red
-        }
+            # Check if error is related to server issues
+            if ($statusCode -ge 500) {
+              Write-Host -NoNewline "🔥 "
+              Write-Host -NoNewline "GitHub server error (" -ForegroundColor Red
+              Write-Host -NoNewline "$statusCode" -ForegroundColor Magenta
+              Write-Host "). GitHub's fault, not yours ! Try later... 🔥" -ForegroundColor Red
+            }
 
-        # Check if error is related to authentication
-        elseif ($_.Exception.Response.StatusCode -eq 401) {
-          Write-Host "󰊤 Check your personal token defined in your settings 󰊤" -ForegroundColor Red
-        }
+            # Check if error is related to remote repository not existing
+            elseif ($statusCode -eq 404) {
+              Write-Host -NoNewline "⚠️ "
+              Write-Host -NoNewline "Remote repository " -ForegroundColor Red
+              Write-Host -NoNewline "$repoName" -ForegroundColor white -BackgroundColor DarkBlue
+              Write-Host " doesn't exists ⚠️" -ForegroundColor Red
+            }
 
-        # Check for network issues (maybe no internet)
-        elseif ($null -eq $_.Exception.Response) {
-          Write-Host -NoNewline "💀 "
-          Write-Host -NoNewline "Network error for " -ForegroundColor Red
-          Write-Host -NoNewline "$repoName" -ForegroundColor White -BackgroundColor DarkBlue
-          Write-Host ". Unable to connect to GitHub, maybe chek your connection ! 💀" -ForegroundColor Red
-        }
+            # Check if error is related to rate limiting
+            elseif ($statusCode -eq 403) {
+              Write-Host "󰊤 GitHub API rate limit exceeded! Try again later or authenticate to increase your rate limit. 󰊤" -ForegroundColor Red
+            }
 
-        # Other errors
-        else {
-          Write-Host -NoNewline "⚠️ An error occurred while updating "
-          Write-Host -NoNewline "$repoName" -ForegroundColor white -BackgroundColor DarkBlue
-          Write-Host ": ${_} ⚠️" -ForegroundColor Red
+            # Check if error is related to authentication
+            elseif ($statusCode -eq 401) {
+              Write-Host "󰊤 Check your personal token defined in your settings 󰊤" -ForegroundColor Red
+            }
+
+            # Network problem (DNS, unplugged cable, firewall, no internet)
+            else {
+              Write-Host -NoNewline "💀 "
+              Write-Host -NoNewline "Network error for " -ForegroundColor Red
+              Write-Host -NoNewline "$repoName" -ForegroundColor White -BackgroundColor DarkBlue
+              Write-Host ". Unable to connect to GitHub, maybe check your connection or your firewall ! 💀" -ForegroundColor Red
+            }
+          }
+          else {
+            Write-Host -NoNewline "💥 Internal Script/Git Error processing 💥" -ForegroundColor Red
+
+            # Display technical message for debugging
+            Write-Host "Details 👉 " -ForegroundColor Magenta
+            Write-Host -NoNewline "$($_.Exception.Message)"-ForegroundColor Red
+          }
         }
       }
 
@@ -1223,7 +1231,8 @@ function Get-RepositoriesInfo {
   }
 
   # All is fine
-  Write-Host "✔️ GitHub configuration and projects are validated ✔️" -ForegroundColor Green
+  Write-Host "✔️ GitHub configuration and projects are ok ✔️" -ForegroundColor Green
+  Write-Host "------------------------------------------------------------------------------" -ForegroundColor DarkYellow
 
   return @{
     Username = $gitHubUsername
