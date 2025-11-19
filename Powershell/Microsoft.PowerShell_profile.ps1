@@ -423,6 +423,36 @@ function gpull {
   foreach ($repoName in $reposOrder) {
     $repoPath = $repos[$repoName]
 
+    # If repository path doesn't exist
+    if (-not ($repoPath -and (Test-Path -Path $repoPath))) {
+      Write-Host -NoNewline "⚠️ Local repository path for" -ForegroundColor Red
+      Write-Host -NoNewline "$repoName" -ForegroundColor white -BackgroundColor Magenta
+      Write-Host " doesn't exist ⚠️" -ForegroundColor Red
+      Write-Host "Path searched 👉" -ForegroundColor DarkYellow
+      Write-Host "$repoPath" -ForegroundColor Red
+      Write-Host ""
+      Write-Host "------------------------------------------------------------------------------" -ForegroundColor DarkGray -BackgroundColor Gray
+      Write-Host ""
+
+      # Move next repository
+      continue
+    }
+
+    # No valid Git repository (.git)
+    if (-not (Test-Path -Path "$repoPath\.git")) {
+      Write-Host -NoNewline "⛔ Local folder " -ForegroundColor Red
+      Write-Host -NoNewline "$repoName" -ForegroundColor White -BackgroundColor Magenta
+      Write-Host " found but it's NOT a git repository ⛔" -ForegroundColor Red
+      Write-Host "Missing .git folder inside 👉" -ForegroundColor DarkYellow
+      Write-Host "$repoPath" -ForegroundColor Red
+      Write-Host ""
+      Write-Host "──────────────────────────────────────────────────────────────────────────────" -ForegroundColor DarkGray -BackgroundColor Gray
+      Write-Host ""
+
+      # Move next repository
+      continue
+    }
+
     if ($repoPath -and (Test-Path -Path $repoPath)) {
       # Change current directory to repository path
       Set-Location -Path $repoPath
@@ -1052,15 +1082,6 @@ function gpull {
 
       # Return to home directory
       Set-Location -Path $HOME
-    }
-    # If repository path doesn't exist
-    else {
-      Write-Host -NoNewline "⚠️ Local repository " -ForegroundColor Red
-      Write-Host -NoNewline "$repoName" -ForegroundColor white -BackgroundColor DarkBlue
-      Write-Host " doesn't exists ⚠️" -ForegroundColor Red
-      Write-Host ""
-      Write-Host "------------------------------------------------------------------------------" -ForegroundColor DarkGray -BackgroundColor Gray
-      Write-Host ""
     }
   }
 }
