@@ -1050,7 +1050,7 @@ function Show-LastCommitDate {
     $parts = $lastCommitInfo -split ' ', 2
 
     if ($parts.Length -eq 2) {
-      $branchName = $parts[0]
+      $branchName = $parts[0] -replace '^[^/]+/', ''
       $dateString = $parts[1]
 
       # Convert ISO string into [datetime] object
@@ -1060,7 +1060,7 @@ function Show-LastCommitDate {
       $culture = [System.Globalization.CultureInfo]'en-US'
 
       # Format date (ex: Monday 13 September)
-      $formattedDate = $commitDate.ToString('dddd dd MMMM', $culture)
+      $formattedDate = $commitDate.ToString('dddd dd MMMM yyyy', $culture)
 
       # Display formated message
       Write-Host -NoNewline "📈 Last repository commit : " -ForegroundColor DarkYellow
