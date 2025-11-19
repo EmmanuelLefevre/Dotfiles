@@ -1215,12 +1215,45 @@ function Get-RepositoriesInfo {
   $gitHubToken = "<YOUR PERSONAL TOKEN>"
 
   # Array to define the order of repositories
-  $reposOrder = @("Test", "YRepo")
+  $reposOrder = @(
+    "ArtiWave",
+    "Cours",
+    "DailyPush",
+    "DataScrub",
+    "Documentations",
+    "Dotfiles",
+    "EmmanuelLefevre",
+    "GitHubProfileIcons",
+    "GoogleSheets",
+    "IAmEmmanuelLefevre",
+    "MarkdownImg",
+    "OpenScraper",
+    "ParquetFlow",
+    "ReplicaMySQL",
+    "Schemas",
+    "ScrapMate",
+    "Soutenances"
+  )
 
   # Dictionary containing local repositories path
   $repos = @{
-    "Test"                   = "$env:USERPROFILE\Desktop\Projets\Test"
-    "YRepo"                  = "$env:USERPROFILE\Desktop\Projets\YRepo"
+    "ArtiWave"               = "$env:USERPROFILE\Desktop\Projets\ArtiWave"
+    "Cours"                  = "$env:USERPROFILE\Desktop\Cours"
+    "DailyPush"              = "$env:USERPROFILE\Desktop\DailyPush"
+    "DataScrub"              = "$env:USERPROFILE\Desktop\Projets\DataScrub"
+    "Documentations"         = "$env:USERPROFILE\Documents\Documentations"
+    "Dotfiles"               = "$env:USERPROFILE\Desktop\Dotfiles"
+    "EmmanuelLefevre"        = "$env:USERPROFILE\Desktop\Projets\EmmanuelLefevre"
+    "GitHubProfileIcons"     = "$env:USERPROFILE\Pictures\GitHubProfileIcons"
+    "GoogleSheets"           = "$env:USERPROFILE\Desktop\GoogleSheets"
+    "IAmEmmanuelLefevre"     = "$env:USERPROFILE\Desktop\Projets\IAmEmmanuelLefevre"
+    "MarkdownImg"            = "$env:USERPROFILE\Desktop\MarkdownImg"
+    "OpenScraper"            = "$env:USERPROFILE\Desktop\Projets\OpenScraper"
+    "ParquetFlow"            = "$env:USERPROFILE\Desktop\Projets\ParquetFlow"
+    "ReplicaMySQL"           = "$env:USERPROFILE\Desktop\Projets\ReplicaMySQL"
+    "Schemas"                = "$env:USERPROFILE\Desktop\Schemas"
+    "ScrapMate"              = "$env:USERPROFILE\Desktop\Projets\ScrapMate"
+    "Soutenances"            = "$env:USERPROFILE\Desktop\Soutenances"
   }
 
   # Validations
