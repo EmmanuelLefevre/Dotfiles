@@ -451,17 +451,6 @@ function gpull {
       $repoUrl = "https://api.github.com/repos/$username/$repoName"
       $response = Invoke-RestMethod -Uri $repoUrl -Method Get -Headers @{ Authorization = "Bearer $token" } -ErrorAction Stop
 
-      # Check local origin remote corresponds to expected repository
-      $localRemoteUrl = (git remote get-url origin 2>$null)
-      if (-not ($localRemoteUrl -match "$username/$repoName")) {
-        Write-Host -NoNewline "⚠️ Original local remote " -ForegroundColor Red
-        Write-Host -NoNewline "$localRemoteUrl" -ForegroundColor Magenta
-        Write-Host " doesn't match to expected GitHub repository ($username/$repoName). Repository ignored ! ⚠️" -ForegroundColor Red
-
-        # Move next repository
-        continue
-      }
-
       # Store original branch to return it later
       $originalBranch = git rev-parse --abbrev-ref HEAD
 
