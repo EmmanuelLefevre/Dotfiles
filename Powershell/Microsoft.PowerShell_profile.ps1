@@ -423,33 +423,13 @@ function gpull {
   foreach ($repoName in $reposOrder) {
     $repoPath = $repos[$repoName]
 
-    # If repository path doesn't exist
-    if (-not ($repoPath -and (Test-Path -Path $repoPath))) {
-      Write-Host -NoNewline "⚠️ Local repository path for" -ForegroundColor Red
-      Write-Host -NoNewline "$repoName" -ForegroundColor white -BackgroundColor Magenta
-      Write-Host " doesn't exist ⚠️" -ForegroundColor Red
-      Write-Host "Path searched 👉" -ForegroundColor DarkYellow
-      Write-Host "$repoPath" -ForegroundColor Red
-      Write-Host ""
-      Write-Host "------------------------------------------------------------------------------" -ForegroundColor DarkGray -BackgroundColor Gray
-      Write-Host ""
-
-      # Move next repository
+    # Check if path exists
+    if (-not (Test-LocalRepoExists -Path $repoPath -Name $repoName)) {
       continue
     }
 
-    # No valid Git repository (.git)
-    if (-not (Test-Path -Path "$repoPath\.git")) {
-      Write-Host -NoNewline "⛔ Local folder " -ForegroundColor Red
-      Write-Host -NoNewline "$repoName" -ForegroundColor White -BackgroundColor Magenta
-      Write-Host " found but it's NOT a git repository ⛔" -ForegroundColor Red
-      Write-Host "Missing .git folder inside 👉" -ForegroundColor DarkYellow
-      Write-Host "$repoPath" -ForegroundColor Red
-      Write-Host ""
-      Write-Host "──────────────────────────────────────────────────────────────────────────────" -ForegroundColor DarkGray -BackgroundColor Gray
-      Write-Host ""
-
-      # Move next repository
+    # Check if it is a valid git repo
+    if (-not (Test-IsGitRepo -Path $repoPath -Name $repoName)) {
       continue
     }
 
@@ -1091,6 +1071,54 @@ function gpull {
 #-------------------#
 # UTILITY FUNCTIONS #
 #-------------------#
+########## Check if folder is a valid git repository ##########
+function Test-IsGitRepo {
+  param (
+    [string]$Path,
+    [string]$Name
+  )
+
+  if (-not (Test-Path -Path "$Path\.git")) {
+    Write-Host -NoNewline "⛔ Local folder " -ForegroundColor Red
+    Write-Host -NoNewline "$Name" -ForegroundColor White -BackgroundColor Magenta
+    Write-Host " found but it's NOT a git repository ⛔" -ForegroundColor Red
+    Write-Host "Missing .git folder inside 👉 " -ForegroundColor DarkYellow
+    Write-Host "$Path" -ForegroundColor Red
+
+    Write-Host ""
+    Write-Host "──────────────────────────────────────────────────────────────────────────────" -ForegroundColor DarkGray
+    Write-Host ""
+
+    return $false
+  }
+
+  return $true
+}
+
+########## Check if local repository path exists ##########
+function Test-LocalRepoExists {
+  param (
+    [string]$Path,
+    [string]$Name
+  )
+
+  if (-not ($Path -and (Test-Path -Path $Path))) {
+    Write-Host -NoNewline "⚠️ Local repository path for " -ForegroundColor Red
+    Write-Host -NoNewline "$Name" -ForegroundColor White -BackgroundColor Magenta
+    Write-Host " doesn't exist ⚠️" -ForegroundColor Red
+    Write-Host "Path searched 👉 " -ForegroundColor DarkYellow
+    Write-Host "$Path" -ForegroundColor Red
+
+    Write-Host ""
+    Write-Host "──────────────────────────────────────────────────────────────────────────────" -ForegroundColor DarkGray
+    Write-Host ""
+
+    return $false
+  }
+
+  return $true
+}
+
 ########## Show last commit date regardless of branch ##########
 function Show-LastCommitDate {
   # Retrieves most recent remote branch and its date
