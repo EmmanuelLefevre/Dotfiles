@@ -1072,7 +1072,7 @@ function gpull {
 # UTILITY FUNCTIONS #
 #-------------------#
 ########## Check if folder is a valid git repository ##########
-function Test-IsGitRepo {
+function Test-IsGitRepository {
   param (
     [string]$Path,
     [string]$Name
