@@ -452,8 +452,8 @@ function gpull {
       $repoUrl = "https://api.github.com/repos/$username/$repoName"
       $response = Invoke-RestMethod -Uri $repoUrl -Method Get -Headers @{ Authorization = "Bearer $token" } -ErrorAction Stop
 
-      # Store original branch to return it later
-      $originalBranch = git rev-parse --abbrev-ref HEAD
+      # Store original branch to return it later (Trim removes invisible blank spaces)
+      $originalBranch = (git rev-parse --abbrev-ref HEAD).Trim()
 
       # Fetch latest remote changes
       git fetch --prune --quiet
@@ -464,7 +464,7 @@ function gpull {
       # Check if fetch worked (Git/SSH authentication)
       if ($LASTEXITCODE -ne 0) {
         Write-Host -NoNewline "⚠️ "
-        Write-Host -NoNewline ""Git Fetch" failed ! " -ForegroundColor Red
+        Write-Host -NoNewline "`"Git Fetch`" failed ! " -ForegroundColor Red
         Write-Host "Check your Git access credentials (SSH keys/Credential Manager)... ⚠️" -ForegroundColor Red
 
         $repoIsInSafeState = $false
@@ -1170,8 +1170,9 @@ function Show-LatestCommitMessage {
   # Check if references are valid
   if (-not $localHash -or -not $remoteHash) {
     Write-Host "⚠️ Unable to read local/remote references ! ⚠️" -ForegroundColor Red
-    sLocalBehind  = git merge-base --is-ancestor $localHash $remoteHash 2>$null
-  $ireturn
+    $isLocalBehind  = git merge-base --is-ancestor $localHash $remoteHash 2>$null
+
+    return
   }
 
   # Divergence detection (detect rebase/push --force)
@@ -1213,14 +1214,14 @@ function Show-LatestCommitMessage {
   # One commit
   if ($newCommits.Count -eq 1) {
     Write-Host -NoNewline "Commit message : " -ForegroundColor Magenta
-    Write-Host ""$($newCommits[0])"" -ForegroundColor Cyan
+    Write-Host "`"$($newCommits[0])`"" -ForegroundColor Cyan
     return
   }
 
   # Several commits
   Write-Host "New commits received :" -ForegroundColor Magenta
   foreach ($commit in $newCommits) {
-    Write-Host "- "$commit"" -ForegroundColor Cyan
+    Write-Host "- `"$commit`"" -ForegroundColor Cyan
   }
 }
 
@@ -1323,8 +1324,8 @@ function Get-GoalFunctionsDictionary {
 ########## Get script path and name ##########
 function Get-ScriptInfo {
   param (
-    [string]$ScriptPath = "$HOME\Documents\PowerShell\Microsoft.PowerShell_profile.ps1",
-    [string]$FileName = "Microsoft.PowerShell_profile.ps1"
+    [string]$FileName = "Microsoft.PowerShell_profile.ps1",
+    [string]$ScriptPath = "$HOME\Documents\PowerShell\Microsoft.PowerShell_profile.ps1"
   )
 
   # Display script path
