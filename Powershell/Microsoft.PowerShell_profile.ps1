@@ -452,8 +452,8 @@ function gpull {
       $repoUrl = "https://api.github.com/repos/$username/$repoName"
       $response = Invoke-RestMethod -Uri $repoUrl -Method Get -Headers @{ Authorization = "Bearer $token" } -ErrorAction Stop
 
-      # Store original branch to return it later (removes invisible new lines)
-      $originalBranch = (git rev-parse --abbrev-ref HEAD).Trim()
+      # Store original branch to return it later
+      $originalBranch = git rev-parse --abbrev-ref HEAD
 
       # Fetch latest remote changes
       git fetch --prune --quiet
@@ -1246,21 +1246,20 @@ function Restore-UserLocation {
     return
   }
 
-  # Retrieves branch on which script finished its work (removes invisible new lines)
-  $currentBranch = (git rev-parse --abbrev-ref HEAD).Trim()
-  $trimedOriginalBranch = $OriginalBranch.Trim()
+  # Retrieves branch on which script finished its work
+  $currentBranch = git rev-parse --abbrev-ref HEAD
 
   # If we are already on original branch, we do nothing and we say nothing
-  if ($currentBranch -eq $trimedOriginalBranch) {
+  if ($currentBranch -eq $OriginalBranch) {
     return
   }
 
   ######## STANDARD RETURN ########
   # Otherwise, we go there and display it
-  git checkout $trimedOriginalBranch *> $null
+  git checkout $OriginalBranch *> $null
 
   Write-Host -NoNewline "👌 Place it back on the branch where you were => " -ForegroundColor Magenta
-  Write-Host "$trimedOriginalBranch" -ForegroundColor Red
+  Write-Host "$OriginalBranch" -ForegroundColor Red
 }
 
 ########## Dictionary of functions and their objectives ##########
