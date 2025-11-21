@@ -929,25 +929,8 @@ function gpull {
         }
       }
 
-      # Check for unmerged commits between main and dev branches
-      # If main branch exists
-      $mainBranch = if (git branch --list main) { "main" } elseif (git branch --list master) { "master" } else { $null }
-      # If dev branch exists
-      $devBranch = if (git branch --list develop) { "develop" } elseif (git branch --list dev) { "dev" } else { $null }
-
-      # If both branches exist check for unmerged commits
-      if ($mainBranch -and $devBranch) {
-        # Check if there are any commits in 'dev' that are not in 'main'
-        $unmergedCommits = git log "$mainBranch..$devBranch" --oneline -q 2>$null
-
-        # If unmerged commits, notify the user
-        if ($unmergedCommits) {
-          Write-Host -NoNewline "ℹ️ $devBranch" -ForegroundColor Magenta
-          Write-Host -NoNewline " has commits that are not in " -ForegroundColor DarkYellow
-          Write-Host -NoNewline "$mainBranch" -ForegroundColor Magenta
-          Write-Host ". Think about merging ! ℹ️" -ForegroundColor DarkYellow
-        }
-      }
+      ######## WORKFLOW INFO ########
+      Show-MergeAdvice
 
       ######## RETURN STRATEGY ########
       Restore-UserLocation -OriginalBranch $originalBranch -RepoIsSafe $repoIsInSafeState -OriginalWasDeleted $originalBranchWasDeleted
@@ -1210,6 +1193,33 @@ function Show-LatestCommitMessage {
   foreach ($commit in $newCommits) {
     Write-Host ""$commit"" -ForegroundColor Cyan
   }
+}
+
+########## Check for unmerged commits in main from dev ##########
+function Show-MergeAdvice {
+  ######## GUARDS CLAUSES ########
+  # Main branch exists
+  $mainBranch = if (git branch --list "main") { "main" }
+                elseif (git branch --list "master") { "master" }
+                else { $null }
+  if (-not $mainBranch) { return }
+
+  # Dev branch exists
+  $devBranch = if (git branch --list "develop") { "develop" }
+              elseif (git branch --list "dev") { "dev" }
+              else { $null }
+  if (-not $devBranch) { return }
+
+  $unmergedCommits = git log "$mainBranch..$devBranch" --oneline -q 2>$null
+
+  # If everything is already merged (empty result), exit
+  if (-not $unmergedCommits) { return }
+
+  ######## SHOW ADVICE ########
+  Write-Host -NoNewline "ℹ️ $devBranch" -ForegroundColor Magenta
+  Write-Host -NoNewline " has commits that are not in " -ForegroundColor DarkYellow
+  Write-Host -NoNewline "$mainBranch" -ForegroundColor Magenta
+  Write-Host ". Think about merging ! ℹ️" -ForegroundColor DarkYellow
 }
 
 ########## Restore user to original branch ##########
