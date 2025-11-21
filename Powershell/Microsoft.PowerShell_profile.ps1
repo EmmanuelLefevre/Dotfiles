@@ -423,6 +423,7 @@ function gpull {
   foreach ($repoName in $reposOrder) {
     $repoPath = $repos[$repoName]
 
+    ######## GUARDS CLAUSES ########
     # Check if path exists
     if (-not (Test-LocalRepoExists -Path $repoPath -Name $repoName)) {
       continue
@@ -948,36 +949,8 @@ function gpull {
         }
       }
 
-      # Return to a safe branch
-      if ($repoIsInSafeState -eq $false) {
-        Write-Host "⚠️ Repo is in an unstable state. Can't returning on the branch where you were ! ⚠️" -ForegroundColor Red
-
-        # Store current branch
-        $originalBranch = git rev-parse --abbrev-ref HEAD
-      }
-
-      # Original branch has been deleted
-      elseif ($originalBranchWasDeleted -eq $true) {
-        Write-Host -NoNewline "⚡ Original branch " -ForegroundColor Magenta
-        Write-Host -NoNewline "$originalBranch" -ForegroundColor Red
-        Write-Host " has been deleted..." -ForegroundColor Magenta
-
-        # Move onto fallback branch
-        $fallbackBranch = if (git branch --list "develop") { "develop" } elseif (git branch --list "dev") { "dev" } elseif (git branch --list "main") { "main" } else { "master" }
-
-        Write-Host -NoNewline "😍 You have been moved to " -ForegroundColor DarkYellow
-        Write-Host -NoNewline "$fallbackBranch" -ForegroundColor Magenta
-        Write-Host " branch 😍" -ForegroundColor DarkYellow
-
-        git checkout $fallbackBranch *> $null
-      }
-      # Move onto original branch
-      else {
-        git checkout $originalBranch *> $null
-
-        Write-Host -NoNewline "👌 Place it back on the branch where you were => " -ForegroundColor Magenta
-        Write-Host "$originalBranch" -ForegroundColor Red
-      }
+      ######## RETURN STRATEGY ########
+      Restore-UserLocation -OriginalBranch $originalBranch -RepoIsSafe $repoIsInSafeState -OriginalWasDeleted $originalBranchWasDeleted
     }
     catch {
       # Get HTTP response if exists (regardless of the error type)
@@ -1060,15 +1033,14 @@ function gpull {
 }
 
 
-
-#-------------------#
-# UTILITY FUNCTIONS #
-#-------------------#
+#------------------------------#
+# GIT PULL UTILITIES FUNCTIONS #
+#------------------------------#
 ########## Check if folder is a valid git repository ##########
 function Test-IsGitRepository {
   param (
-    [string]$Path,
-    [string]$Name
+    [string]$Name,
+    [string]$Path
   )
 
   if (-not (Test-Path -Path "$Path\.git")) {
@@ -1091,8 +1063,8 @@ function Test-IsGitRepository {
 ########## Check if local repository path exists ##########
 function Test-LocalRepoExists {
   param (
-    [string]$Path,
-    [string]$Name
+    [string]$Name,
+    [string]$Path
   )
 
   if (-not ($Path -and (Test-Path -Path $Path))) {
@@ -1115,8 +1087,8 @@ function Test-LocalRepoExists {
 ########## Check if local remote matches expected GitHub URL ##########
 function Test-LocalRemoteMatch {
   param (
-    [string]$UserName,
-    [string]$RepoName
+    [string]$RepoName,
+    [string]$UserName
   )
 
   $localRemoteUrl = (git remote get-url origin 2>$null)
@@ -1174,9 +1146,9 @@ function Show-LastCommitDate {
 ########## Get and show latest commit message ##########
 function Show-LatestCommitMessage {
   param (
+    [switch]$HideHashes,
     [string]$LocalBranch,
-    [string]$RemoteBranch,
-    [switch]$HideHashes
+    [string]$RemoteBranch
   )
 
   # Get HASH HEAD
@@ -1238,6 +1210,56 @@ function Show-LatestCommitMessage {
   foreach ($commit in $newCommits) {
     Write-Host ""$commit"" -ForegroundColor Cyan
   }
+}
+
+########## Restore user to original branch ##########
+function Restore-UserLocation {
+  param (
+    [bool]$RepoIsSafe,
+    [string]$OriginalBranch,
+    [bool]$OriginalWasDeleted
+  )
+
+  ######## GUARDS CLAUSES ########
+  # Repository isn't in a safe mode
+  if (-not $RepoIsSafe) {
+    Write-Host "⚠️ Repo is in an unstable state. Can't return to the branch where you were ! ⚠️" -ForegroundColor Red
+    return
+  }
+
+  # Original branch was removed during cleaning
+  if ($OriginalWasDeleted) {
+    Write-Host -NoNewline "⚡ Original branch " -ForegroundColor Magenta
+    Write-Host -NoNewline "$OriginalBranch" -ForegroundColor Red
+    Write-Host " has been deleted..." -ForegroundColor Magenta
+
+    $fallbackBranch = if (git branch --list "develop") { "develop" }
+                      elseif (git branch --list "dev") { "dev" }
+                      elseif (git branch --list "main") { "main" }
+                      else { "master" }
+
+    Write-Host -NoNewline "😍 You have been moved to " -ForegroundColor DarkYellow
+    Write-Host -NoNewline "$fallbackBranch" -ForegroundColor Magenta
+    Write-Host " branch 😍" -ForegroundColor DarkYellow
+
+    git checkout $fallbackBranch *> $null
+    return
+  }
+
+  # Retrieves branch on which script finished its work
+  $currentBranch = git rev-parse --abbrev-ref HEAD
+
+  # If we are already on original branch, we do nothing and we say nothing
+  if ($currentBranch -eq $OriginalBranch) {
+    return
+  }
+
+  ######## STANDARD RETURN ########
+  # Otherwise, we go there and display it
+  git checkout $OriginalBranch *> $null
+
+  Write-Host -NoNewline "👌 Place it back on the branch where you were => " -ForegroundColor Magenta
+  Write-Host "$OriginalBranch" -ForegroundColor Red
 }
 
 ########## Dictionary of functions and their objectives ##########
