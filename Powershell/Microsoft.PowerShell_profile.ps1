@@ -452,7 +452,7 @@ function gpull {
       $repoUrl = "https://api.github.com/repos/$username/$repoName"
       $response = Invoke-RestMethod -Uri $repoUrl -Method Get -Headers @{ Authorization = "Bearer $token" } -ErrorAction Stop
 
-      # Store original branch to return it later (Trim removes invisible blank spaces)
+      # Store original branch to return it later (removes invisible new lines)
       $originalBranch = (git rev-parse --abbrev-ref HEAD).Trim()
 
       # Fetch latest remote changes
@@ -1246,7 +1246,7 @@ function Restore-UserLocation {
     return
   }
 
-  # Retrieves branch on which script finished its work (Trim removes invisible blank spaces)
+  # Retrieves branch on which script finished its work (removes invisible new lines)
   $currentBranch = (git rev-parse --abbrev-ref HEAD).Trim()
   $trimedOriginalBranch = $OriginalBranch.Trim()
 
