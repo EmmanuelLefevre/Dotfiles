@@ -1096,44 +1096,73 @@ function Test-LocalRemoteMatch {
 
 ########## Show last commit date regardless of branch ##########
 function Show-LastCommitDate {
-  # Retrieves most recent remote branch and its date
-  $lastCommitInfo = git for-each-ref --sort=-committerdate refs/remotes --count=1 --format="%(refname:short) %(committerdate:iso-strict)" 2>$null
+  ######## DATA RETRIEVAL ########
 
-  if ($lastCommitInfo) {
-    # Separate the chain into two
-    $parts = $lastCommitInfo -split ' ', 2
+  # Retrieve all remote branches sorted by date
+  $allRefs = git for-each-ref --sort=-committerdate refs/remotes --format="%(refname:short) %(committerdate:iso-strict)" 2>$null
 
-    if ($parts.Length -eq 2) {
-      $branchName = $parts[0] -replace '^[^/]+/', ''
-      $dateString = $parts[1]
+  ######## GUARD CLAUSES ########
+  # Check if we got a result
+  if ([string]::IsNullOrWhiteSpace($allRefs)) {
+    return
+  }
 
-      # Convert ISO string into [datetime] object
-      [datetime]$commitDate = $dateString
+  ######## FILTERING ########
+  # Exclude "HEAD" references (ex: origin/HEAD) and select most recent
+  $lastCommitInfo = $allRefs | Where-Object {
+    ($_ -notmatch '/HEAD\s') -and ($_ -match '/')
+  } | Select-Object -First 1
 
-      # Define culture on "en-US"
-      $culture = [System.Globalization.CultureInfo]'en-US'
+  ######## GUARD CLAUSES ########
+  if ([string]::IsNullOrWhiteSpace($lastCommitInfo)) {
+    return
+  }
 
-      # Format date (ex: Monday 13 September)
-      $formattedDate = $commitDate.ToString('dddd dd MMMM yyyy', $culture)
+  # Separate the chain into two
+  $parts = $lastCommitInfo -split ' ', 2
 
-      # Display formated message
-      Write-Host -NoNewline "📈 Last repository commit : " -ForegroundColor DarkYellow
-      Write-Host -NoNewline "$formattedDate" -ForegroundColor Cyan
-      Write-Host -NoNewline " on " -ForegroundColor DarkYellow
-      Write-Host "$branchName" -ForegroundColor Magenta
-      Write-Host "------------------------------------------------------------------------------" -ForegroundColor DarkGray
-    }
+  # Check data integrity (must have Branch + Date)
+  if ($parts.Length -ne 2) {
+    return
+  }
+
+  ######## PROCESSING / DISPLAY ########
+  # Clean up branch name (Remove "origin/")
+  $branchName = $parts[0] -replace '^.*?/', ''
+  $dateString = $parts[1]
+
+  try {
+    # Convert ISO string into [datetime] object
+    [datetime]$commitDate = $dateString
+
+    # Define culture on "en-US"
+    $culture = [System.Globalization.CultureInfo]'en-US'
+
+    # Format date (ex: Monday 13 September 2025)
+    $formattedDate = $commitDate.ToString('dddd dd MMMM yyyy', $culture)
+
+    # Display formatted message
+    Write-Host -NoNewline "📈 Last repository commit : " -ForegroundColor DarkYellow
+    Write-Host -NoNewline "$formattedDate" -ForegroundColor Cyan
+    Write-Host -NoNewline " on " -ForegroundColor DarkYellow
+    Write-Host "$branchName" -ForegroundColor Magenta
+    Write-Host "------------------------------------------------------------------------------" -ForegroundColor DarkGray
+  }
+  catch {
+    # If date parsing fails, exit silently
+    return
   }
 }
 
 ########## Get and show latest commit message ##########
 function Show-LatestCommitMessage {
   param (
-    [switch]$HideHashes,
     [string]$LocalBranch,
-    [string]$RemoteBranch
+    [string]$RemoteBranch,
+    [switch]$HideHashes
   )
 
+  ######## GUARDS CLAUSES ########
   # Get HASH HEAD
   $localHash  = git rev-parse $LocalBranch 2>$null
   $remoteHash = git rev-parse $RemoteBranch 2>$null
@@ -1141,14 +1170,13 @@ function Show-LatestCommitMessage {
   # Check if references are valid
   if (-not $localHash -or -not $remoteHash) {
     Write-Host "⚠️ Unable to read local/remote references ! ⚠️" -ForegroundColor Red
-    return
+    sLocalBehind  = git merge-base --is-ancestor $localHash $remoteHash 2>$null
+  $ireturn
   }
 
-  # Divergence detection
-  $isLocalBehind  = git merge-base --is-ancestor $localHash $remoteHash 2>$null
+  # Divergence detection (detect rebase/push --force)
   $isRemoteBehind = git merge-base --is-ancestor $remoteHash $localHash 2>$null
 
-  # Complete divergence (push force detected)
   if (-not $isLocalBehind -and -not $isRemoteBehind) {
     Write-Host "⚠️ History rewritten or divergence detected... A pull can trigger a rebase or a reset ! ⚠️" -ForegroundColor Red
   }
@@ -1181,6 +1209,7 @@ function Show-LatestCommitMessage {
     }
   }
 
+  ######## PROCESSING / DISPLAY ########
   # One commit
   if ($newCommits.Count -eq 1) {
     Write-Host -NoNewline "Commit message : " -ForegroundColor Magenta
@@ -1191,7 +1220,7 @@ function Show-LatestCommitMessage {
   # Several commits
   Write-Host "New commits received :" -ForegroundColor Magenta
   foreach ($commit in $newCommits) {
-    Write-Host ""$commit"" -ForegroundColor Cyan
+    Write-Host "- "$commit"" -ForegroundColor Cyan
   }
 }
 
