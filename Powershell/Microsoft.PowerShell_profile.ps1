@@ -1347,7 +1347,7 @@ function Get-RepositoriesInfo {
     "Soutenances"            = "$env:USERPROFILE\Desktop\Soutenances"
   }
 
-  # Validations
+  ######## GUARDS CLAUSES ########
   $functionNameMessage = "in Get-RepositoriesInfo function"
   # Username check
   if (-not $gitHubUsername -or $gitHubUsername -match '^<YOUR GITHUB USERNAME>$') {
