@@ -930,72 +930,19 @@ function gpull {
         $responseError = $_.Exception.Response
       }
 
-      ######## ERROR TYPE : HTTP RESPONSE ########
-      # If we have a server response, handle based on Status Code
+      ######## ERROR HANDLER : HTTP ########
+      # If we have a server response
       if ($null -ne $responseError) {
-        # Secure conversion of StatusCode in integer
-        $statusCode = [int]$responseError.StatusCode
-
-        switch ($statusCode) {
-          # Server Errors
-          { $_ -ge 500 } {
-            Write-Host -NoNewline "🔥 "
-            Write-Host -NoNewline "GitHub server error (" -ForegroundColor Red
-            Write-Host -NoNewline "$statusCode" -ForegroundColor Magenta
-            Write-Host "). GitHub's fault, not yours ! Try later... 🔥" -ForegroundColor Red
-            break
-          }
-
-          # Not Found
-          404 {
-            Write-Host -NoNewline "⚠️ "
-            Write-Host -NoNewline "Remote repository " -ForegroundColor Red
-            Write-Host -NoNewline "$repoName" -ForegroundColor white -BackgroundColor DarkBlue
-            Write-Host " doesn't exists ⚠️" -ForegroundColor Red
-            break
-          }
-
-          # Rate Limit
-          403 {
-            Write-Host "󰊤 GitHub API rate limit exceeded! Try again later or authenticate to increase your rate limit. 󰊤" -ForegroundColor Red
-            break
-          }
-
-          # Unauthorized
-          401 {
-            Write-Host "󰊤 Check your personal token defined in your settings 󰊤" -ForegroundColor Red
-            break
-          }
-
-          # Default/Other HTTP errors
-          Default {
-            Write-Host "⚠️ HTTP Error $statusCode : $($_.Exception.Message)" -ForegroundColor Red
-          }
-        }
+        Show-GitHubHttpError -StatusCode $responseError.StatusCode `
+                            -RepoName $repoName `
+                            -ErrorMessage $_.Exception.Message
       }
 
-      ######## ERROR TYPE : SYSTEM / NETWORK ########
+      ######## ERROR HANDLER : NETWORK / SYSTEM ########
       # No HTTP response
       else {
-        # Analyzes message to distinguish a network breakdown from a script bug
-        $msg = $_.Exception.Message
-
-        # Network problem (DNS, unplugged cable, firewall, no internet ...)
-        if ($msg -match "remote name could not be resolved" -or $msg -match "connect" -or $msg -match "timed out") {
-          Write-Host -NoNewline "💀 "
-          Write-Host -NoNewline "Network error for " -ForegroundColor Red
-          Write-Host -NoNewline "$repoName" -ForegroundColor White -BackgroundColor DarkBlue
-          Write-Host ". Unable to connect to GitHub, maybe check your connection or your firewall ! 💀" -ForegroundColor Red
-        }
-
-        # Script or Git processing error
-        else {
-          Write-Host -NoNewline "💥 Internal Script/Git processing error 💥" -ForegroundColor Red
-
-          # Display technical message for debugging
-          Write-Host "Details 👉 " -ForegroundColor Magenta
-          Write-Host -NoNewline "$msg" -ForegroundColor Red
-        }
+        Show-NetworkOrSystemError -RepoName $repoName `
+                                    -Message $_.Exception.Message
       }
     }
 
@@ -1008,6 +955,107 @@ function gpull {
 #------------------------------#
 # GIT PULL UTILITIES FUNCTIONS #
 #------------------------------#
+##########---------- Get local repositories information ----------##########
+function Get-RepositoriesInfo {
+  ######## DATA DEFINITION ########
+  # GitHub username
+  $gitHubUsername = $env:GITHUB_USERNAME
+
+  # GitHub token
+  $gitHubToken = $env:GITHUB_TOKEN
+
+  # Array to define the order of repositories
+  $reposOrder = @(
+    "ArtiWave",
+    "Cours",
+    "DailyPush",
+    "DataScrub",
+    "Documentations",
+    "Dotfiles",
+    "EmmanuelLefevre",
+    "GitHubProfileIcons",
+    "GoogleSheets",
+    "IAmEmmanuelLefevre",
+    "MarkdownImg",
+    "OpenScraper",
+    "ParquetFlow",
+    "ReplicaMySQL",
+    "Schemas",
+    "ScrapMate",
+    "Soutenances"
+  )
+
+  # Dictionary containing local repositories path
+  $repos = @{
+    "ArtiWave"               = "$env:USERPROFILE\Desktop\Projets\ArtiWave"
+    "Cours"                  = "$env:USERPROFILE\Desktop\Cours"
+    "DailyPush"              = "$env:USERPROFILE\Desktop\DailyPush"
+    "DataScrub"              = "$env:USERPROFILE\Desktop\Projets\DataScrub"
+    "Documentations"         = "$env:USERPROFILE\Documents\Documentations"
+    "Dotfiles"               = "$env:USERPROFILE\Desktop\Dotfiles"
+    "EmmanuelLefevre"        = "$env:USERPROFILE\Desktop\Projets\EmmanuelLefevre"
+    "GitHubProfileIcons"     = "$env:USERPROFILE\Pictures\GitHubProfileIcons"
+    "GoogleSheets"           = "$env:USERPROFILE\Desktop\GoogleSheets"
+    "IAmEmmanuelLefevre"     = "$env:USERPROFILE\Desktop\Projets\IAmEmmanuelLefevre"
+    "MarkdownImg"            = "$env:USERPROFILE\Desktop\MarkdownImg"
+    "OpenScraper"            = "$env:USERPROFILE\Desktop\Projets\OpenScraper"
+    "ParquetFlow"            = "$env:USERPROFILE\Desktop\Projets\ParquetFlow"
+    "ReplicaMySQL"           = "$env:USERPROFILE\Desktop\Projets\ReplicaMySQL"
+    "Schemas"                = "$env:USERPROFILE\Desktop\Schemas"
+    "ScrapMate"              = "$env:USERPROFILE\Desktop\Projets\ScrapMate"
+    "Soutenances"            = "$env:USERPROFILE\Desktop\Soutenances"
+  }
+
+  # Error message templates
+  $envVarMessageTemplate = "Check/add {0} and its value in your Windows Environment Variables..."
+  $functionNameMessage = "in Get-RepositoriesInfo function !"
+
+  ######## GUARD CLAUSE : MISSING USERNAME ########
+  if ([string]::IsNullOrWhiteSpace($gitHubUsername)) {
+    Write-Host "❌ GitHub username is missing or invalid ! ❌" -ForegroundColor Red
+
+    $msg = $envVarMessageTemplate -f "'GITHUB_USERNAME'"
+    Write-Host "ℹ️ $msg" -ForegroundColor DarkYellow
+    return $null
+  }
+
+  ######## GUARD CLAUSE : MISSING TOKEN ########
+  if ([string]::IsNullOrWhiteSpace($gitHubToken)) {
+    Write-Host "❌ GitHub token is missing or invalid ! ❌" -ForegroundColor Red
+
+    $msg = $envVarMessageTemplate -f "'GITHUB_TOKEN'"
+    Write-Host "ℹ️ $msg" -ForegroundColor DarkYellow
+    return $null
+  }
+
+  ######## GUARD CLAUSE : EMPTY ORDER LIST ########
+  if (-not $reposOrder -or $reposOrder.Count -eq 0) {
+    Write-Host "❌ Local array repo order is empty ! ❌" -ForegroundColor Red
+    Write-Host "ℹ️ Define at least one repository in the repository order array $functionNameMessage" -ForegroundColor Yellow
+    return $null
+  }
+
+  ######## GUARD CLAUSE : EMPTY PATH DICTIONARY ########
+  if (-not $repos -or $repos.Keys.Count -eq 0) {
+    Write-Host "❌ Local repository dictionary is empty ! ❌" -ForegroundColor Red
+    Write-Host "ℹ️ Ensure repository dictionary contains at least one reference with a valid path $functionNameMessage" -ForegroundColor Yellow
+    return $null
+  }
+
+  ######## RETURN SUCCESS ########
+  # All is fine
+  Write-Host "✔️ GitHub configuration and projects are ok ✔️" -ForegroundColor Green
+  Show-Separator -Length 80 -ForegroundColor DarkBlue
+  Write-Host ""
+
+  return @{
+    Username = $gitHubUsername
+    Token = $gitHubToken
+    Order = $reposOrder
+    Paths = $repos
+  }
+}
+
 ##########---------- Display a separator line with custom length and colors ----------##########
 function Show-Separator {
   param (
@@ -1333,7 +1381,6 @@ function Show-MergeAdvice {
                 else { $null }
 
   ######## GUARD CLAUSE : MAIN BRANCH NOT FOUND ########
-  # Check if a valid main branch exists
   if (-not $mainBranch) { return }
 
   ######## DATA RETRIEVAL ########
@@ -1343,7 +1390,6 @@ function Show-MergeAdvice {
               else { $null }
 
   ######## GUARD CLAUSE : DEV BRANCH NOT FOUND ########
-  # Check if a valid dev branch exists
   if (-not $devBranch) { return }
 
   ######## DATA RETRIEVAL ########
@@ -1415,104 +1461,85 @@ function Restore-UserLocation {
   Write-Host "$OriginalBranch" -ForegroundColor Red
 }
 
-##########---------- Get local repositories information ----------##########
-function Get-RepositoriesInfo {
-  ######## DATA DEFINITION ########
-  # GitHub username
-  $gitHubUsername = $env:GITHUB_USERNAME
+##########---------- Display HTTP errors ----------##########
+function Show-GitHubHttpError {
+  param (
+    [Parameter(Mandatory=$true)]
+    [int]$StatusCode,
 
-  # GitHub token
-  $gitHubToken = $env:GITHUB_TOKEN
+    [Parameter(Mandatory=$true)]
+    [string]$RepoName,
 
-  # Array to define the order of repositories
-  $reposOrder = @(
-    "ArtiWave",
-    "Cours",
-    "DailyPush",
-    "DataScrub",
-    "Documentations",
-    "Dotfiles",
-    "EmmanuelLefevre",
-    "GitHubProfileIcons",
-    "GoogleSheets",
-    "IAmEmmanuelLefevre",
-    "MarkdownImg",
-    "OpenScraper",
-    "ParquetFlow",
-    "ReplicaMySQL",
-    "Schemas",
-    "ScrapMate",
-    "Soutenances"
+    [Parameter(Mandatory=$false)]
+    [string]$ErrorMessage
   )
 
-  # Dictionary containing local repositories path
-  $repos = @{
-    "ArtiWave"               = "$env:USERPROFILE\Desktop\Projets\ArtiWave"
-    "Cours"                  = "$env:USERPROFILE\Desktop\Cours"
-    "DailyPush"              = "$env:USERPROFILE\Desktop\DailyPush"
-    "DataScrub"              = "$env:USERPROFILE\Desktop\Projets\DataScrub"
-    "Documentations"         = "$env:USERPROFILE\Documents\Documentations"
-    "Dotfiles"               = "$env:USERPROFILE\Desktop\Dotfiles"
-    "EmmanuelLefevre"        = "$env:USERPROFILE\Desktop\Projets\EmmanuelLefevre"
-    "GitHubProfileIcons"     = "$env:USERPROFILE\Pictures\GitHubProfileIcons"
-    "GoogleSheets"           = "$env:USERPROFILE\Desktop\GoogleSheets"
-    "IAmEmmanuelLefevre"     = "$env:USERPROFILE\Desktop\Projets\IAmEmmanuelLefevre"
-    "MarkdownImg"            = "$env:USERPROFILE\Desktop\MarkdownImg"
-    "OpenScraper"            = "$env:USERPROFILE\Desktop\Projets\OpenScraper"
-    "ParquetFlow"            = "$env:USERPROFILE\Desktop\Projets\ParquetFlow"
-    "ReplicaMySQL"           = "$env:USERPROFILE\Desktop\Projets\ReplicaMySQL"
-    "Schemas"                = "$env:USERPROFILE\Desktop\Schemas"
-    "ScrapMate"              = "$env:USERPROFILE\Desktop\Projets\ScrapMate"
-    "Soutenances"            = "$env:USERPROFILE\Desktop\Soutenances"
+  ######## ERROR DISPATCHING ########
+  switch ($StatusCode) {
+    # Server Errors (all 500+ code)
+    { $_ -ge 500 } {
+      Write-Host -NoNewline "🔥 "
+      Write-Host -NoNewline "GitHub server error (" -ForegroundColor Red
+      Write-Host -NoNewline "$StatusCode" -ForegroundColor Magenta
+      Write-Host "). GitHub's fault, not yours ! Try later... 🔥" -ForegroundColor Red
+      return
+    }
+
+    # Not Found
+    404 {
+      Write-Host -NoNewline "⚠️ "
+      Write-Host -NoNewline "Remote repository " -ForegroundColor Red
+      Write-Host -NoNewline "$RepoName" -ForegroundColor white -BackgroundColor DarkBlue
+      Write-Host " doesn't exists ⚠️" -ForegroundColor Red
+      return
+    }
+
+    # Rate Limit
+    403 {
+      Write-Host "󰊤 GitHub API rate limit exceeded! Try again later or authenticate to increase your rate limit. 󰊤" -ForegroundColor Red
+      return
+    }
+
+    # Unauthorized
+    401 {
+      Write-Host "󰊤 Check your personal token defined in your settings 󰊤" -ForegroundColor Red
+      return
+    }
+
+    # Default/Other HTTP errors
+    Default {
+      Write-Host "⚠️ HTTP Error $StatusCode : $ErrorMessage" -ForegroundColor Red
+    }
+  }
+}
+
+##########---------- Display Network/System errors ----------##########
+function Show-NetworkOrSystemError {
+  param (
+    [Parameter(Mandatory=$true)]
+    [string]$RepoName,
+
+    [Parameter(Mandatory=$true)]
+    [string]$Message
+  )
+
+  ######## ERROR TYPE : NETWORK ########
+  # Network problem (DNS, unplugged cable, firewall, no internet ...)
+  if ($Message -match "remote name could not be resolved" -or $Message -match "connect" -or $Message -match "timed out") {
+    Write-Host -NoNewline "💀 "
+    Write-Host -NoNewline "Network error for " -ForegroundColor Red
+    Write-Host -NoNewline "$RepoName" -ForegroundColor White -BackgroundColor DarkBlue
+    Write-Host ". Unable to connect to GitHub, maybe check your connection or your firewall ! 💀" -ForegroundColor Red
   }
 
-  # Error message templates
-  $envVarMessageTemplate = "Check/add {0} and its value in your Windows Environment Variables..."
-  $functionNameMessage = "in Get-RepositoriesInfo function !"
+  ######## ERROR TYPE : INTERNAL/SCRIPT ########
+  # Script or Git processing error (fallback)
+  else {
+    Write-Host -NoNewline "💥 Internal Script/Git processing error 💥" -ForegroundColor Red
 
-  ######## GUARD CLAUSE : MISSING USERNAME ########
-  if ([string]::IsNullOrWhiteSpace($gitHubUsername)) {
-    Write-Host "❌ GitHub username is missing or invalid ! ❌" -ForegroundColor Red
-
-    $msg = $envVarMessageTemplate -f "'GITHUB_USERNAME'"
-    Write-Host "ℹ️ $msg" -ForegroundColor DarkYellow
-    return $null
-  }
-
-  ######## GUARD CLAUSE : MISSING TOKEN ########
-  if ([string]::IsNullOrWhiteSpace($gitHubToken)) {
-    Write-Host "❌ GitHub token is missing or invalid ! ❌" -ForegroundColor Red
-
-    $msg = $envVarMessageTemplate -f "'GITHUB_TOKEN'"
-    Write-Host "ℹ️ $msg" -ForegroundColor DarkYellow
-    return $null
-  }
-
-  ######## GUARD CLAUSE : EMPTY ORDER LIST ########
-  if (-not $reposOrder -or $reposOrder.Count -eq 0) {
-    Write-Host "❌ Local array repo order is empty ! ❌" -ForegroundColor Red
-    Write-Host "ℹ️ Define at least one repository in the repository order array $functionNameMessage" -ForegroundColor Yellow
-    return $null
-  }
-
-  ######## GUARD CLAUSE : EMPTY PATH DICTIONARY ########
-  if (-not $repos -or $repos.Keys.Count -eq 0) {
-    Write-Host "❌ Local repository dictionary is empty ! ❌" -ForegroundColor Red
-    Write-Host "ℹ️ Ensure repository dictionary contains at least one reference with a valid path $functionNameMessage" -ForegroundColor Yellow
-    return $null
-  }
-
-  ######## RETURN SUCCESS ########
-  # All is fine
-  Write-Host "✔️ GitHub configuration and projects are ok ✔️" -ForegroundColor Green
-  Show-Separator -Length 80 -ForegroundColor DarkBlue
-  Write-Host ""
-
-  return @{
-    Username = $gitHubUsername
-    Token = $gitHubToken
-    Order = $reposOrder
-    Paths = $repos
+    # Display technical message for debugging
+    Write-Host "Details 👉 " -ForegroundColor Magenta
+    Write-Host -NoNewline "$Message" -ForegroundColor Red
   }
 }
 
