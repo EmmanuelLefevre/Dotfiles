@@ -496,37 +496,20 @@ function gpull {
       ######## USER PERMISSION TO PULL NEW BRANCHES ########
       Invoke-NewBranchTracking -NewBranches $newBranchesToTrack
 
+      ######## DATA RETRIEVAL : TRACKED BRANCHES ########
       # Find all local branches that have a remote upstream
-      $branchesToUpdate = git for-each-ref --format="%(refname:short) %(upstream:short)" refs/heads | ForEach-Object {
-        $parts = $_ -split ' '
-        if ($parts.Length -eq 2 -and $parts[1]) {
-          [PSCustomObject]@{ Local = $parts[0]; Remote = $parts[1] }
-        }
-      }
+      $branchesToUpdate = Get-LocalBranchesWithUpstream
 
-      # If no branch has an upstream defined
+      ######## GUARD CLAUSE : NO UPSTREAM ########
+      # If no branch has an upstream defined, nothing to update or clean up
       if (-not $branchesToUpdate) {
         Write-Host "ℹ️ No upstream defined ! Nothing to update or clean up for this repository ! ℹ️" -ForegroundColor DarkYellow
-
-        # Move next repository
         continue
       }
 
-      # Defines priority branches in specific order
-      $mainBranchNames = @("main", "master")
-      $devBranchNames = @("dev", "develop")
-
-      # Create three lists to guarantee order (force an array)
-      $mainBranches = @($branchesToUpdate | Where-Object { $mainBranchNames -icontains $_.Local })
-      $devBranches = @($branchesToUpdate | Where-Object { $devBranchNames -icontains $_.Local })
-
-      # Combines two priority lists into one for filtering
-      $allPriorityNames = $mainBranchNames + $devBranchNames
-      # Sort other branches in alphabetical order
-      $otherBranches = $branchesToUpdate | Where-Object { -not ($allPriorityNames -icontains $_.Local) } | Sort-Object Local
-
-      # Combine lists in the desired order
-      $sortedBranchesToUpdate = $mainBranches + $devBranches + $otherBranches
+      ######## DATA PROCESSING : SORTING ########
+      # Organize branches : Main -> Dev -> Others by alphabetical
+      $sortedBranchesToUpdate = Get-SortedBranches -Branches $branchesToUpdate
 
       # Track repository state
       $repoIsInSafeState = $true
@@ -534,6 +517,7 @@ function gpull {
       # Track if any branch needed a pull
       $anyBranchNeededPull = $false
 
+      ######## UPDATE LOOP ########
       # Iterate over each branch found to pull updates from remote
       foreach ($branch in $sortedBranchesToUpdate) {
         # Checkout to branch
@@ -1193,7 +1177,7 @@ function Get-NewRemoteBranches {
   return $branchesFound
 }
 
-##########---------- Interactive process to track new branches ----------##########
+##########---------- Interactive proposal to create new local branches ----------##########
 function Invoke-NewBranchTracking {
   param (
     [array]$NewBranches
@@ -1250,6 +1234,62 @@ function Invoke-NewBranchTracking {
 
   ######## UI : END SEPARATOR ########
   Show-Separator -Length 80 -ForegroundColor DarkGray
+}
+
+##########---------- Retrieve local branches that have a remote upstream ----------##########
+function Get-LocalBranchesWithUpstream {
+  ######## DATA RETRIEVAL ########
+  # Get raw data : LocalBranchName + RemoteUpstreamName
+  $rawRefs = git for-each-ref --format="%(refname:short) %(upstream:short)" refs/heads 2>$null
+
+  ######## GUARD CLAUSE : NO REFS ########
+  if ([string]::IsNullOrWhiteSpace($rawRefs)) {
+    return $null
+  }
+
+  ######## DATA PROCESSING ########
+  # Convert raw text to objects
+  $branchesWithUpstream = $rawRefs | ForEach-Object {
+    $parts = $_ -split ' '
+
+    # Check data integrity (Must have: Name + Upstream)
+    if ($parts.Length -eq 2 -and -not [string]::IsNullOrWhiteSpace($parts[1])) {
+      [PSCustomObject]@{
+        Local  = $parts[0]
+        Remote = $parts[1]
+      }
+    }
+  }
+
+  return $branchesWithUpstream
+}
+
+##########---------- Sort branches by priority (Main > Dev > Others) ----------##########
+function Get-SortedBranches {
+  param (
+    [Parameter(Mandatory=$true)]
+    [array]$Branches
+  )
+
+  ######## CONFIGURATION ########
+  # Defines priority branches names
+  $mainBranchNames = @("main", "master")
+  $devBranchNames  = @("dev", "develop")
+
+  ######## SORTING LOGIC ########
+  # Create three lists to guarantee order (force an array)
+  $mainList   = @($Branches | Where-Object { $mainBranchNames -icontains $_.Local })
+  $devList    = @($Branches | Where-Object { $devBranchNames -icontains $_.Local })
+
+  # Combines two priority lists for exclusion filter
+  $allPriorityNames = $mainBranchNames + $devBranchNames
+
+  # Sort other branches alphabetically
+  $otherList  = $Branches | Where-Object { -not ($allPriorityNames -icontains $_.Local) } | Sort-Object Local
+
+  ######## MERGE & RETURN ########
+  # Combine lists in the desired order
+  return $mainList + $devList + $otherList
 }
 
 ##########---------- Show last commit date regardless of branch ----------##########
