@@ -545,93 +545,15 @@ function gpull {
         # If we get here, a branch needs a pull
         $anyBranchNeededPull = $true
 
-        # Update branchs
-        $pullSuccess = $false
+        # Execute the update strategy and get the result status
+        $updateStatus = Invoke-BranchUpdateStrategy -LocalBranch $branch.Local `
+                                                    -RemoteBranch $branch.Remote `
+                                                    -RepoName $repoName
 
-        # If main/master automatically pull it
-        if ($branch.Local -eq "main" -or $branch.Local -eq "master") {
-          Write-Host "⏳ Updating main branch..." -ForegroundColor Magenta
-
-          Show-LatestCommitMessage -LocalBranch $branch.Local -RemoteBranch $branch.Remote -HideHashes
-
-          git pull
-
-          # Check if pull worked
-          if ($LASTEXITCODE -eq 0) {
-            # Mark pull as successful
-            $pullSuccess = $true
-          }
-        }
-        # If dev/develop automatically pull it
-        elseif ($branch.Local -eq "dev" -or $branch.Local -eq "develop") {
-          Write-Host "⏳ Updating develop branch..." -ForegroundColor Magenta
-
-          Show-LatestCommitMessage -LocalBranch $branch.Local -RemoteBranch $branch.Remote -HideHashes
-
-          git pull
-
-          # Check if pull worked
-          if ($LASTEXITCODE -eq 0) {
-            # Mark pull as successful
-            $pullSuccess = $true
-          }
-        }
-        # Ask user for other branches
-        else {
-          Write-Host -NoNewline "Branch " -ForegroundColor Magenta
-          Write-Host -NoNewline "$($branch.Local)" -ForegroundColor Red
-          Write-Host " has updates" -ForegroundColor Magenta
-
-          Show-LatestCommitMessage -LocalBranch $branch.Local -RemoteBranch $branch.Remote -HideHashes
-
-          Write-Host -NoNewline "Pull ? (Y/n): " -ForegroundColor Magenta
-
-          $choice = Read-Host
-          if ($choice -match '^(Y|y|yes|^)$') {
-            Write-Host -NoNewline "⏳ Updating " -ForegroundColor Magenta
-            Write-Host -NoNewline "$($branch.Local)" -ForegroundColor Red
-            Write-Host "..." -ForegroundColor Magenta
-
-            git pull
-
-            # Check if pull worked
-            if ($LASTEXITCODE -eq 0) {
-              # Mark pull as successful
-              $pullSuccess = $true
-            }
-          }
-          # If user refuses pull
-          else {
-            Write-Host -NoNewline "Skipping pull for " -ForegroundColor Magenta
-            Write-Host -NoNewline "$($branch.Local)" -ForegroundColor Red
-            Write-Host "..." -ForegroundColor Magenta
-
-            Show-Separator -Length 80 -ForegroundColor DarkGray
-
-            # Reset pull success
-            $pullSuccess = $null
-          }
-        }
-
-        # Check pull status for each updated branch
-        if ($pullSuccess -eq $true) {
-          Write-Host -NoNewline "$($branch.Local)" -ForegroundColor Red
-          Write-Host " successfully updated ✅" -ForegroundColor Green
-          Show-Separator -Length 80 -ForegroundColor DarkGray
-        }
-        # Check pull status for each not updated branch
-        elseif ($pullSuccess -eq $false) {
-          Write-Host "⚠️ "
-          Write-Host -NoNewline "Error updating " -ForegroundColor Red
-          Write-Host -NoNewline "$($branch.Local)" -ForegroundColor Magenta
-          Write-Host -NoNewline " in " -ForegroundColor Red
-          Write-Host -NoNewline "$repoName" -ForegroundColor white -BackgroundColor DarkBlue
-          Write-Host " ⚠️" -ForegroundColor Red
-
-          # Mark repository as not in a safe state
+        ######## GUARD CLAUSE : UPDATE FAILED ########
+        # If update failed critically, mark repo as unsafe and stop
+        if ($updateStatus -eq 'Failed') {
           $repoIsInSafeState = $false
-
-          # Exit branch loop
           break
         }
       }
@@ -1349,6 +1271,109 @@ function Test-IsUpToDate {
   ######## RETURN FAILURE ########
   # Hashes are different, so it's not up to date
   return $false
+}
+
+##########---------- Execute pull strategy (Auto vs Interactive) ----------##########
+function Invoke-BranchUpdateStrategy {
+  param (
+    [string]$LocalBranch,
+    [string]$RemoteBranch,
+    [string]$RepoName
+  )
+
+  # Default state
+  $pullStatus = 'Skipped'
+
+  ######## STRATEGY : AUTO-UPDATE (Main/Master) ########
+  if ($LocalBranch -eq "main" -or $LocalBranch -eq "master") {
+    Write-Host "⏳ Updating main branch..." -ForegroundColor Magenta
+    Show-LatestCommitMessage -LocalBranch $LocalBranch -RemoteBranch $RemoteBranch -HideHashes
+
+    git pull
+
+    # Check if pull worked
+    if ($LASTEXITCODE -eq 0) {
+      $pullStatus = 'Success'
+    }
+    else {
+      $pullStatus = 'Failed'
+    }
+  }
+
+  ######## STRATEGY : AUTO-UPDATE (Dev/Develop) ########
+  elseif ($LocalBranch -eq "dev" -or $LocalBranch -eq "develop") {
+    Write-Host "⏳ Updating develop branch..." -ForegroundColor Magenta
+    Show-LatestCommitMessage -LocalBranch $LocalBranch -RemoteBranch $RemoteBranch -HideHashes
+
+    git pull
+
+    # Check if pull worked
+    if ($LASTEXITCODE -eq 0) {
+      $pullStatus = 'Success'
+    }
+    else {
+      $pullStatus = 'Failed'
+    }
+  }
+
+  ######## STRATEGY : INTERACTIVE ########
+  # Ask user for other branches
+  else {
+    Write-Host -NoNewline "Branch " -ForegroundColor Magenta
+    Write-Host -NoNewline "$LocalBranch" -ForegroundColor Red
+    Write-Host " has updates." -ForegroundColor Magenta
+
+    Show-LatestCommitMessage -LocalBranch $LocalBranch -RemoteBranch $RemoteBranch -HideHashes
+
+    Write-Host -NoNewline "Pull ? (Y/n): " -ForegroundColor Magenta
+
+    $choice = Read-Host
+    if ($choice -match '^(Y|y|yes|^)$') {
+      Write-Host -NoNewline "⏳ Updating " -ForegroundColor Magenta
+      Write-Host -NoNewline "$LocalBranch" -ForegroundColor Red
+      Write-Host "..." -ForegroundColor Magenta
+
+      git pull
+
+      # Check if pull worked
+      if ($LASTEXITCODE -eq 0) {
+        $pullStatus = 'Success'
+      }
+      else {
+        $pullStatus = 'Failed'
+      }
+    }
+    else {
+      Write-Host -NoNewline "Skipping pull for " -ForegroundColor Magenta
+      Write-Host -NoNewline "$LocalBranch" -ForegroundColor Red
+      Write-Host "..." -ForegroundColor Magenta
+
+      Show-Separator -Length 80 -ForegroundColor DarkGray
+
+      # Reset pull success
+      $pullStatus = 'Skipped'
+    }
+  }
+
+  ######## RESULT FEEDBACK ########
+  switch ($pullStatus) {
+    'Success' {
+      Write-Host -NoNewline "$LocalBranch" -ForegroundColor Red
+      Write-Host " successfully updated ✅" -ForegroundColor Green
+
+      Show-Separator -Length 80 -ForegroundColor DarkGray
+    }
+    'Failed' {
+      Write-Host "⚠️ "
+      Write-Host -NoNewline "Error updating " -ForegroundColor Red
+      Write-Host -NoNewline "$LocalBranch" -ForegroundColor Magenta
+      Write-Host -NoNewline " in " -ForegroundColor Red
+      Write-Host -NoNewline "$RepoName" -ForegroundColor white -BackgroundColor DarkBlue
+      Write-Host " ⚠️" -ForegroundColor Red
+    }
+  }
+
+  return $pullStatus
 }
 
 ##########---------- Show last commit date regardless of branch ----------##########
