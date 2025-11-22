@@ -921,6 +921,7 @@ function gpull {
       Restore-UserLocation -OriginalBranch $originalBranch -RepoIsSafe $repoIsInSafeState -OriginalWasDeleted $originalBranchWasDeleted
     }
     catch {
+      ######## ERROR CONTEXT ANALYSIS ########
       # Get HTTP response if exists (regardless of the error type)
       $responseError = $null
 
@@ -929,43 +930,51 @@ function gpull {
         $responseError = $_.Exception.Response
       }
 
-      # HTTP error (server responded)
+      ######## ERROR TYPE : HTTP RESPONSE ########
+      # If we have a server response, handle based on Status Code
       if ($null -ne $responseError) {
         # Secure conversion of StatusCode in integer
         $statusCode = [int]$responseError.StatusCode
 
-        # Check if error is related to server issues
-        if ($statusCode -ge 500) {
-          Write-Host -NoNewline "🔥 "
-          Write-Host -NoNewline "GitHub server error (" -ForegroundColor Red
-          Write-Host -NoNewline "$statusCode" -ForegroundColor Magenta
-          Write-Host "). GitHub's fault, not yours ! Try later... 🔥" -ForegroundColor Red
-        }
+        switch ($statusCode) {
+          # Server Errors
+          { $_ -ge 500 } {
+            Write-Host -NoNewline "🔥 "
+            Write-Host -NoNewline "GitHub server error (" -ForegroundColor Red
+            Write-Host -NoNewline "$statusCode" -ForegroundColor Magenta
+            Write-Host "). GitHub's fault, not yours ! Try later... 🔥" -ForegroundColor Red
+            break
+          }
 
-        # Check if error is related to remote repository not existing
-        elseif ($statusCode -eq 404) {
-          Write-Host -NoNewline "⚠️ "
-          Write-Host -NoNewline "Remote repository " -ForegroundColor Red
-          Write-Host -NoNewline "$repoName" -ForegroundColor white -BackgroundColor DarkBlue
-          Write-Host " doesn't exists ⚠️" -ForegroundColor Red
-        }
+          # Not Found
+          404 {
+            Write-Host -NoNewline "⚠️ "
+            Write-Host -NoNewline "Remote repository " -ForegroundColor Red
+            Write-Host -NoNewline "$repoName" -ForegroundColor white -BackgroundColor DarkBlue
+            Write-Host " doesn't exists ⚠️" -ForegroundColor Red
+            break
+          }
 
-        # Check if error is related to rate limiting
-        elseif ($statusCode -eq 403) {
-          Write-Host "󰊤 GitHub API rate limit exceeded! Try again later or authenticate to increase your rate limit. 󰊤" -ForegroundColor Red
-        }
+          # Rate Limit
+          403 {
+            Write-Host "󰊤 GitHub API rate limit exceeded! Try again later or authenticate to increase your rate limit. 󰊤" -ForegroundColor Red
+            break
+          }
 
-        # Check if error is related to authentication
-        elseif ($statusCode -eq 401) {
-          Write-Host "󰊤 Check your personal token defined in your settings 󰊤" -ForegroundColor Red
-        }
+          # Unauthorized
+          401 {
+            Write-Host "󰊤 Check your personal token defined in your settings 󰊤" -ForegroundColor Red
+            break
+          }
 
-        # Other HTTP errors
-        else {
-          Write-Host "⚠️ HTTP Error $statusCode : $($_.Exception.Message)" -ForegroundColor Red
+          # Default/Other HTTP errors
+          Default {
+            Write-Host "⚠️ HTTP Error $statusCode : $($_.Exception.Message)" -ForegroundColor Red
+          }
         }
       }
 
+      ######## ERROR TYPE : SYSTEM / NETWORK ########
       # No HTTP response
       else {
         # Analyzes message to distinguish a network breakdown from a script bug
