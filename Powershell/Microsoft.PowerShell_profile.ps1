@@ -32,7 +32,7 @@ Set-PSReadLineOption -PredictionViewStyle ListView
 # HELPERS #
 #---------#
 
-########## Get help ##########
+##########---------- Get help ----------##########
 function help {
   $scriptInfo = Get-ScriptInfo
   $FileName = $scriptInfo.FileName
@@ -75,7 +75,7 @@ function help {
   }
 }
 
-########## Get custom aliases ##########
+##########---------- Get custom aliases ----------##########
 function custom_alias {
   $scriptInfo = Get-ScriptInfo
   $ScriptPath = $scriptInfo.Path
@@ -116,7 +116,7 @@ function custom_alias {
   }
 }
 
-########## Get custom functions ##########
+##########---------- Get custom functions ----------##########
 function custom_function {
   $scriptInfo = Get-ScriptInfo
   $ScriptPath = $scriptInfo.Path
@@ -174,20 +174,20 @@ function custom_function {
 # FUNCTIONS #
 #-----------#
 
-########## Clear ##########
+##########---------- Clear ----------##########
 function c {
   clear
 }
 
-########## Display the current directory path ##########
+##########----------Display current directory path ----------##########
 function path {
   Write-Host ""
   $currentPath = Get-Location
   Write-Host $currentPath -ForegroundColor DarkMagenta
 }
 
-########## Navigate to the specified folder passed as a parameter ##########
-########## Or returns to parent directory if no paramater is specified ##########
+##########---------- Navigate to specified folder passed as a parameter ----------##########
+##########---------- Or returns to parent directory if no paramater ----------##########
 function z {
   param (
     [string]$folder
@@ -212,7 +212,7 @@ function z {
   }
 }
 
-# Docker
+##########---------- Docker ----------##########
 function dc {
   docker-compose up --build
 }
@@ -229,7 +229,7 @@ function dl {
   docker compose logs -f
 }
 
-########## Create a file ##########
+##########---------- Create a file ----------##########
 function touch {
   param (
     [string]$path
@@ -245,7 +245,7 @@ function touch {
   }
 }
 
-########## Jump to a specific directory ##########
+##########---------- Jump to a specific directory ----------##########
 function go {
   param (
     [string]$location
@@ -340,13 +340,13 @@ function go {
   }
 }
 
-########## Find path of a specified command/executable ##########
+##########---------- Find path of a specified command/executable ----------##########
 function whereis ($comand) {
   Get-Command -Name $comand -ErrorAction SilentlyContinue |
   Select-Object -ExpandProperty Path -ErrorAction SilentlyContinue
 }
 
-########## Test GitHub SSH connection with GPG keys ##########
+##########---------- Test GitHub SSH connection with GPG keys ----------##########
 function ssh_github {
   param (
     [string]$hostname = "github.com",  # default host
@@ -368,7 +368,7 @@ function ssh_github {
   }
 }
 
-########## Display powershell colors in terminal ##########
+##########---------- Display powershell colors in terminal ----------##########
 function colors {
   $colors = [enum]::GetValues([System.ConsoleColor])
 
@@ -381,7 +381,7 @@ function colors {
   }
 }
 
-########## Update your local repositories ##########
+##########---------- Update your local repositories ----------##########
 function gpull {
   [CmdletBinding()]
   param (
@@ -389,13 +389,16 @@ function gpull {
     [switch]$RefreshCache
   )
 
+  ######## CACHE MANAGEMENT ########
   # If cache doesn't exist or if a refresh is forced
   if (-not $Global:GPullCache -or $RefreshCache) {
     Write-Host "🔄 Updating repositories informations... 🔄" -ForegroundColor Cyan
 
+    ######## DATA RETRIEVAL ########
     # Function is called only once
     $tempReposInfo = Get-RepositoriesInfo
 
+    ######## GUARD CLAUSE : INVALID CONFIGURATION ########
     # Validate result before caching it
     $functionNameMessage = "in Get-RepositoriesInfo function"
     if ($tempReposInfo -eq $null) {
@@ -411,6 +414,7 @@ function gpull {
     }
   }
 
+  ######## DATA RETRIEVAL ########
   # Retrieve repositories information from cache
   $reposInfo = $Global:GPullCache.ReposInfo
 
@@ -422,10 +426,12 @@ function gpull {
   # Tack if it's first tour
   $isFirstRepo = $true
 
+  ######## REPOSITORY ITERATION ########
   # Iterate over each repository in the defined order
   foreach ($repoName in $reposOrder) {
     $repoPath = $repos[$repoName]
 
+    ######## UI : SEPARATOR ########
     # Separator after each repository (except first)
     if (-not $isFirstRepo) {
       Write-Host ""
@@ -436,13 +442,12 @@ function gpull {
     }
     $isFirstRepo = $false
 
-    ######## GUARDS CLAUSES ########
-    # Check if path exists
+    ######## GUARD CLAUSE : PATH EXISTS ########
     if (-not (Test-LocalRepoExists -Path $repoPath -Name $repoName)) {
       continue
     }
 
-    # Check if it is a valid git repo
+    ######## GUARD CLAUSE : NOT A GIT REPO ########
     if (-not (Test-IsGitRepository -Path $repoPath -Name $repoName)) {
       continue
     }
@@ -450,6 +455,7 @@ function gpull {
     # Change current directory to repository path
     Set-Location -Path $repoPath
 
+    ######## GUARD CLAUSE : REMOTE MISMATCH ########
     # Check local remote matches GitHub info
     if (-not (Test-LocalRemoteMatch -UserName $username -RepoName $repoName)) {
       continue
@@ -461,6 +467,7 @@ function gpull {
     Write-Host " is on update process 🚀" -ForegroundColor Green
 
     try {
+      ######## API CHECK & FETCH ########
       # Check for remote repository existence using GitHub API with authentication token
       $repoUrl = "https://api.github.com/repos/$username/$repoName"
       $response = Invoke-RestMethod -Uri $repoUrl -Method Get -Headers @{ Authorization = "Bearer $token" } -ErrorAction Stop
@@ -474,51 +481,16 @@ function gpull {
       # Display date of last remote commit
       Show-LastCommitDate
 
-      # Check if fetch worked (Git/SSH authentication)
-      if ($LASTEXITCODE -ne 0) {
-        Write-Host -NoNewline "⚠️ "
-        Write-Host -NoNewline "`"Git Fetch`" failed ! " -ForegroundColor Red
-        Write-Host "Check your Git access credentials (SSH keys/Credential Manager)... ⚠️" -ForegroundColor Red
-
+      ######## GUARD CLAUSE : FETCH FAILED ########
+      if (-not (Test-GitFetchSuccess -ExitCode $LASTEXITCODE)) {
         $repoIsInSafeState = $false
 
-        # Move next repository
         continue
+        # Move next repository
       }
 
-      # Check for new remote branches
-      $allRemoteRefs = git for-each-ref --format="%(refname:short)" refs/remotes | Where-Object { $_ -notmatch '/HEAD$' }
-      $allLocalBranches = git for-each-ref --format="%(refname:short)" refs/heads
-
-      # List to store new branches to track
-      $newBranchesToTrack = @()
-
-      # Find remote branches that aren't tracked locally
-      foreach ($remoteRef in $allRemoteRefs) {
-        if ($remoteRef -match '^[^/]+/(.+)$') {
-          $localEquivalent = $Matches[1]
-
-          # Ignore hotfix and release branches
-          $prefixesToIgnore = @('hotfix/', 'release/')
-          $shouldIgnore = $false
-
-          # Check each prefix to ignore
-          foreach ($prefix in $prefixesToIgnore) {
-            # Check if branch name begins with a prefix to ignore
-            if ($localEquivalent.StartsWith($prefix, [System.StringComparison]::OrdinalIgnoreCase)) {
-              $shouldIgnore = $true
-
-              # No point in continuing to search, exit loop
-              break
-            }
-          }
-
-          # If local branch doesn't exist and not ignored, add it to list
-          if (($localEquivalent -notin $allLocalBranches) -and (-not $shouldIgnore)) {
-            $newBranchesToTrack += $remoteRef
-          }
-        }
-      }
+      ######## DETECT NEW BRANCHES ########
+      $newBranchesToTrack = Get-NewRemoteBranches
 
       # Interactively track new remote branches
       if ($newBranchesToTrack) {
@@ -1027,7 +999,7 @@ function gpull {
 #------------------------------#
 # GIT PULL UTILITIES FUNCTIONS #
 #------------------------------#
-########## Display a separator line with custom length and colors ##########
+##########---------- Display a separator line with custom length and colors ----------##########
 function Show-Separator {
   param (
     [Parameter(Mandatory=$true)]
@@ -1043,26 +1015,31 @@ function Show-Separator {
     [switch]$NoNewline
   )
 
-  # Create line
+  ######## DATA PREPARATION ########
+  # Create line string based on requested length
   $line = "─" * $Length
 
-  # If background color
+  ######## GUARD CLAUSE : WITH BACKGROUND COLOR ########
+  # If a background color is specified, handle it specific way and exit
   if ($PSBoundParameters.ContainsKey('BackgroundColor')) {
     Write-Host -NoNewline:$NoNewline $line -ForegroundColor $ForegroundColor -BackgroundColor $BackgroundColor
+    return
   }
-  # If not
-  else {
-    Write-Host -NoNewline:$NoNewline $line -ForegroundColor $ForegroundColor
-  }
+
+  ######## STANDARD DISPLAY ########
+  # Otherwise (default behavior), display with foreground color only
+  Write-Host -NoNewline:$NoNewline $line -ForegroundColor $ForegroundColor
 }
 
-########## Check if folder is a valid git repository ##########
+##########---------- Check if folder is a valid git repository ----------##########
 function Test-IsGitRepository {
   param (
     [string]$Name,
     [string]$Path
   )
 
+  ######## GUARD CLAUSE : MISSING .GIT FOLDER ########
+  # Check if the .git hidden folder exists inside the target path
   if (-not (Test-Path -Path "$Path\.git")) {
     Write-Host -NoNewline "⛔ Local folder " -ForegroundColor Red
     Write-Host -NoNewline "$Name" -ForegroundColor White -BackgroundColor Magenta
@@ -1073,16 +1050,19 @@ function Test-IsGitRepository {
     return $false
   }
 
+  ######## RETURN SUCCESS ########
   return $true
 }
 
-########## Check if local repository path exists ##########
+##########---------- Check if local repository path exists ----------##########
 function Test-LocalRepoExists {
   param (
     [string]$Name,
     [string]$Path
   )
 
+  ######## GUARD CLAUSE : PATH NOT FOUND ########
+  # Check if the path variable is defined AND if the folder exists on disk
   if (-not ($Path -and (Test-Path -Path $Path))) {
     Write-Host -NoNewline "⚠️ Local repository path for " -ForegroundColor Red
     Write-Host -NoNewline "$Name" -ForegroundColor White -BackgroundColor Magenta
@@ -1093,17 +1073,23 @@ function Test-LocalRepoExists {
     return $false
   }
 
+  ######## RETURN SUCCESS ########
   return $true
 }
 
-########## Check if local remote matches expected GitHub URL ##########
+##########---------- Check if local remote matches expected GitHub URL ----------##########
 function Test-LocalRemoteMatch {
   param (
     [string]$RepoName,
     [string]$UserName
   )
 
+  ######## DATA RETRIEVAL ########
+  # Retrieve the fetch URL for 'origin'
   $localRemoteUrl = (git remote get-url origin 2>$null)
+
+  ######## GUARD CLAUSE : URL MISMATCH ########
+  # Check if the local remote URL corresponds to the expected GitHub project
   if (-not ($localRemoteUrl -match "$UserName/$RepoName")) {
     Write-Host -NoNewline "⚠️ Original local remote " -ForegroundColor Red
     Write-Host -NoNewline "$localRemoteUrl" -ForegroundColor Magenta
@@ -1116,17 +1102,88 @@ function Test-LocalRemoteMatch {
     return $false
   }
 
+  ######## RETURN SUCCESS ########
   return $true
 }
 
-########## Show last commit date regardless of branch ##########
+##########---------- Check if git fetch succeeded ----------##########
+function Test-GitFetchSuccess {
+  param ([int]$ExitCode)
+
+  ######## GUARD CLAUSE : FETCH FAILED ########
+  # Check if the exit code indicates an error (non-zero)
+  if ($ExitCode -ne 0) {
+    Write-Host -NoNewline "⚠️ "
+    Write-Host -NoNewline "'Git fetch' failed ! Check your Git access credentials (SSH keys/Credential Manager)... ⚠️" -ForegroundColor Red
+
+    return $false
+  }
+
+  ######## RETURN SUCCESS ########
+  return $true
+}
+
+##########---------- Calculate new remote branches to track ----------##########
+function Get-NewRemoteBranches {
+  ######## DATA RETRIEVAL ########
+  # Get all remote branches (excluding HEAD) and local branches
+  $allRemoteRefs = git for-each-ref --format="%(refname:short)" refs/remotes | Where-Object { $_ -notmatch '/HEAD$' }
+  $allLocalBranches = git for-each-ref --format="%(refname:short)" refs/heads
+
+  # List to store new branches to track
+  $branchesFound = @()
+
+  ######## PROCESSING LOOP ########
+  # Iterate through remote branches to find those not tracked locally
+  foreach ($remoteRef in $allRemoteRefs) {
+
+    # Extract local name from remote ref (ex: "origin/feature/x" -> "feature/x")
+    if ($remoteRef -match '^[^/]+/(.+)$') {
+      $localEquivalent = $Matches[1]
+
+      ######## GUARD CLAUSE : IGNORED PREFIXES ########
+      # Define prefixes to exclude (Hotfix and Release)
+      $prefixesToIgnore = @('hotfix/', 'release/')
+      $shouldIgnore = $false
+
+      # Check each prefix to ignore
+      foreach ($prefix in $prefixesToIgnore) {
+        # Check if branch name begins with a prefix to ignore
+        if ($localEquivalent.StartsWith($prefix, [System.StringComparison]::OrdinalIgnoreCase)) {
+          $shouldIgnore = $true
+
+          # No point in continuing to search, exit loop
+          break
+        }
+      }
+
+      # If branch matches an ignored prefix, skip to next iteration
+      if ($isIgnored) {
+        continue
+      }
+
+      ######## GUARD CLAUSE : ALREADY TRACKED ########
+      # If the branch already exists locally, skip it
+      if ($localEquivalent -in $allLocalBranches) {
+        continue
+      }
+
+      ######## ADD TO SELECTION ########
+      # If we are here, strictly valid (Not ignored AND Not already local)
+      $branchesFound += $remoteRef
+    }
+  }
+
+  return $branchesFound
+}
+
+##########---------- Show last commit date regardless of branch ----------##########
 function Show-LastCommitDate {
   ######## DATA RETRIEVAL ########
-
   # Retrieve all remote branches sorted by date
   $allRefs = git for-each-ref --sort=-committerdate refs/remotes --format="%(refname:short) %(committerdate:iso-strict)" 2>$null
 
-  ######## GUARD CLAUSES ########
+  ######## GUARD CLAUSE : NO REFS RETRIEVED ########
   # Check if we got a result
   if ([string]::IsNullOrWhiteSpace($allRefs)) {
     return
@@ -1138,7 +1195,7 @@ function Show-LastCommitDate {
     ($_ -notmatch '/HEAD\s') -and ($_ -match '/')
   } | Select-Object -First 1
 
-  ######## GUARD CLAUSES ########
+  ######## GUARD CLAUSE : NO MATCHING BRANCH ########
   if ([string]::IsNullOrWhiteSpace($lastCommitInfo)) {
     return
   }
@@ -1146,6 +1203,7 @@ function Show-LastCommitDate {
   # Separate the chain into two
   $parts = $lastCommitInfo -split ' ', 2
 
+  ######## GUARD CLAUSE : DATA INTEGRITY FAIL ########
   # Check data integrity (must have Branch + Date)
   if ($parts.Length -ne 2) {
     return
@@ -1179,7 +1237,7 @@ function Show-LastCommitDate {
   }
 }
 
-########## Get and show latest commit message ##########
+##########---------- Get and show latest commit message ----------##########
 function Show-LatestCommitMessage {
   param (
     [string]$LocalBranch,
@@ -1187,22 +1245,23 @@ function Show-LatestCommitMessage {
     [switch]$HideHashes
   )
 
-  ######## GUARDS CLAUSES ########
+  ######## DATA RETRIEVAL ########
   # Get HASH HEAD
   $localHash  = git rev-parse $LocalBranch 2>$null
   $remoteHash = git rev-parse $RemoteBranch 2>$null
 
-  # Check if references are valid
+  ######## GUARD CLAUSE : INVALID REFERENCES ########
   if (-not $localHash -or -not $remoteHash) {
     Write-Host "⚠️ Unable to read local/remote references ! ⚠️" -ForegroundColor Red
-    $isLocalBehind  = git merge-base --is-ancestor $localHash $remoteHash 2>$null
 
     return
   }
 
-  # Divergence detection (detect rebase/push --force)
+  ######## DATA ANALYSIS : ANCESTRY ########
+  $isLocalBehind  = git merge-base --is-ancestor $localHash $remoteHash 2>$null
   $isRemoteBehind = git merge-base --is-ancestor $remoteHash $localHash 2>$null
 
+  # Divergence detection (detect rebase/push --force)
   if (-not $isLocalBehind -and -not $isRemoteBehind) {
     Write-Host "⚠️ History rewritten or divergence detected... A pull can trigger a rebase or a reset ! ⚠️" -ForegroundColor Red
   }
@@ -1213,10 +1272,15 @@ function Show-LatestCommitMessage {
   # Normalisation : string → array
   $newCommits = @()
   if ($raw) {
-    if ($raw -is [string]) { $newCommits = @($raw) }
-    else { $newCommits = $raw }
+    if ($raw -is [string]) {
+      $newCommits = @($raw)
+    }
+    else {
+      $newCommits = $raw
+    }
   }
 
+  ######## GUARD CLAUSE : NO COMMITS VISIBLE ########
   # If no commits
   if ($newCommits.Count -eq 0) {
     if ($isLocalBehind) {
@@ -1235,7 +1299,7 @@ function Show-LatestCommitMessage {
     }
   }
 
-  ######## PROCESSING / DISPLAY ########
+  ######## GUARD CLAUSE : SINGLE COMMIT ########
   # One commit
   if ($newCommits.Count -eq 1) {
     Write-Host -NoNewline "Commit message : " -ForegroundColor Magenta
@@ -1243,6 +1307,7 @@ function Show-LatestCommitMessage {
     return
   }
 
+  ######## DISPLAY MULTIPLE COMMITS ########
   # Several commits
   Write-Host "New commits received :" -ForegroundColor Magenta
   foreach ($commit in $newCommits) {
@@ -1250,24 +1315,34 @@ function Show-LatestCommitMessage {
   }
 }
 
-########## Check for unmerged commits in main from dev ##########
+##########---------- Check for unmerged commits in main from dev ----------##########
 function Show-MergeAdvice {
-  ######## GUARDS CLAUSES ########
-  # Main branch exists
+  ######## DATA RETRIEVAL ########
+  # Identify main branch (main or master)
   $mainBranch = if (git branch --list "main") { "main" }
                 elseif (git branch --list "master") { "master" }
                 else { $null }
+
+  ######## GUARD CLAUSE : MAIN BRANCH NOT FOUND ########
+  # Check if a valid main branch exists
   if (-not $mainBranch) { return }
 
-  # Dev branch exists
+  ######## DATA RETRIEVAL ########
+  # Identify dev branch (develop or dev)
   $devBranch = if (git branch --list "develop") { "develop" }
               elseif (git branch --list "dev") { "dev" }
               else { $null }
+
+  ######## GUARD CLAUSE : DEV BRANCH NOT FOUND ########
+  # Check if a valid dev branch exists
   if (-not $devBranch) { return }
 
+  ######## DATA RETRIEVAL ########
+  # Check for commits in Dev that are not in Main
   $unmergedCommits = git log "$mainBranch..$devBranch" --oneline -q 2>$null
 
-  # If everything is already merged (empty result), exit
+  ######## GUARD CLAUSE : ALREADY MERGED ########
+  # If result is empty, everything is merged, so we exit
   if (-not $unmergedCommits) { return }
 
   ######## SHOW ADVICE ########
@@ -1277,7 +1352,7 @@ function Show-MergeAdvice {
   Write-Host ". Think about merging ! ℹ️" -ForegroundColor DarkYellow
 }
 
-########## Restore user to original branch ##########
+##########---------- Restore user to original branch ----------##########
 function Restore-UserLocation {
   param (
     [bool]$RepoIsSafe,
@@ -1285,19 +1360,21 @@ function Restore-UserLocation {
     [bool]$OriginalWasDeleted
   )
 
-  ######## GUARDS CLAUSES ########
-  # Repository isn't in a safe mode
+  ######## GUARD CLAUSE : UNSAFE REPO STATE ########
+  # Repository isn't in a safe mode, cannot switch branches safely
   if (-not $RepoIsSafe) {
     Write-Host "⚠️ Repo is in an unstable state. Can't return to the branch where you were ! ⚠️" -ForegroundColor Red
     return
   }
 
-  # Original branch was removed during cleaning
+  ######## GUARD CLAUSE : ORIGINAL BRANCH DELETED ########
+  # Original branch was removed during cleaning, switch to a fallback branch
   if ($OriginalWasDeleted) {
     Write-Host -NoNewline "⚡ Original branch " -ForegroundColor Magenta
     Write-Host -NoNewline "$OriginalBranch" -ForegroundColor Red
     Write-Host " has been deleted..." -ForegroundColor Magenta
 
+    # Determine fallback branch priority
     $fallbackBranch = if (git branch --list "develop") { "develop" }
                       elseif (git branch --list "dev") { "dev" }
                       elseif (git branch --list "main") { "main" }
@@ -1311,9 +1388,11 @@ function Restore-UserLocation {
     return
   }
 
+  ######## DATA RETRIEVAL ########
   # Retrieves branch on which script finished its work
   $currentBranch = git rev-parse --abbrev-ref HEAD
 
+  ######## GUARD CLAUSE : ALREADY ON TARGET ########
   # If we are already on original branch, we do nothing and we say nothing
   if ($currentBranch -eq $OriginalBranch) {
     return
@@ -1327,43 +1406,9 @@ function Restore-UserLocation {
   Write-Host "$OriginalBranch" -ForegroundColor Red
 }
 
-########## Dictionary of functions and their objectives ##########
-function Get-GoalFunctionsDictionary {
-  $goalFunctions = @{
-    colors = "Display powershell colors in terminal"
-    custom_alias = "Get custom aliases"
-    custom_function  = "Get custom functions"
-    dc = "Create containers and launch thems"
-    gpull = "Update all your local repositories"
-    go = "Jump to a specific directory"
-    help = "Get help"
-    path = "Display the current directory path"
-    ssh_github = "Test GitHub SSH connection with GPG keys"
-    touch = "Create a file"
-    whereis = "Find path of a specified command/executable"
-    z = "Go specified folder / returns parent directory"
-  }
-  return $goalFunctions
-}
-
-########## Get script path and name ##########
-function Get-ScriptInfo {
-  param (
-    [string]$FileName = "Microsoft.PowerShell_profile.ps1",
-    [string]$ScriptPath = "$HOME\Documents\PowerShell\Microsoft.PowerShell_profile.ps1"
-  )
-
-  # Display script path
-  Write-Host ""
-  Write-Host "ScriptPath: " -ForegroundColor DarkGray -NoNewline
-  Write-Host "$ScriptPath" -ForegroundColor DarkMagenta
-  Write-Host ""
-
-  return @{ Path = $ScriptPath; FileName = $FileName }
-}
-
-########## Get local repositories information ##########
+##########---------- Get local repositories information ----------##########
 function Get-RepositoriesInfo {
+  ######## DATA DEFINITION ########
   # GitHub username
   $gitHubUsername = $env:GITHUB_USERNAME
 
@@ -1412,11 +1457,11 @@ function Get-RepositoriesInfo {
     "Soutenances"            = "$env:USERPROFILE\Desktop\Soutenances"
   }
 
-  ######## GUARDS CLAUSES ########
+  # Error message templates
   $envVarMessageTemplate = "Check/add {0} and its value in your Windows Environment Variables..."
   $functionNameMessage = "in Get-RepositoriesInfo function !"
 
-  # Username check
+  ######## GUARD CLAUSE : MISSING USERNAME ########
   if ([string]::IsNullOrWhiteSpace($gitHubUsername)) {
     Write-Host "❌ GitHub username is missing or invalid ! ❌" -ForegroundColor Red
 
@@ -1425,7 +1470,7 @@ function Get-RepositoriesInfo {
     return $null
   }
 
-  # Token check
+  ######## GUARD CLAUSE : MISSING TOKEN ########
   if ([string]::IsNullOrWhiteSpace($gitHubToken)) {
     Write-Host "❌ GitHub token is missing or invalid ! ❌" -ForegroundColor Red
 
@@ -1434,20 +1479,21 @@ function Get-RepositoriesInfo {
     return $null
   }
 
-  # Order array check
+  ######## GUARD CLAUSE : EMPTY ORDER LIST ########
   if (-not $reposOrder -or $reposOrder.Count -eq 0) {
     Write-Host "❌ Local array repo order is empty ! ❌" -ForegroundColor Red
     Write-Host "ℹ️ Define at least one repository in the repository order array $functionNameMessage" -ForegroundColor Yellow
     return $null
   }
 
-  # Path dictionary check
+  ######## GUARD CLAUSE : EMPTY PATH DICTIONARY ########
   if (-not $repos -or $repos.Keys.Count -eq 0) {
     Write-Host "❌ Local repository dictionary is empty ! ❌" -ForegroundColor Red
     Write-Host "ℹ️ Ensure repository dictionary contains at least one reference with a valid path $functionNameMessage" -ForegroundColor Yellow
     return $null
   }
 
+  ######## RETURN SUCCESS ########
   # All is fine
   Write-Host "✔️ GitHub configuration and projects are ok ✔️" -ForegroundColor Green
   Show-Separator -Length 80 -ForegroundColor DarkBlue
@@ -1459,4 +1505,43 @@ function Get-RepositoriesInfo {
     Order = $reposOrder
     Paths = $repos
   }
+}
+
+
+#---------------------#
+# UTILITIES FUNCTIONS #
+#---------------------#
+##########---------- Dictionary of functions and their objectives ----------##########
+function Get-GoalFunctionsDictionary {
+  $goalFunctions = @{
+    colors = "Display powershell colors in terminal"
+    custom_alias = "Get custom aliases"
+    custom_function  = "Get custom functions"
+    dc = "Create containers and launch thems"
+    gpull = "Update all your local repositories"
+    go = "Jump to a specific directory"
+    help = "Get help"
+    path = "Display the current directory path"
+    ssh_github = "Test GitHub SSH connection with GPG keys"
+    touch = "Create a file"
+    whereis = "Find path of a specified command/executable"
+    z = "Go specified folder / returns parent directory"
+  }
+  return $goalFunctions
+}
+
+##########---------- Get script path and name ----------##########
+function Get-ScriptInfo {
+  param (
+    [string]$FileName = "Microsoft.PowerShell_profile.ps1",
+    [string]$ScriptPath = "$HOME\Documents\PowerShell\Microsoft.PowerShell_profile.ps1"
+  )
+
+  # Display script path
+  Write-Host ""
+  Write-Host "ScriptPath: " -ForegroundColor DarkGray -NoNewline
+  Write-Host "$ScriptPath" -ForegroundColor DarkMagenta
+  Write-Host ""
+
+  return @{ Path = $ScriptPath; FileName = $FileName }
 }
