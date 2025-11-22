@@ -568,73 +568,15 @@ function gpull {
       [bool]$originalBranchWasDeleted = $false
 
       ######## CLEANUP : ORPHANED BRANCHES ########
-      # Clean branches that no longer exist on remote
+      # Ask to clean branches that no longer exist on remote
       if (Invoke-OrphanedCleanup -OriginalBranch $originalBranch) {
         $originalBranchWasDeleted = $true
       }
 
-      # Integration branches to check
-      $integrationBranches = @("main", "master", "develop", "dev")
-
-      # Use hash table to collect merged branches (avoids duplicates)
-      $allMergedBranches = @{}
-
-      foreach ($intBranch in $integrationBranches) {
-        # Check if integration branch exists locally
-        if (git branch --list $intBranch) {
-          # Get merged branches into this branch
-          $branchesMergedIntoThisOne = git branch --merged $intBranch | ForEach-Object { $_.Trim() }
-
-          # Add them to list
-          foreach ($branch in $branchesMergedIntoThisOne) {
-            $allMergedBranches[$branch] = $true
-          }
-        }
-      }
-
-      # Filter list to keep only branches that can be cleaned
-      $mergedBranchesToClean = $allMergedBranches.Keys | Where-Object {
-        ( $_ -ne $originalBranch ) -and ( -not ($protectedBranches -icontains $_) )
-      }
-
-      # Remove integration branches from list
-      if ($mergedBranchesToClean.Count -gt 0) {
-        # Cleaning up merged branches
-        Write-Host "🧹 Cleaning up branches that have already being merged..." -ForegroundColor DarkYellow
-
-        foreach ($merged in $mergedBranchesToClean.Keys) {
-          # Ask user
-          Write-Host -NoNewline "Branch " -ForegroundColor Magenta
-          Write-Host -NoNewline "$merged" -ForegroundColor Red
-          Write-Host -NoNewline " is already merged. Delete ? (Y/n): " -ForegroundColor Magenta
-
-          $choice = Read-Host
-          if ($choice -match '^(Y|y|yes|^)$') {
-            Write-Host -NoNewline "👉 Removal of " -ForegroundColor Magenta
-            Write-Host -NoNewline "$merged" -ForegroundColor Red
-            Write-Host " branch..." -ForegroundColor Magenta
-
-            # Secure removal (guaranteed to work because --merged)
-            git branch -d $merged *> $null
-
-            # Check if deletion worked
-            if ($LASTEXITCODE -eq 0) {
-              Write-Host -NoNewline "$merged" -ForegroundColor Red
-              Write-Host " successfully deleted ✅" -ForegroundColor Green
-
-              # Check if original branch has been deleted
-              if ($merged -eq $originalBranch) {
-                # Mark original branch as deleted
-                $originalBranchWasDeleted = $true
-              }
-            }
-            # If deletion failed
-            else {
-              Write-Host -NoNewline "⚠️ Unexpected error. Failure to remove " -ForegroundColor Red
-              Write-Host "$orphaned ⚠️" -ForegroundColor Magenta
-            }
-          }
-        }
+      ######## CLEANUP : MERGED BRANCHES ########
+      # Ask to clean branches that are already merged into main/dev
+      if (Invoke-MergedCleanup -OriginalBranch $originalBranch) {
+        $originalBranchWasDeleted = $true
       }
 
       ######## WORKFLOW INFO ########
@@ -1533,6 +1475,87 @@ function Invoke-OrphanedCleanup {
           Write-Host -NoNewline "$orphaned" -ForegroundColor Magenta
           Write-Host " kept 👍" -ForegroundColor Green
         }
+      }
+    }
+  }
+
+  return $originalWasDeleted
+}
+
+##########---------- Interactive cleanup of fully merged branches ----------##########
+function Invoke-MergedCleanup {
+  param (
+    [string]$OriginalBranch
+  )
+
+  ######## DATA RETRIEVAL ########
+  # Define integration branches to check against
+  $integrationBranches = @("main", "master", "develop", "dev")
+
+  # Define protected branches (never delete these)
+  $protectedBranches   = @("dev", "develop", "main", "master")
+
+  # Use hash table to collect merged branches (avoids duplicates if merged in both dev and main)
+  $allMergedBranches = @{}
+
+  foreach ($intBranch in $integrationBranches) {
+    # Check if integration branch exists locally
+    if (git branch --list $intBranch) {
+      # Get branches merged into this integration branch
+      git branch --merged $intBranch | ForEach-Object {
+        $branchName = $_.Trim()
+        $allMergedBranches[$branchName] = $true
+      }
+    }
+  }
+
+  ######## FILTERING ########
+  # Filter list to keep only branches that can be cleaned (not current and not protected ones)
+  $branchesToClean = $allMergedBranches.Keys | Where-Object {
+    ($_ -ne $OriginalBranch) -and (-not ($protectedBranches -icontains $_))
+  }
+
+  ######## GUARD CLAUSE : NOTHING TO CLEAN ########
+  if (-not $branchesToClean -or $branchesToClean.Count -eq 0) {
+    # Original branch was NOT deleted
+    return $false
+  }
+
+  Write-Host "🧹 Cleaning up branches that have already being merged..." -ForegroundColor DarkYellow
+
+  $originalWasDeleted = $false
+
+  ######## INTERACTIVE CLEANUP LOOP ########
+  foreach ($merged in $branchesToClean) {
+    # Ask user
+    Write-Host -NoNewline "Branch " -ForegroundColor Magenta
+    Write-Host -NoNewline "$merged" -ForegroundColor Red
+    Write-Host -NoNewline " is already merged. Delete ? (Y/n): " -ForegroundColor Magenta
+
+    $choice = Read-Host
+    if ($choice -match '^(Y|y|yes|^)$') {
+      Write-Host -NoNewline "👉 Removal of " -ForegroundColor Magenta
+      Write-Host -NoNewline "$merged" -ForegroundColor Red
+      Write-Host " branch..." -ForegroundColor Magenta
+
+      # Secure removal (guaranteed to work because we checked --merged)
+      git branch -d $merged *> $null
+
+      # Check if deletion worked
+      if ($LASTEXITCODE -eq 0) {
+        Write-Host -NoNewline "$merged" -ForegroundColor Red
+        Write-Host " successfully deleted ✅" -ForegroundColor Green
+
+        # Check if original branch has been deleted
+        if ($merged -eq $OriginalBranch) {
+          # Mark original branch as deleted
+          $originalWasDeleted = $true
+        }
+      }
+      # If deletion failed
+      else {
+        Write-Host -NoNewline "⚠️ Unexpected error. Failure to remove " -ForegroundColor Red
+        Write-Host "$merged ⚠️" -ForegroundColor Magenta
       }
     }
   }
