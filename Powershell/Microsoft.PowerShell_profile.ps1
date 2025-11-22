@@ -601,15 +601,15 @@ function gpull {
       }
 
       ######## UI : PRE-CALCULATION ########
-      $mergeWillTalk   = Show-MergeAdvice -DryRun
-      $restoreWillTalk = Restore-UserLocation -RepoIsSafe $repoIsInSafeState `
+      $mergeWillDisplayMessage   = Show-MergeAdvice -DryRun
+      $restoreWillDisplayMessage = Restore-UserLocation -RepoIsSafe $repoIsInSafeState `
                                               -OriginalBranch $originalBranch `
                                               -OriginalWasDeleted $originalBranchWasDeleted `
                                               -DryRun
 
       ######## SEPARATOR MANAGEMENT ########
       # If one OR other
-      if ($mergeWillTalk -or $restoreWillTalk) {
+      if ($mergeWillDisplayMessage -or $restoreWillDisplayMessage) {
         Show-Separator -Length 80 -ForegroundColor DarkGray
       }
 
@@ -1591,7 +1591,10 @@ function Show-MergeAdvice {
                 else { $null }
 
   ######## GUARD CLAUSE : MAIN BRANCH NOT FOUND ########
-  if (-not $mainBranch) { return $false }
+  if (-not $mainBranch) {
+    if ($DryRun) { return $false }
+    return
+  }
 
   ######## DEV BRANCH DATA RETRIEVAL ########
   # Identify dev branch (develop or dev)
@@ -1600,7 +1603,9 @@ function Show-MergeAdvice {
               else { $null }
 
   ######## GUARD CLAUSE : DEV BRANCH NOT FOUND ########
-  if (-not $devBranch) { return $false }
+  if (-not $devBranch) {
+    if ($DryRun) { return $false }
+  }
 
   ######## LOGIC CHECK ########
   # Check for commits in Dev that are not in Main
