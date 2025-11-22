@@ -520,92 +520,28 @@ function gpull {
       ######## UPDATE LOOP ########
       # Iterate over each branch found to pull updates from remote
       foreach ($branch in $sortedBranchesToUpdate) {
-        # Checkout to branch
-        git checkout $branch.Local *> $null
-
-        Write-Host -NoNewline "Inspecting branch " -ForegroundColor Cyan
-        Write-Host "$($branch.Local)" -ForegroundColor Magenta
-
-        # Check if checkout worked
-        if ($LASTEXITCODE -ne 0) {
-          Write-Host "⚠️ "
-          Write-Host -NoNewline "Could not checkout " -ForegroundColor Magenta
-          Write-Host -NoNewline "$($branch.Local)" -ForegroundColor Red
-          Write-Host " !!!" -ForegroundColor Magenta
-
-          Write-Host -NoNewline "Blocked by local changes on " -ForegroundColor Magenta
-          Write-Host -NoNewline "$originalBranch" -ForegroundColor Red
-          Write-Host ". Halting updates for this repo" -ForegroundColor Magenta
-
-          # Marks repository as an unstable state
+        ######## GUARD CLAUSE : CHECKOUT ########
+        if (-not (Invoke-SafeCheckout -TargetBranch $branch.Local -OriginalBranch $originalBranch)) {
           $repoIsInSafeState = $false
-
-          # Exit loop, no need to continue processing this repository
           break
         }
 
-        # Check for local (stagged/unstaged) changes
-        $unstagedChanges = git diff --name-only --quiet
-        $stagedChanges = git diff --cached --name-only --quiet
-
-        # If local changes, skip pull
-        if ($unstagedChanges -or $stagedChanges) {
-          Write-Host -NoNewline "󰨈  Conflict detected on" -ForegroundColor Red
-          Write-Host -NoNewline "$($branch.Local)" -ForegroundColor Magenta
-          Write-Host -NoNewline " , this branch has local changes. Pull avoided... 󰨈" -ForegroundColor Red
-          Write-Host "Affected files =>" -ForegroundColor DarkCyan
-
-          # List affected files
-          if ($unstagedChanges) {
-            Write-Host "Unstaged affected files =>" -ForegroundColor DarkCyan
-            foreach ($file in $unstagedChanges) {
-              Write-Host " $file" -ForegroundColor DarkCyan
-            }
-          }
-          # List staged files
-          if ($stagedChanges) {
-            Write-Host "Staged affected files =>" -ForegroundColor DarkCyan
-            foreach ($file in $stagedChanges) {
-              Write-Host " $file" -ForegroundColor DarkCyan
-            }
-          }
-          Show-Separator -Length 80 -ForegroundColor DarkGray
-
-          # Skip to next branch
+        ######## GUARD CLAUSE : LOCAL CONFLICTS ########
+        if (-not (Test-WorkingTreeClean -BranchName $branch.Local)) {
           continue
         }
 
-        # Check if branch has local commits that doesn't exist on remote branch
-        $unpushedCommits = git log "@{u}..HEAD" --oneline -q 2>$null
-        if ($unpushedCommits) {
-          Write-Host -NoNewline "⚠️ Branch ahead => " -ForegroundColor Red
-          Write-Host -NoNewline "$($branch.Local)" -ForegroundColor Magenta
-          Write-Host " has unpushed commits. Pull avoided to prevent a merge ⚠️" -ForegroundColor Red
-          Show-Separator -Length 80 -ForegroundColor DarkGray
-
-          # Skip to next branch
+        ######## GUARD CLAUSE : UNPUSHED COMMITS ########
+        if (Test-UnpushedCommits -BranchName $branch.Local) {
           continue
         }
 
-        # Compare local and remote commits
-        $localCommit = git rev-parse $branch.Local
-        $remoteCommit = (git rev-parse $branch.Remote -q 2>$null)
-        # If remote commit doesn't exist, skip branch
-        if (-not $remoteCommit) {
-          # Skip to next branch
+        ######## GUARD CLAUSE : ALREADY UP-TO-DATE ########
+        if (Test-IsUpToDate -LocalBranch $branch.Local -RemoteBranch $branch.Remote) {
           continue
         }
 
-        # If commits are the same, branch is up to date
-        if ($localCommit -eq $remoteCommit) {
-          Write-Host -NoNewline "$($branch.Local)" -ForegroundColor Red
-          Write-Host " is already updated ✅" -ForegroundColor Green
-          Show-Separator -Length 80 -ForegroundColor DarkGray
-
-          # Skip to next branch
-          continue
-        }
-
+        ######## PULL PROCESS ########
         # If we get here, a branch needs a pull
         $anyBranchNeededPull = $true
 
@@ -974,14 +910,14 @@ function Get-RepositoriesInfo {
   ######## GUARD CLAUSE : EMPTY ORDER LIST ########
   if (-not $reposOrder -or $reposOrder.Count -eq 0) {
     Write-Host "❌ Local array repo order is empty ! ❌" -ForegroundColor Red
-    Write-Host "ℹ️ Define at least one repository in the repository order array $functionNameMessage" -ForegroundColor Yellow
+    Write-Host "ℹ️ Define at least one repository in the repository order array $functionNameMessage" -ForegroundColor DarkYellow
     return $null
   }
 
   ######## GUARD CLAUSE : EMPTY PATH DICTIONARY ########
   if (-not $repos -or $repos.Keys.Count -eq 0) {
     Write-Host "❌ Local repository dictionary is empty ! ❌" -ForegroundColor Red
-    Write-Host "ℹ️ Ensure repository dictionary contains at least one reference with a valid path $functionNameMessage" -ForegroundColor Yellow
+    Write-Host "ℹ️ Ensure repository dictionary contains at least one reference with a valid path $functionNameMessage" -ForegroundColor DarkYellow
     return $null
   }
 
@@ -1290,6 +1226,129 @@ function Get-SortedBranches {
   ######## MERGE & RETURN ########
   # Combine lists in the desired order
   return $mainList + $devList + $otherList
+}
+
+##########---------- Try to checkout branch, handle errors ----------##########
+function Invoke-SafeCheckout {
+  param (
+    [string]$TargetBranch,
+    [string]$OriginalBranch
+  )
+
+  ######## CHECKOUT ACTION ########
+  git checkout $TargetBranch *> $null
+
+  ######## GUARD CLAUSE : CHECKOUT FAILED ########
+  if ($LASTEXITCODE -ne 0) {
+    Write-Host "⚠️ "
+    Write-Host -NoNewline "Could not checkout " -ForegroundColor Magenta
+    Write-Host -NoNewline "$TargetBranch" -ForegroundColor Red
+    Write-Host " !!! ⚠️" -ForegroundColor Magenta
+
+    Write-Host -NoNewline "ℹ️ Blocked by local changes on " -ForegroundColor DarYellow
+    Write-Host -NoNewline "$OriginalBranch" -ForegroundColor Magenta
+    Write-Host ". Halting updates for this repository !" -ForegroundColor DarYellow
+
+    return $false
+  }
+
+  ######## SUCCESS FEEDBACK ########
+  Write-Host -NoNewline "Inspecting branch " -ForegroundColor Cyan
+  Write-Host "$TargetBranch" -ForegroundColor Magenta
+
+  return $true
+}
+
+##########---------- Check for local modifications (Staged/Unstaged) ----------##########
+function Test-WorkingTreeClean {
+  param (
+    [string]$BranchName
+  )
+
+  ######## DATA RETRIEVAL ########
+  $unstagedChanges = git diff --name-only --quiet
+  $stagedChanges   = git diff --cached --name-only --quiet
+
+  ######## GUARD CLAUSE : DIRTY TREE ########
+  if ($unstagedChanges -or $stagedChanges) {
+    Write-Host -NoNewline "󰨈  Conflict detected on " -ForegroundColor Red
+    Write-Host -NoNewline "$BranchName" -ForegroundColor Magenta
+    Write-Host -NoNewline " , this branch has local changes. Pull avoided... 󰨈" -ForegroundColor Red
+    Write-Host "Affected files =>" -ForegroundColor DarkCyan
+
+    # Display details logic
+    if ($unstagedChanges) {
+      Write-Host "Unstaged affected files =>" -ForegroundColor DarkCyan
+      git diff --name-only | ForEach-Object {
+        Write-Host " $_" -ForegroundColor DarkCyan
+      }
+    }
+    if ($stagedChanges) {
+      Write-Host "Staged affected files =>" -ForegroundColor DarkCyan
+      git diff --cached --name-only | ForEach-Object {
+        Write-Host " $_" -ForegroundColor DarkCyan
+      }
+    }
+    Show-Separator -Length 80 -ForegroundColor DarkGray
+
+    return $false
+  }
+
+  ######## RETURN SUCCESS ########
+  return $true
+}
+
+##########---------- Check if local branch has unpushed commits ----------##########
+function Test-UnpushedCommits {
+  param (
+    [string]$BranchName
+  )
+
+  ######## DATA RETRIEVAL ########
+  $unpushed = git log "@{u}..HEAD" --oneline -q 2>$null
+
+  ######## GUARD CLAUSE : BRANCH AHEAD ########
+  if ($unpushed) {
+    Write-Host -NoNewline "⚠️ Branch ahead => " -ForegroundColor Red
+    Write-Host -NoNewline "$BranchName" -ForegroundColor Magenta
+    Write-Host " has unpushed commits. Pull avoided to prevent a merge ! ⚠️" -ForegroundColor Red
+    Show-Separator -Length 80 -ForegroundColor DarkGray
+
+    return $true
+  }
+
+  ######## RETURN SUCCESS ########
+  return $false
+}
+
+##########---------- Check if local branch is already up to date ----------##########
+function Test-IsUpToDate {
+  param (
+    [string]$LocalBranch,
+    [string]$RemoteBranch
+  )
+
+  ######## DATA RETRIEVAL ########
+  $localCommit  = git rev-parse $LocalBranch
+  $remoteCommit = (git rev-parse $RemoteBranch -q 2>$null)
+
+  ######## GUARD CLAUSE : : REMOTE MISSING ########
+  # Consider "Up to date" to avoid pull errors, or handle separately
+  if (-not $remoteCommit) {
+    return $true
+  }
+
+  ######## GUARD CLAUSE : ALREADY SYNCED ########
+  if ($localCommit -eq $remoteCommit) {
+    Write-Host -NoNewline "$LocalBranch" -ForegroundColor Red
+    Write-Host " is already updated ✅" -ForegroundColor Green
+    Show-Separator -Length 80 -ForegroundColor DarkGray
+    return $true
+  }
+
+  ######## RETURN FAILURE ########
+  # Hashes are different, so it's not up to date
+  return $false
 }
 
 ##########---------- Show last commit date regardless of branch ----------##########
