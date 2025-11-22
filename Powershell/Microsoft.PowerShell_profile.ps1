@@ -739,7 +739,7 @@ function gpull {
           if ($choice -match '^(Y|y|yes|^)$') {
             Write-Host -NoNewline "⏳ Updating " -ForegroundColor Magenta
             Write-Host -NoNewline "$($branch.Local)" -ForegroundColor Red
-            Write-Host " ..." -ForegroundColor Magenta
+            Write-Host "..." -ForegroundColor Magenta
 
             git pull
 
@@ -753,7 +753,7 @@ function gpull {
           else {
             Write-Host -NoNewline "Skipping pull for " -ForegroundColor Magenta
             Write-Host -NoNewline "$($branch.Local)" -ForegroundColor Red
-            Write-Host " ..." -ForegroundColor Magenta
+            Write-Host "..." -ForegroundColor Magenta
 
             Show-Separator -Length 80 -ForegroundColor DarkGray
 
@@ -1365,10 +1365,10 @@ function Get-ScriptInfo {
 ########## Get local repositories information ##########
 function Get-RepositoriesInfo {
   # GitHub username
-  $gitHubUsername = "<YOUR GITUB USERNAME>"
+  $gitHubUsername = $env:GITHUB_USERNAME
 
   # GitHub token
-  $gitHubToken = "<YOUR PERSONAL TOKEN>"
+  $gitHubToken = $env:GITHUB_TOKEN
 
   # Array to define the order of repositories
   $reposOrder = @(
@@ -1413,38 +1413,44 @@ function Get-RepositoriesInfo {
   }
 
   ######## GUARDS CLAUSES ########
-  $functionNameMessage = "in Get-RepositoriesInfo function"
+  $envVarMessageTemplate = "Check/add {0} and its value in your Windows Environment Variables..."
+  $functionNameMessage = "in Get-RepositoriesInfo function !"
+
   # Username check
-  if (-not $gitHubUsername -or $gitHubUsername -match '^<YOUR GITHUB USERNAME>$') {
+  if ([string]::IsNullOrWhiteSpace($gitHubUsername)) {
     Write-Host "❌ GitHub username is missing or invalid ! ❌" -ForegroundColor Red
-    Write-Host "➡️ Specify your actual GitHub username $functionNameMessage" -ForegroundColor Yellow
+
+    $msg = $envVarMessageTemplate -f "'GITHUB_USERNAME'"
+    Write-Host "ℹ️ $msg" -ForegroundColor DarkYellow
     return $null
   }
 
   # Token check
-  if (-not $gitHubToken -or $gitHubToken -match '^<YOUR PERSONAL TOKEN>$') {
+  if ([string]::IsNullOrWhiteSpace($gitHubToken)) {
     Write-Host "❌ GitHub token is missing or invalid ! ❌" -ForegroundColor Red
-    Write-Host "➡️ Add a valid GitHub token $functionNameMessage" -ForegroundColor Yellow
+
+    $msg = $envVarMessageTemplate -f "'GITHUB_TOKEN'"
+    Write-Host "ℹ️ $msg" -ForegroundColor DarkYellow
     return $null
   }
 
-  # Array order check
+  # Order array check
   if (-not $reposOrder -or $reposOrder.Count -eq 0) {
     Write-Host "❌ Local array repo order is empty ! ❌" -ForegroundColor Red
-    Write-Host "➡️ Define at least one repository in the processing order $functionNameMessage" -ForegroundColor Yellow
+    Write-Host "ℹ️ Define at least one repository in the repository order array $functionNameMessage" -ForegroundColor Yellow
     return $null
   }
 
   # Path dictionary check
   if (-not $repos -or $repos.Keys.Count -eq 0) {
     Write-Host "❌ Local repository dictionary is empty ! ❌" -ForegroundColor Red
-    Write-Host "➡️ Ensure repository dictionary contains at least one reference with a valid path $functionNameMessage" -ForegroundColor Yellow
+    Write-Host "ℹ️ Ensure repository dictionary contains at least one reference with a valid path $functionNameMessage" -ForegroundColor Yellow
     return $null
   }
 
   # All is fine
   Write-Host "✔️ GitHub configuration and projects are ok ✔️" -ForegroundColor Green
-  Write-Host "------------------------------------------------------------------------------" -ForegroundColor DarkBlue
+  Show-Separator -Length 80 -ForegroundColor DarkBlue
   Write-Host ""
 
   return @{
