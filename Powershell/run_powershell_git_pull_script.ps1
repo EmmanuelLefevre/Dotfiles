@@ -2,7 +2,7 @@
 . "$env:USERPROFILE\Documents\PowerShell\Microsoft.PowerShell_profile.ps1"
 
 # Call function
-git_pull
+gpull
 
 # Close terminal
 Write-Host ""
