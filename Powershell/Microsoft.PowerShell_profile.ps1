@@ -419,9 +419,22 @@ function gpull {
   $username = $reposInfo.Username
   $token = $reposInfo.Token
 
+  # Tack if it's first tour
+  $isFirstRepo = $true
+
   # Iterate over each repository in the defined order
   foreach ($repoName in $reposOrder) {
     $repoPath = $repos[$repoName]
+
+    # Separator after each repository (except first)
+    if (-not $isFirstRepo) {
+      Write-Host ""
+      Write-Host -NoNewline "     " -ForegroundColor DarkGray
+      Show-Separator -NoNewline -Length 70 -ForegroundColor DarkGray -BackgroundColor Gray
+      Write-Host "     " -ForegroundColor DarkGray
+      Write-Host ""
+    }
+    $isFirstRepo = $false
 
     ######## GUARDS CLAUSES ########
     # Check if path exists
@@ -549,7 +562,7 @@ function gpull {
           }
         }
 
-        Write-Host "------------------------------------------------------------------------------" -ForegroundColor DarkGray
+        Show-Separator -Length 80 -ForegroundColor DarkGray
       }
 
       # Find all local branches that have a remote upstream
@@ -641,7 +654,7 @@ function gpull {
               Write-Host " $file" -ForegroundColor DarkCyan
             }
           }
-          Write-Host "------------------------------------------------------------------------------" -ForegroundColor DarkGray
+          Show-Separator -Length 80 -ForegroundColor DarkGray
 
           # Skip to next branch
           continue
@@ -653,7 +666,7 @@ function gpull {
           Write-Host -NoNewline "⚠️ Branch ahead => " -ForegroundColor Red
           Write-Host -NoNewline "$($branch.Local)" -ForegroundColor Magenta
           Write-Host " has unpushed commits. Pull avoided to prevent a merge ! ⚠️" -ForegroundColor Red
-          Write-Host "------------------------------------------------------------------------------" -ForegroundColor DarkGray
+          Show-Separator -Length 80 -ForegroundColor DarkGray
 
           # Skip to next branch
           continue
@@ -672,7 +685,7 @@ function gpull {
         if ($localCommit -eq $remoteCommit) {
           Write-Host -NoNewline "$($branch.Local)" -ForegroundColor Red
           Write-Host " is already updated ✅" -ForegroundColor Green
-          Write-Host "------------------------------------------------------------------------------" -ForegroundColor DarkGray
+          Show-Separator -Length 80 -ForegroundColor DarkGray
 
           # Skip to next branch
           continue
@@ -742,7 +755,7 @@ function gpull {
             Write-Host -NoNewline "$($branch.Local)" -ForegroundColor Red
             Write-Host " ..." -ForegroundColor Magenta
 
-            Write-Host "------------------------------------------------------------------------------" -ForegroundColor DarkGray
+            Show-Separator -Length 80 -ForegroundColor DarkGray
 
             # Reset pull success
             $pullSuccess = $null
@@ -753,7 +766,7 @@ function gpull {
         if ($pullSuccess -eq $true) {
           Write-Host -NoNewline "$($branch.Local)" -ForegroundColor Red
           Write-Host " successfully updated ✅" -ForegroundColor Green
-          Write-Host "------------------------------------------------------------------------------" -ForegroundColor DarkGray
+          Show-Separator -Length 80 -ForegroundColor DarkGray
         }
         # Check pull status for each not updated branch
         elseif ($pullSuccess -eq $false) {
@@ -1005,11 +1018,6 @@ function gpull {
       }
     }
 
-    # Line separator after each repository processing
-    Write-Host ""
-    Write-Host "------------------------------------------------------------------------------" -ForegroundColor DarkGray -BackgroundColor Gray
-    Write-Host ""
-
     # Return to home directory
     Set-Location -Path $HOME
   }
@@ -1019,6 +1027,35 @@ function gpull {
 #------------------------------#
 # GIT PULL UTILITIES FUNCTIONS #
 #------------------------------#
+########## Display a separator line with custom length and colors ##########
+function Show-Separator {
+  param (
+    [Parameter(Mandatory=$true)]
+    [int]$Length,
+
+    [Parameter(Mandatory=$true)]
+    [System.ConsoleColor]$ForegroundColor,
+
+    [Parameter(Mandatory=$false)]
+    [System.ConsoleColor]$BackgroundColor,
+
+    [Parameter(Mandatory=$false)]
+    [switch]$NoNewline
+  )
+
+  # Create line
+  $line = "─" * $Length
+
+  # If background color
+  if ($PSBoundParameters.ContainsKey('BackgroundColor')) {
+    Write-Host -NoNewline:$NoNewline $line -ForegroundColor $ForegroundColor -BackgroundColor $BackgroundColor
+  }
+  # If not
+  else {
+    Write-Host -NoNewline:$NoNewline $line -ForegroundColor $ForegroundColor
+  }
+}
+
 ########## Check if folder is a valid git repository ##########
 function Test-IsGitRepository {
   param (
@@ -1032,10 +1069,6 @@ function Test-IsGitRepository {
     Write-Host " found but it's NOT a git repository ⛔" -ForegroundColor Red
     Write-Host "Missing .git folder inside 👉 " -ForegroundColor DarkYellow
     Write-Host "$Path" -ForegroundColor Red
-
-    Write-Host ""
-    Write-Host "──────────────────────────────────────────────────────────────────────────────" -ForegroundColor DarkGray
-    Write-Host ""
 
     return $false
   }
@@ -1056,10 +1089,6 @@ function Test-LocalRepoExists {
     Write-Host " doesn't exist ⚠️" -ForegroundColor Red
     Write-Host "Path searched 👉 " -ForegroundColor DarkYellow
     Write-Host "$Path" -ForegroundColor Red
-
-    Write-Host ""
-    Write-Host "──────────────────────────────────────────────────────────────────────────────" -ForegroundColor DarkGray
-    Write-Host ""
 
     return $false
   }
@@ -1083,10 +1112,6 @@ function Test-LocalRemoteMatch {
     Write-Host -NoNewline "/" -ForegroundColor Red
     Write-Host -NoNewline "$RepoName" -ForegroundColor Magenta
     Write-Host "). Repository ignored ! ⚠️" -ForegroundColor Red
-
-    Write-Host ""
-    Write-Host "──────────────────────────────────────────────────────────────────────────────" -ForegroundColor DarkGray
-    Write-Host ""
 
     return $false
   }
@@ -1146,7 +1171,7 @@ function Show-LastCommitDate {
     Write-Host -NoNewline "$formattedDate" -ForegroundColor Cyan
     Write-Host -NoNewline " on " -ForegroundColor DarkYellow
     Write-Host "$branchName" -ForegroundColor Magenta
-    Write-Host "------------------------------------------------------------------------------" -ForegroundColor DarkGray
+    Show-Separator -Length 80 -ForegroundColor DarkGray
   }
   catch {
     # If date parsing fails, exit silently
