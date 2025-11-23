@@ -1145,8 +1145,10 @@ function Invoke-BranchUpdateStrategy {
 
     Write-Host -NoNewline "Pull ? (Y/n): " -ForegroundColor Magenta
 
-    $choice = Read-Host
-    if ($choice -match '^(Y|y|Yes|yes|YES|^)$') {
+    # Helper called for a robust response
+    $wantToPull = Wait-ForUserConfirmation
+
+    if ($wantToPull) {
       Write-Host -NoNewline "⏳ Updating " -ForegroundColor Magenta
       Write-Host -NoNewline "$LocalBranch" -ForegroundColor Red
       Write-Host "..." -ForegroundColor Magenta
@@ -1408,7 +1410,7 @@ function Invoke-NewBranchTracking {
 
       Write-Host -NoNewline "☁️ You don't want to pull " -ForegroundColor DarkYellow
       Write-Host -NoNewline "$localBranchName" -ForegroundColor Magenta
-      Write-Host ", perhaps because it is obsolete ?" -ForegroundColor DarkYellow
+      Write-Host ", perhaps because this branch is obsolete ?" -ForegroundColor DarkYellow
 
       ######## STEP 1 : REMOTE DELETION ########
       Write-Host -NoNewline "🗑️ Delete remote branch " -ForegroundColor Magenta
@@ -1448,13 +1450,13 @@ function Invoke-NewBranchTracking {
           }
         }
         else {
-          Write-Host -NoNewline "👍 Remote branch  " -ForegroundColor Green
+          Write-Host -NoNewline "👍 Remote branch " -ForegroundColor Green
           Write-Host -NoNewline "$localBranchName" -ForegroundColor Magenta
           Write-Host " kept 👍" -ForegroundColor Green
         }
       }
       else {
-        Write-Host -NoNewline "👍 Remote branch  " -ForegroundColor Green
+        Write-Host -NoNewline "👍 Remote branch " -ForegroundColor Green
         Write-Host -NoNewline "$localBranchName" -ForegroundColor Magenta
         Write-Host " kept 👍" -ForegroundColor Green
       }
@@ -1508,8 +1510,10 @@ function Invoke-OrphanedCleanup {
     Write-Host -NoNewline "$orphaned" -ForegroundColor Red
     Write-Host -NoNewline " ? (Y/n): " -ForegroundColor Magenta
 
-    $choice = Read-Host
-    if ($choice -match '^(Y|y|Yes|yes|YES|^)$') {
+    # Helper called for a robust response
+    $wantToDelete = Wait-ForUserConfirmation
+
+    if ($wantToDelete) {
       Write-Host -NoNewline "🔥 Removal of " -ForegroundColor Magenta
       Write-Host -NoNewline "$orphaned" -ForegroundColor Red
       Write-Host " branch..." -ForegroundColor Magenta
@@ -1535,8 +1539,10 @@ function Invoke-OrphanedCleanup {
         Write-Host -NoNewline "$orphaned" -ForegroundColor Red
         Write-Host -NoNewline " ? (Y/n): " -ForegroundColor Magenta
 
-        $forceChoice = Read-Host
-        if ($forceChoice -match '^(Y|y|Yes|yes|YES|^)$') {
+        # Helper called for a robust response
+        $wantToForce = Wait-ForUserConfirmation
+
+        if ($wantToForce) {
           # Forced removal
           git branch -D $orphaned *> $null
 
@@ -1558,7 +1564,7 @@ function Invoke-OrphanedCleanup {
         }
         # User refuses forced deletion
         else {
-          Write-Host -NoNewline "👍 Local branch  " -ForegroundColor Green
+          Write-Host -NoNewline "👍 Local branch " -ForegroundColor Green
           Write-Host -NoNewline "$orphaned" -ForegroundColor Magenta
           Write-Host " kept 👍" -ForegroundColor Green
         }
@@ -1627,8 +1633,10 @@ function Invoke-MergedCleanup {
     Write-Host -NoNewline "$merged" -ForegroundColor Red
     Write-Host -NoNewline " is already merged. 🗑️ Delete ? (Y/n): " -ForegroundColor Magenta
 
-    $choice = Read-Host
-    if ($choice -match '^(Y|y|Yes|yes|YES|^)$') {
+    # Helper called for a robust response
+    $wantToDelete = Wait-ForUserConfirmation
+
+    if ($wantToDelete) {
       Write-Host -NoNewline "🔥 Removal of " -ForegroundColor Magenta
       Write-Host -NoNewline "$merged" -ForegroundColor Red
       Write-Host " branch..." -ForegroundColor Magenta
