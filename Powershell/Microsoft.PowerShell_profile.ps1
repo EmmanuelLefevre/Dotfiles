@@ -423,7 +423,7 @@ function gpull {
   $username = $reposInfo.Username
   $token = $reposInfo.Token
 
-  # Tack if it's first tour
+  # Flag initialization
   $isFirstRepo = $true
 
   ######## REPOSITORY ITERATION ########
@@ -431,8 +431,8 @@ function gpull {
   foreach ($repoName in $reposOrder) {
     $repoPath = $repos[$repoName]
 
-    ######## UI : SEPARATOR ########
-    # Separator after each repository (except first)
+    ######## UI : SEPARATOR MANAGEMENT ########
+    # Display separator (except first)
     if (-not $isFirstRepo) {
       Write-Host ""
       Write-Host -NoNewline "     " -ForegroundColor DarkGray
@@ -440,6 +440,7 @@ function gpull {
       Write-Host "     " -ForegroundColor DarkGray
       Write-Host ""
     }
+    # Mark first loop is finished
     $isFirstRepo = $false
 
     ######## GUARD CLAUSE : PATH EXISTS ########
@@ -1341,11 +1342,10 @@ function Invoke-NewBranchTracking {
   # Branches that should NEVER be deleted remotely even if user doesn't track them
   $protectedBranches = @("dev", "develop", "main", "master")
 
-  ######## UI : START SEPARATOR ########
   Show-Separator -Length 80 -ForegroundColor DarkGray
 
   # Flag initialization
-  $isFirstPass = $true
+  $isFirstLoop = $true
 
   ######## USER INTERACTION LOOP ########
   foreach ($newBranchRef in $NewBranches) {
@@ -1353,13 +1353,13 @@ function Invoke-NewBranchTracking {
     $null = $newBranchRef -match '^[^/]+/(.+)$'
     $localBranchName = $Matches[1]
 
-    ######## SEPARATOR MANAGEMENT ########
-    # Display separator ONLY if not first pass
-    if (-not $isFirstPass) {
+    ######## UI : SEPARATOR MANAGEMENT ########
+    # Display separator (except first)
+    if (-not $isFirstLoop) {
       Show-Separator -Length 80 -ForegroundColor DarkGray
     }
-    # Mark that first pass is finished
-    $isFirstPass = $false
+    # Mark first loop is finished
+    $isFirstLoop = $false
 
     # Display Branch Found
     Write-Host -NoNewline "❤️ New remote branches found ❤️ =>" -ForegroundColor Blue
@@ -1496,7 +1496,6 @@ function Invoke-OrphanedCleanup {
     return $false
   }
 
-  ######## UI : START SEPARATOR ########
   Show-Separator -Length 80 -ForegroundColor DarkGray
 
   Write-Host "🧹 Cleaning up orphaned local branches..." -ForegroundColor DarkYellow
@@ -1505,6 +1504,19 @@ function Invoke-OrphanedCleanup {
 
   ######## INTERACTIVE CLEANUP LOOP ########
   foreach ($orphaned in $branchesToClean) {
+    # Check if this branch has stash files
+    $stashCheck = git stash list | Select-String -Pattern "On $orphaned:"
+
+    if ($stashCheck) {
+      Write-Host -NoNewline "⚠️ WARNING : There are stashes on branch $orphaned ⚠️" -ForegroundColor Red
+
+      $stashCheck | ForEach-Object {
+        Write-Host "   - $_" -ForegroundColor DarkYellow
+      }
+
+      Write-Host "   La suppression de la branche ne supprime pas le stash, mais vous perdrez le contexte." -ForegroundColor Gray
+    }
+
     # Ask user
     Write-Host -NoNewline "🗑️ Delete the orphaned local branch " -ForegroundColor Magenta
     Write-Host -NoNewline "$orphaned" -ForegroundColor Red
@@ -1619,7 +1631,6 @@ function Invoke-MergedCleanup {
     return $false
   }
 
-  ######## UI : START SEPARATOR ########
   Show-Separator -Length 80 -ForegroundColor DarkGray
 
   Write-Host "🧹 Cleaning up branches that have already being merged..." -ForegroundColor DarkYellow
