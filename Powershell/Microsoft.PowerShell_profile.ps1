@@ -424,10 +424,9 @@ function gpull {
 
     ######## GUARD CLAUSE : INVALID CONFIGURATION ########
     # Validate result before caching it
-    $functionNameMessage = "in Get-RepositoriesInfo function"
     if ($tempReposInfo -eq $null) {
       # Helper called to center message nicely
-      $msg = "⛔ Script stopped due to an invalid configuration $functionNameMessage ! ⛔"
+      $msg = "⛔ Script stopped due to an invalid configuration ! ⛔"
       $paddingStr = Get-CenteredPadding -RawMessage $msg
 
       # Display message
@@ -755,8 +754,8 @@ function Get-RepositoriesInfo {
   }
 
   # Error message templates
-  $envVarMessageTemplate = "Check/add {0} and its value in your Windows Environment Variables..."
-  $functionNameMessage = "in Get-RepositoriesInfo function !"
+  $envVarMessageTemplate = "Check {0} in Windows Environment Variables..."
+  $functionNameMessage = "in Get-RepositoriesInfo !"
 
   ######## GUARD CLAUSE : MISSING USERNAME ########
   if ([string]::IsNullOrWhiteSpace($gitHubUsername)) {
@@ -811,7 +810,7 @@ function Get-RepositoriesInfo {
     Write-Host $errMsg -ForegroundColor Red
 
     # Helper called to center info message nicely
-    $infoMsg = "ℹ️ Define at least one repository in the repository order array $functionNameMessage"
+    $infoMsg = "ℹ️ Define at least one repository $functionNameMessage (order array)"
     $paddingInfoStr = Get-CenteredPadding -RawMessage $infoMsg
 
     # Display info message
@@ -832,7 +831,7 @@ function Get-RepositoriesInfo {
     Write-Host $errMsg -ForegroundColor Red
 
     # Helper called to center info message nicely
-    $infoMsg = "ℹ️ Ensure repository dictionary contains at least one reference with a valid path $functionNameMessage"
+    $infoMsg = "ℹ️ Ensure repository dictionary has valid paths $functionNameMessage"
     $paddingInfoStr = Get-CenteredPadding -RawMessage $infoMsg
 
     # Display info message
@@ -890,6 +889,12 @@ function Get-RepoListToProcess {
 
   # Name not found
   else {
+    # Helper called to center message nicely
+    $msg = "⚠️ Repository `"$($TargetName)`" not found in your configuration list ! ⚠️"
+    $paddingStr = Get-CenteredPadding -RawMessage $msg
+
+    # Display message
+    Write-Host -NoNewline $paddingStr
     Write-Host -NoNewline "⚠️ Repository " -ForegroundColor Red
     Write-Host -NoNewline "`"$($TargetName)`"" -ForegroundColor Magenta
     Write-Host " not found in your configuration list ! ⚠️" -ForegroundColor Red
@@ -908,11 +913,19 @@ function Test-LocalRepoExists {
   ######## GUARD CLAUSE : PATH NOT FOUND ########
   # Check if the path variable is defined AND if the folder exists on disk
   if (-not ($Path -and (Test-Path -Path $Path))) {
+    # Helper called to center message nicely
+    $msg = "⚠️ Local repository path for $Name  doesn't exist ⚠️"
+    $paddingStr = Get-CenteredPadding -RawMessage $msg
+
+    # Display message
+    Write-Host -NoNewline $paddingStr
     Write-Host -NoNewline "⚠️ Local repository path for " -ForegroundColor Red
     Write-Host -NoNewline "$Name" -ForegroundColor White -BackgroundColor Magenta
     Write-Host " doesn't exist ⚠️" -ForegroundColor Red
+    Write-Host ""
+
     Write-Host "Path searched 👉 " -ForegroundColor DarkYellow
-    Write-Host "$Path" -ForegroundColor Red
+    Write-Host "$Path" -ForegroundColor DarkCyan
 
     return $false
   }
@@ -931,11 +944,19 @@ function Test-IsGitRepository {
   ######## GUARD CLAUSE : MISSING .GIT FOLDER ########
   # Check if the .git hidden folder exists inside the target path
   if (-not (Test-Path -Path "$Path\.git")) {
+    # Helper called to center message nicely
+    $msg = "⛔ Local folder $Name found but it's NOT a git repository ⛔"
+    $paddingStr = Get-CenteredPadding -RawMessage $msg
+
+    # Display message
+    Write-Host -NoNewline $paddingStr
     Write-Host -NoNewline "⛔ Local folder " -ForegroundColor Red
-    Write-Host -NoNewline "$Name" -ForegroundColor White -BackgroundColor Magenta
+    Write-Host -NoNewline "$Name" -ForegroundColor White -BackgroundColor DarkBlue
     Write-Host " found but it's NOT a git repository ⛔" -ForegroundColor Red
+    Write-Host ""
+
     Write-Host "Missing .git folder inside 👉 " -ForegroundColor DarkYellow
-    Write-Host "$Path" -ForegroundColor Red
+    Write-Host "$Path" -ForegroundColor DarkCyan
 
     return $false
   }
@@ -953,18 +974,56 @@ function Test-LocalRemoteMatch {
 
   ######## DATA RETRIEVAL ########
   # Retrieve the fetch URL for 'origin'
-  $localRemoteUrl = (git remote get-url origin 2>$null)
+  $rawUrl = (git remote get-url origin 2>$null)
+
+  ######## GUARD CLAUSE : NO REMOTE CONFIGURED ########
+  if ([string]::IsNullOrWhiteSpace($rawUrl)) {
+    # Helper called to center error message nicely
+    $errMsg = "⚠️ No remote 'origin' found for this repository ⚠️"
+    $paddingErrStr = Get-CenteredPadding -RawMessage $errMsg
+
+    # Display error message
+    Write-Host -NoNewline $paddingErrStr
+    Write-Host $errMsg -ForegroundColor Red
+
+    # Helper called to center info message nicely
+    $infoMsg = "ℹ️ Repository ignored !"
+    $paddingInfoStr = Get-CenteredPadding -RawMessage $infoMsg
+
+    # Helper called to center info message nicely
+    Write-Host -NoNewline $paddingInfoStr
+    Write-Host $infoMsg -ForegroundColor DarkYellow
+
+    return $false
+  }
 
   ######## GUARD CLAUSE : URL MISMATCH ########
+  # Clean up URL because we know it's not empty
+  $localRemoteUrl = $rawUrl.Trim()
+
   # Check if the local remote URL corresponds to the expected GitHub project
   if (-not ($localRemoteUrl -match "$UserName/$RepoName")) {
+    # Helper called to center error message nicely
+    $errMsg = "⚠️ Original local remote $localRemoteUrl doesn't match ($UserName/$RepoName) ⚠️"
+    $paddingErrStr = Get-CenteredPadding -RawMessage $errMsg
+
+    # Display error message
+    Write-Host -NoNewline $paddingErrStr
     Write-Host -NoNewline "⚠️ Original local remote " -ForegroundColor Red
     Write-Host -NoNewline "$localRemoteUrl" -ForegroundColor Magenta
     Write-Host -NoNewline " doesn't match (" -ForegroundColor Red
     Write-Host -NoNewline "$UserName" -ForegroundColor Magenta
     Write-Host -NoNewline "/" -ForegroundColor Red
     Write-Host -NoNewline "$RepoName" -ForegroundColor Magenta
-    Write-Host "). Repository ignored ! ⚠️" -ForegroundColor Red
+    Write-Host ") ⚠️" -ForegroundColor Red
+
+    # Helper called to center info message nicely
+    $InfoMsg = "ℹ️ Repository ignored !"
+    $paddingInfoStr = Get-CenteredPadding -RawMessage $InfoMsg
+
+    # Display info message
+    Write-Host -NoNewline $paddingInfoStr
+    Write-Host $InfoMsg -ForegroundColor DarkYellow
 
     return $false
   }
@@ -1159,17 +1218,15 @@ function Test-WorkingTreeClean {
     if ($unstagedChanges) {
       Write-Host "Unstaged affected files =>" -ForegroundColor DarkCyan
       git diff --name-only | ForEach-Object {
-        Write-Host " $_" -ForegroundColor DarkCyan
+        Write-Host "   $_" -ForegroundColor DarkCyan
       }
     }
     if ($stagedChanges) {
       Write-Host "Staged affected files =>" -ForegroundColor DarkCyan
       git diff --cached --name-only | ForEach-Object {
-        Write-Host " $_" -ForegroundColor DarkCyan
+        Write-Host "   $_" -ForegroundColor DarkCyan
       }
     }
-
-    Show-Separator -Length 80 -ForegroundColor DarkGray
 
     return $false
   }
@@ -1192,8 +1249,6 @@ function Test-UnpushedCommits {
     Write-Host -NoNewline "⚠️ Branch ahead => " -ForegroundColor Red
     Write-Host -NoNewline "$BranchName" -ForegroundColor Magenta
     Write-Host " has unpushed commits. Pull avoided to prevent a merge ! ⚠️" -ForegroundColor Red
-
-    Show-Separator -Length 80 -ForegroundColor DarkGray
 
     return $true
   }
@@ -1502,8 +1557,8 @@ function Invoke-NewBranchTracking {
     $isFirstLoop = $false
 
     # Display Branch Found
-    Write-Host -NoNewline "❤️ New remote branches found ❤️ =>" -ForegroundColor Blue
-    Write-Host "🦄 $localBranchName 🦄" -ForegroundColor DarkCyan
+    Write-Host -NoNewline "❤️ New remote branches found => " -ForegroundColor Blue
+    Write-Host "🦄 $localBranchName 🦄" -ForegroundColor Red
 
     # Get and show latest commit message
     $latestCommitMsg = git log -1 --format="%s" $newBranchRef 2>$null
@@ -1943,7 +1998,7 @@ function Show-StashWarning {
     Write-Host -NoNewline " ⚠️" -ForegroundColor Red
 
     $stashCheck | ForEach-Object {
-      Write-Host "    - $($_.Line.Trim())" -ForegroundColor DarkCyan
+      Write-Host "  - $($_.Line.Trim())" -ForegroundColor DarkCyan
     }
 
     Write-Host "ℹ️ Deleting branch doesn't delete stash but you will lose context of it" -ForegroundColor Magenta
@@ -2172,9 +2227,21 @@ function Get-CenteredPadding {
     [string]$RawMessage
   )
 
+  # Standard length in memory
+  $visualLength = $RawMessage.Length
+
+  # Range : U+2300 to U+23FF (Technical) and U+2600 to U+27BF (Symbols)
+  $emojiPattern = "[\u2300-\u23FF\u2600-\u27BF]"
+
+  # Count how many there are in message
+  $hiddenWidth = ([regex]::Matches($RawMessage, $emojiPattern)).Count
+
+  # Add this hidden width to the total length
+  $visualLength += $hiddenWidth
+
   # (Total Width - Message Length) / 2
   # [math]::Max(0, ...) => prevents crash if message is longer than 80 characters
-  $paddingCount = [math]::Max(0, [int](($TotalWidth - $RawMessage.Length) / 2))
+  $paddingCount = [math]::Max(0, [int](($TotalWidth - $visualLength) / 2))
 
   return " " * $paddingCount
 }
