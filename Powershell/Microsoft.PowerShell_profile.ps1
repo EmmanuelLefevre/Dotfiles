@@ -1,387 +1,43 @@
-#---------------#
-# PROMPT THEMES #
-#---------------#
+#--------------------------------------------------------------------------#
+#                           PROMPT THEMES                                  #
+#--------------------------------------------------------------------------#
+
 oh-my-posh init pwsh --config "$env:USERPROFILE/Documents/PowerShell/powershell_profile_darka.json" | Invoke-Expression
 
-#-------------------------------#
-# USE SECURITY PROTOCOL TLS 1.2 #
-#-------------------------------#
+
+#--------------------------------------------------------------------------#
+#                   USE SECURITY PROTOCOL TLS 1.2                          #
+#--------------------------------------------------------------------------#
+
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
-#---------#
-# ALIASES #
-#---------#
+
+#--------------------------------------------------------------------------#
+#                              ALIASES                                     #
+#--------------------------------------------------------------------------#
+
 Set-Alias ll ls
 Set-Alias neo nvim
 Set-Alias tt tree
 
 
-#---------#
-# MODULES #
-#---------#
+#--------------------------------------------------------------------------#
+#                              MODULES                                     #
+#--------------------------------------------------------------------------#
 
 ########## Terminal Icons ##########
 Import-Module Terminal-Icons
+
 ########## PSReadLine ##########
 Import-Module PSReadLine
 Set-PSReadLineKeyHandler -Key Tab -Function Complete
 Set-PSReadLineOption -PredictionViewStyle ListView
 
 
-#---------#
-# HELPERS #
-#---------#
+#--------------------------------------------------------------------------#
+#                   UPDATE YOUR LOCAL REPOSITORIES                         #
+#--------------------------------------------------------------------------#
 
-##########---------- Get help ----------##########
-function help {
-  $scriptInfo = Get-ScriptInfo
-  $FileName = $scriptInfo.FileName
-
-  # Dictionary of help alias with definition
-  $aliasHelp = @{
-    custom_alias = "List of custom aliases"
-    custom_function = "List of custom functions"
-  }
-
-  # Convert dictionary to array of objects
-  $aliasArray = @()
-  foreach ($key in $aliasHelp.Keys) {
-    $aliasArray += [PSCustomObject]@{
-      Alias      = $key
-      Definition = $aliasHelp[$key]
-      FileName   = $FileName
-    }
-  }
-
-  # Sort array by alias name
-  $sortedAliasArray = $aliasArray | Sort-Object Alias
-
-  # Check if any aliases were found and display them
-  if ($sortedAliasArray.Count -gt 0) {
-    # Display headers
-    Write-Host ("{0,-20} {1,-30} {2,-34}" -f "Alias", "Definition", "File Name") -ForegroundColor White -BackgroundColor DarkGray
-
-    # Display each alias informations
-    foreach ($alias in $sortedAliasArray) {
-      Write-Host -NoNewline ("{0,-21}" -f "$($alias.Alias)") -ForegroundColor DarkCyan
-      Write-Host -NoNewline ("{0,-31}" -f "$($alias.Definition)") -ForegroundColor DarkMagenta
-      Write-Host ("{0,-30}" -f " $($alias.FileName)") -ForegroundColor DarkYellow
-    }
-    Write-Host ""
-  }
-  else {
-    Write-Host ""
-    Write-Host "⚠️ No help aliases found in script ⚠️" -ForegroundColor Red
-  }
-}
-
-##########---------- Get custom aliases ----------##########
-function custom_alias {
-  $scriptInfo = Get-ScriptInfo
-  $ScriptPath = $scriptInfo.Path
-  $FileName = $scriptInfo.FileName
-
-  # Read file content
-  $fileContent = Get-Content -Path $ScriptPath
-
-  # Search aliases defined in file (Set-Alias)
-  $aliasLines = $fileContent | Where-Object { $_ -match 'Set-Alias' }
-
-  # Extract alias names and definitions
-  $customAliases = $aliasLines | ForEach-Object {
-    if ($_ -match 'Set-Alias\s+(\S+)\s+(\S+)') {
-      [PSCustomObject]@{
-        Name     = $matches[1]
-        Alias    = $matches[2]
-        FileName = $FileName
-      }
-    }
-  }
-
-  if ($customAliases) {
-    # Display headers
-    Write-Host ("{0,-10} {1,-14} {2,-34}" -f "Alias", "Command", "FileName") -ForegroundColor White -BackGroundColor DarkGray
-
-    # Display each alias informations
-    foreach ($alias in $customAliases) {
-      Write-Host -NoNewline ("{0,-11}" -f "$($alias.Name)") -ForegroundColor DarkCyan
-      Write-Host -NoNewline ("{0,-15}" -f "$($alias.Alias)") -ForegroundColor DarkMagenta
-      Write-Host ("{0,-40}" -f " $($alias.FileName)") -ForegroundColor DarkYellow
-    }
-    Write-Host ""
-  }
-  else {
-    Write-Host ""
-    Write-Host "⚠️ No custom aliases found in script ⚠️" -ForegroundColor Red
-  }
-}
-
-##########---------- Get custom functions ----------##########
-function custom_function {
-  $scriptInfo = Get-ScriptInfo
-  $ScriptPath = $scriptInfo.Path
-  $FileName = $scriptInfo.FileName
-
-  # Read file content
-  $fileContent = Get-Content -Path $ScriptPath
-
-  # Search functions defined in file (function keyword)
-  $functionLines = $fileContent | Where-Object { $_ -match 'function\s+\w+\s*\(?.*\)?' }
-
-  # Extract function names and definitions
-  $customFunctions = $functionLines | ForEach-Object {
-    if ($_ -match 'function\s+(\w+)\s*\(?.*\)?') {
-      [PSCustomObject]@{
-        Alias    = $matches[1]
-        FileName = $FileName
-      }
-    }
-  }
-
-  # List of names to exclude
-  $excludedFunctions = @("Complete", "Get", "keyword", "names", "objective", "with", "in")
-
-  # Filter custom functions to exclude those from the list
-  $customFunctions = $customFunctions | Where-Object { -not ($excludedFunctions -contains $_.Alias) }
-
-  # Sort functions alphabetically
-  $sortedFunctions = $customFunctions | Sort-Object -Property Alias
-
-  # Get function objective
-  $goals = Get-GoalFunctionsDictionary
-
-  if ($sortedFunctions) {
-    # Display headers
-    Write-Host ("{0,-18} {1,-50} {2,-34}" -f "Alias", "Definition", "FileName") -ForegroundColor White -BackGroundColor DarkGray
-
-    # Display each function with informations
-    foreach ($function in $sortedFunctions) {
-      Write-Host -NoNewline ("{0,-19}" -f "$($function.Alias)") -ForegroundColor DarkCyan
-      $goal = $goals[$function.Alias]
-      Write-Host -NoNewline ("{0,-51}" -f "$goal") -ForegroundColor DarkMagenta
-      Write-Host ("{0,-50}" -f " $($function.FileName)") -ForegroundColor DarkYellow
-    }
-    Write-Host ""
-  }
-  else {
-    Write-Host ""
-    Write-Host "⚠️ No custom functions found in script ⚠️" -ForegroundColor Red
-  }
-}
-
-
-#-----------#
-# FUNCTIONS #
-#-----------#
-
-##########---------- Clear ----------##########
-function c {
-  clear
-}
-
-##########----------Display current directory path ----------##########
-function path {
-  Write-Host ""
-  $currentPath = Get-Location
-  Write-Host $currentPath -ForegroundColor DarkMagenta
-}
-
-##########---------- Navigate to specified folder passed as a parameter ----------##########
-##########---------- Or returns to parent directory if no paramater ----------##########
-function z {
-  param (
-    [string]$folder
-  )
-
-  # If no parameter is specified, returns to parent directory
-  if (!$folder) {
-    Set-Location ..
-    return
-  }
-
-  # Resolve relative or absolute folder path
-  $path = Resolve-Path -Path $folder -ErrorAction SilentlyContinue
-
-  if ($path) {
-    Set-Location -Path $path
-  }
-  else {
-    Write-Host -NoNewline "⚠️ Folder " -ForegroundColor Red
-    Write-Host -NoNewline "$folder" -ForegroundColor Magenta
-    Write-Host " not found ⚠️" -ForegroundColor Red
-  }
-}
-
-##########---------- Docker ----------##########
-function dc {
-  docker-compose up --build
-}
-
-function dr {
-  docker rm -f $(docker ps -aq)
-  docker volume rm $(docker volume ls -q)
-  docker network prune -f
-  docker builder prune -af
-  docker rmi -f $(docker images -q)
-}
-
-function dl {
-  docker compose logs -f
-}
-
-##########---------- Create a file ----------##########
-function touch {
-  param (
-    [string]$path
-  )
-
-  # If file does not exist, create it
-  if (-not (Test-Path -Path $path)) {
-    New-Item -Path $path -ItemType File
-  }
-  # Display message if file already exists
-  else {
-    Write-Host "⚠️ File always exists ⚠️" -ForegroundColor Red
-  }
-}
-
-##########---------- Jump to a specific directory ----------##########
-function go {
-  param (
-    [string]$location
-  )
-
-  # Check if the argument is empty
-  if (-not $location) {
-    Write-Host "⚠️ Invalid option! Type 'go help' ⚠️" -ForegroundColor Red
-    return
-  }
-
-  # List of valid options and their corresponding paths
-  $validOptions = @(
-    @{ Name = "aw";        Path = "$HOME\Desktop\Projets\ArtiWave" },
-    @{ Name = "cours";     Path = "$HOME\Desktop\Cours" },
-    @{ Name = "docs";      Path = "$HOME\Documents\Documentations" },
-    @{ Name = "dotfiles";  Path = "$HOME\Desktop\Dotfiles" },
-    @{ Name = "dwld";      Path = "$HOME\Downloads" },
-    @{ Name = "eg";        Path = "$HOME\Desktop\Projets\EasyGarden" },
-    @{ Name = "el";        Path = "$HOME\Desktop\Projets\EmmanuelLefevre" },
-    @{ Name = "home";      Path = "$HOME" },
-    @{ Name = "mdimg";     Path = "$HOME\Desktop\MarkdownImg" },
-    @{ Name = "nvim";      Path = "$HOME\AppData\Local\nvim" },
-    @{ Name = "profile";   Path = "$HOME\Documents\PowerShell" },
-    @{ Name = "projets";   Path = "$HOME\Desktop\Projets" },
-    @{ Name = "replica";   Path = "$HOME\Desktop\Projets\ReplicaMysql" },
-    @{ Name = "help";      Path = "Available paths" }
-  )
-
-  # Check if the passed argument is valid
-  if ($validOptions.Name -notcontains $location) {
-    Write-Host "⚠️ Invalid argument! Type 'go help' ⚠️" -ForegroundColor Red
-    return
-  }
-
-  Switch ($location) {
-    "aw" {
-      Set-Location -Path "$HOME\Desktop\Projets\ArtiWave"
-    }
-    "cours" {
-      Set-Location -Path "$HOME\Desktop\Cours"
-    }
-    "docs" {
-      Set-Location -Path "$HOME\Documents\Documentations"
-    }
-    "dotfiles" {
-      Set-Location -Path "$HOME\Desktop\Dotfiles"
-    }
-    "dwld" {
-      Set-Location -Path "$HOME\Downloads"
-    }
-    "eg" {
-      Set-Location -Path "$HOME\Desktop\Projets\EasyGarden"
-    }
-    "el" {
-      Set-Location -Path "$HOME\Desktop\Projets\EmmanuelLefevre"
-    }
-    "home" {
-      Set-Location -Path "$HOME"
-    }
-    "mdimg" {
-      Set-Location -Path "$HOME\Desktop\MarkdownImg"
-    }
-    "nvim" {
-      Set-Location -Path "$HOME\AppData\Local\nvim"
-    }
-    "profile" {
-      Set-Location -Path "$HOME\Documents\PowerShell"
-    }
-    "projets" {
-      Set-Location -Path "$HOME\Desktop\Projets"
-    }
-    "replica" {
-      Set-Location -Path "$HOME\Desktop\Projets\ReplicaMySQL"
-    }
-    "help" {
-      # Create a table of valid options
-      Write-Host ""
-      Write-Host ("{0,-20} {1,-50}" -f "Alias", "Path Direction") -ForegroundColor White -BackgroundColor DarkGray
-
-      foreach ($option in $validOptions) {
-        if ($option.Name -ne "help") {
-          Write-Host -NoNewline ("{0,-21}" -f "$($option.Name)") -ForegroundColor DarkCyan
-          Write-Host ("{0,-50}" -f " $($option.Path)") -ForegroundColor DarkYellow
-        }
-      }
-      Write-Host ""
-    }
-    default {
-      Write-Host "⚠️ Error occurred! ⚠️" -ForegroundColor Red
-    }
-  }
-}
-
-##########---------- Find path of a specified command/executable ----------##########
-function whereis ($comand) {
-  Get-Command -Name $comand -ErrorAction SilentlyContinue |
-  Select-Object -ExpandProperty Path -ErrorAction SilentlyContinue
-}
-
-##########---------- Test GitHub SSH connection with GPG keys ----------##########
-function ssh_github {
-  param (
-    [string]$hostname = "github.com",  # default host
-    [int]$port = 22                    # default port for SSH
-  )
-  Write-Host "🚀 Launch SSH connection with GPG keys 🚀" -ForegroundColor Green
-  # Test connection to SSH server
-  $connection = Test-NetConnection -ComputerName $hostname -Port $port
-  if ($connection.TcpTestSucceeded) {
-    Write-Host "The SSH connection to $hostname is open on $port!" -ForegroundColor Green
-    & "C:\Windows\System32\OpenSSH\ssh.exe" -T git@github.com
-  }
-  else {
-    Write-Host -NoNewline "⚠️ Unable to connect to " -ForegroundColor Red
-    Write-Host -NoNewline "$hostname" -ForegroundColor Magenta
-    Write-Host -NoNewline " on port " -ForegroundColor Red
-    Write-Host -NoNewline "$port" -ForegroundColor Magenta
-    Write-Host "! ⚠️" -ForegroundColor Red
-  }
-}
-
-##########---------- Display powershell colors in terminal ----------##########
-function colors {
-  $colors = [enum]::GetValues([System.ConsoleColor])
-
-  Foreach ($bgcolor in $colors) {
-    Foreach ($fgcolor in $colors) {
-      Write-Host "$fgcolor|" -ForegroundColor $fgcolor -BackgroundColor $bgcolor -NoNewLine
-    }
-
-  Write-Host " on $bgcolor"
-  }
-}
-
-##########---------- Update your local repositories ----------##########
 function gpull {
   [CmdletBinding()]
   param (
@@ -462,50 +118,65 @@ function gpull {
   # Flag initialization
   $isFirstRepo = $true
 
+  # Init summary table list
+  $summaryTableList = @()
+
   ######## REPOSITORY ITERATION ########
   # Iterate over each repository in the defined order
   foreach ($repoName in $reposToProcess) {
     ######## START REPOSITORY TIMER ########
     $repoTimer = Start-OperationTimer
 
-    ######## DATA RETRIEVAL ########
-    $repoPath = $repos[$repoName]
-
-    ######## UI : SEPARATOR MANAGEMENT ########
-    # Display main separator (except first)
-    if (-not $isFirstRepo) {
-      Show-MainSeparator
-    }
-    # Mark first loop is finished
-    $isFirstRepo = $false
-
-    ######## GUARD CLAUSE : PATH EXISTS ########
-    if (-not (Test-LocalRepoExists -Path $repoPath -Name $repoName)) {
-      continue
-    }
-
-    ######## GUARD CLAUSE : NOT A GIT REPO ########
-    if (-not (Test-IsGitRepository -Path $repoPath -Name $repoName)) {
-      continue
-    }
-
-    # Change current directory to repository path
-    Set-Location -Path $repoPath
-
-    ######## GUARD CLAUSE : REMOTE MISMATCH ########
-    # Check local remote matches GitHub info
-    if (-not (Test-LocalRemoteMatch -UserName $username -RepoName $repoName)) {
-      continue
-    }
-
-    ######## MAIN PROCESS ########
-    # Show repository name being updated
-    Write-Host -NoNewline "🚀 "
-    Write-Host -NoNewline "$repoName" -ForegroundColor white -BackgroundColor DarkBlue
-    Write-Host " is on update process..." -ForegroundColor Green
+    ######## UPDATING SUMMARY TABLE STATUS ########
+    $summaryTableCurrentStatus = "Skipped"
 
     try {
-      ######## API CHECK & FETCH ########
+      ######## DATA SETUP ########
+      $repoPath = $repos[$repoName]
+
+      ######## UI : SEPARATOR MANAGEMENT ########
+      # Display main separator (except first)
+      if (-not $isFirstRepo) {
+        Show-MainSeparator
+      }
+      # Mark first loop is finished
+      $isFirstRepo = $false
+
+      ######## GUARD CLAUSE : PATH EXISTS ########
+      if (-not (Test-LocalRepoExists -Path $repoPath -Name $repoName)) {
+        $summaryTableCurrentStatus = "Failed"
+
+        # Go finally block (and after next repository)
+        continue
+      }
+
+      ######## GUARD CLAUSE : NOT A GIT REPO ########
+      if (-not (Test-IsGitRepository -Path $repoPath -Name $repoName)) {
+        $summaryTableCurrentStatus = "Ignored"
+
+        # Go finally block (and after next repository)
+        continue
+      }
+
+      # Change current directory to repository path
+      Set-Location -Path $repoPath
+
+      ######## GUARD CLAUSE : REMOTE MISMATCH ########
+      # Check local remote matches GitHub info
+      if (-not (Test-LocalRemoteMatch -UserName $username -RepoName $repoName)) {
+        $summaryTableCurrentStatus = "Ignored"
+
+        # Go finally block (and after next repository)
+        continue
+      }
+
+      ######## MAIN PROCESS ########
+      # Show repository name being updated
+      Write-Host -NoNewline "🚀 "
+      Write-Host -NoNewline "$repoName" -ForegroundColor white -BackgroundColor DarkBlue
+      Write-Host " is on update process..." -ForegroundColor Green
+
+      ######## API CALL ########
       # Check for remote repository existence using GitHub API with authentication token
       $repoUrl = "https://api.github.com/repos/$username/$repoName"
       $response = Invoke-RestMethod -Uri $repoUrl -Method Get -Headers @{ Authorization = "Bearer $token" } -ErrorAction Stop
@@ -522,9 +193,10 @@ function gpull {
       ######## GUARD CLAUSE : FETCH FAILED ########
       if (-not (Test-GitFetchSuccess -ExitCode $LASTEXITCODE)) {
         $repoIsInSafeState = $false
+        $summaryTableCurrentStatus = "Failed"
 
+        # Go finally block (and after next repository)
         continue
-        # Move next repository
       }
 
       ######## DATA RETRIEVAL : TRACKED BRANCHES ########
@@ -535,10 +207,14 @@ function gpull {
       # If no branch has an upstream defined, nothing to update or clean up
       if (-not $branchesToUpdate) {
         Write-Host "ℹ️ No upstream defined ! Nothing to update or clean up for this repository ! ℹ️" -ForegroundColor DarkYellow
+
+        $summaryTableCurrentStatus = "Ignored"
+
+        # Go finally block (and after next repository)
         continue
       }
 
-      ######## DATA PROCESSING : SORTING ########
+      ######## BRANCH PROCESSING : SORTING ########
       # Organize branches : Main -> Dev -> Others by alphabetical
       $sortedBranchesToUpdate = Get-SortedBranches -Branches $branchesToUpdate
 
@@ -552,6 +228,9 @@ function gpull {
       $branchCount = $sortedBranchesToUpdate.Count
       $i = 0
 
+      # Assume up-to-date until proven otherwise
+      $summaryTableCurrentStatus = "Already-Updated"
+
       ######## UPDATE LOOP ########
       # Iterate over each branch found to pull updates from remote
       foreach ($branch in $sortedBranchesToUpdate) {
@@ -559,22 +238,36 @@ function gpull {
         $i++
 
         ######## GUARD CLAUSE : CHECKOUT ########
-        if (-not (Invoke-SafeCheckout -TargetBranch $branch.Local -OriginalBranch $originalBranch)) {
+        if (-not (Invoke-SafeCheckout -TargetBranch $branch.Local`
+                                      -OriginalBranch $originalBranch)) {
           $repoIsInSafeState = $false
+          $summaryTableCurrentStatus = "Failed"
+
+          # Stop processing branches for this repo (fatal error)
           break
         }
 
         ######## GUARD CLAUSE : LOCAL CONFLICTS ########
         if (-not (Test-WorkingTreeClean -BranchName $branch.Local)) {
+          if ($summaryTableCurrentStatus -ne "Failed") {
+            $summaryTableCurrentStatus = "Skipped"
+          }
+
+          # Jump to next branch in list
           continue
         }
 
         ######## GUARD CLAUSE : UNPUSHED COMMITS ########
         if (Test-UnpushedCommits -BranchName $branch.Local) {
+          if ($summaryTableCurrentStatus -ne "Failed") {
+            $summaryTableCurrentStatus = "Skipped"
+          }
+
+          # Jump to next branch in list
           continue
         }
 
-        ######## GUARD CLAUSE : ALREADY UP-TO-DATE ########
+        ######## GUARD CLAUSE : ALREADY UPDATED ########
         if (Test-IsUpToDate -LocalBranch $branch.Local `
                             -RemoteBranch $branch.Remote) {
 
@@ -583,6 +276,7 @@ function gpull {
             Show-Separator -Length 80 -ForegroundColor DarkGray
           }
 
+          # Jump to next branch in list
           continue
         }
 
@@ -596,9 +290,18 @@ function gpull {
                                                     -RepoName $repoName
 
         ######## GUARD CLAUSE : UPDATE FAILED ########
-        # If update failed critically, mark repo as unsafe and stop
-        if ($updateStatus -eq 'Failed') {
+        # Update was successfull
+        if ($updateStatus -eq 'Success') {
+          if ($summaryTableCurrentStatus -ne "Failed" -and $summaryTableCurrentStatus -ne "Skipped") {
+            $summaryTableCurrentStatus = "Updated"
+          }
+        }
+        # Update failed
+        elseif ($updateStatus -eq 'Failed') {
+          $summaryTableCurrentStatus = "Failed"
           $repoIsInSafeState = $false
+
+          # Stop processing branches for this repo
           break
         }
 
@@ -608,58 +311,65 @@ function gpull {
         }
       }
 
-      ######## STATUS REPORT ########
-      # If no branch needed pull and there was more than one branch to check
-      if (($anyBranchNeededPull -eq $false) -and ($sortedBranchesToUpdate.Count -gt 1)) {
-        Show-Separator -Length 80 -ForegroundColor DarkGray
+      ######## POST-UPDATE ACTIONS (only if safe) ########
+      # We check this flag because if a checkout failed (break), we must NOT try to cleanup
+      if ($repoIsInSafeState) {
+        ######## STATUS REPORT ########
+        # If no branch needed pull and there was more than one branch to check
+        if (($anyBranchNeededPull -eq $false) -and ($sortedBranchesToUpdate.Count -gt 1)) {
+          Show-Separator -Length 80 -ForegroundColor DarkGray
 
-        Write-Host "All branches are being updated 🤙" -ForegroundColor Green
+          Write-Host "All branches are being updated 🤙" -ForegroundColor Green
+        }
+
+        ######## DETECT NEW BRANCHES ########
+        # Calculate which remote branches are missing locally
+        $newBranchesToTrack = Get-NewRemoteBranches
+
+        ######## USER PERMISSION TO PULL NEW BRANCHES ########
+        Invoke-NewBranchTracking -NewBranches $newBranchesToTrack
+
+        # Track whether user's branch has been deleted
+        [bool]$originalBranchWasDeleted = $false
+
+        ######## CLEANUP : ORPHANED BRANCHES ########
+        # Ask to clean branches that no longer exist on remote
+        if (Invoke-OrphanedCleanup -OriginalBranch $originalBranch) {
+          $originalBranchWasDeleted = $true
+        }
+
+        ######## CLEANUP : MERGED BRANCHES ########
+        # Ask to clean branches that are already merged into main/dev
+        if (Invoke-MergedCleanup -OriginalBranch $originalBranch) {
+          $originalBranchWasDeleted = $true
+        }
+
+        ######## UI : PRE-CALCULATION ########
+        $mergeWillDisplayMessage   = Show-MergeAdvice -DryRun
+        $restoreWillDisplayMessage = Restore-UserLocation -RepoIsSafe $repoIsInSafeState `
+                                                -OriginalBranch $originalBranch `
+                                                -OriginalWasDeleted $originalBranchWasDeleted `
+                                                -DryRun
+
+        ######## SEPARATOR MANAGEMENT ########
+        # If one OR other
+        if ($mergeWillDisplayMessage -or $restoreWillDisplayMessage) {
+          Show-Separator -Length 80 -ForegroundColor DarkGray
+        }
+
+        ######## WORKFLOW INFO ########
+        Show-MergeAdvice
+
+        ######## RETURN STRATEGY ########
+        Restore-UserLocation -OriginalBranch $originalBranch `
+                            -RepoIsSafe $repoIsInSafeState `
+                            -OriginalWasDeleted $originalBranchWasDeleted
       }
-
-      ######## DETECT NEW BRANCHES ########
-      # Calculate which remote branches are missing locally
-      $newBranchesToTrack = Get-NewRemoteBranches
-
-      ######## USER PERMISSION TO PULL NEW BRANCHES ########
-      Invoke-NewBranchTracking -NewBranches $newBranchesToTrack
-
-      # Track whether user's branch has been deleted
-      [bool]$originalBranchWasDeleted = $false
-
-      ######## CLEANUP : ORPHANED BRANCHES ########
-      # Ask to clean branches that no longer exist on remote
-      if (Invoke-OrphanedCleanup -OriginalBranch $originalBranch) {
-        $originalBranchWasDeleted = $true
-      }
-
-      ######## CLEANUP : MERGED BRANCHES ########
-      # Ask to clean branches that are already merged into main/dev
-      if (Invoke-MergedCleanup -OriginalBranch $originalBranch) {
-        $originalBranchWasDeleted = $true
-      }
-
-      ######## UI : PRE-CALCULATION ########
-      $mergeWillDisplayMessage   = Show-MergeAdvice -DryRun
-      $restoreWillDisplayMessage = Restore-UserLocation -RepoIsSafe $repoIsInSafeState `
-                                              -OriginalBranch $originalBranch `
-                                              -OriginalWasDeleted $originalBranchWasDeleted `
-                                              -DryRun
-
-      ######## SEPARATOR MANAGEMENT ########
-      # If one OR other
-      if ($mergeWillDisplayMessage -or $restoreWillDisplayMessage) {
-        Show-Separator -Length 80 -ForegroundColor DarkGray
-      }
-
-      ######## WORKFLOW INFO ########
-      Show-MergeAdvice
-
-      ######## RETURN STRATEGY ########
-      Restore-UserLocation -OriginalBranch $originalBranch `
-                          -RepoIsSafe $repoIsInSafeState `
-                          -OriginalWasDeleted $originalBranchWasDeleted
     }
     catch {
+      ######## UPDATING SUMMARY TABLE STATUS ########
+      $summaryTableCurrentStatus = "Failed"
+
       ######## ERROR CONTEXT ANALYSIS ########
       # Get HTTP response if exists (regardless of the error type)
       $responseError = $null
@@ -684,24 +394,49 @@ function gpull {
                                   -Message $_.Exception.Message
       }
     }
+    finally {
+      ######## STOP TIMER ########
+      $repoTimer.Stop()
+      $elapsed = $repoTimer.Elapsed
 
-    ######## STOP REPOSITORY TIMER & DISPLAY ########
-    Stop-OperationTimer -Watch $repoTimer -RepoName $repoName
+      ######## FORMAT TIME ########
+      $timeForTable = ""
+      # Less than a second (Milliseconds)
+      if ($elapsed.TotalSeconds -lt 1) {
+        $timeForTable = "$($elapsed.TotalMilliseconds.ToString("0"))ms"
+      }
+      # More than a minute (Minutes + Seconds)
+      elseif ($elapsed.TotalMinutes -ge 1) {
+        $timeForTable = "$($elapsed.ToString("mm'm 'ss's'"))"
+      }
+      # Between 1s and 59s (Seconds)
+      else {
+        $timeForTable = "$($elapsed.ToString("ss's'"))"
+      }
 
-    ######## RETURN HOME DIRECTORY ########
-    Set-Location -Path $HOME
+      ######## ADD TO SUMMARY TABLE ########
+      $summaryTableList += [PSCustomObject]@{ Repo=$repoName; Status=$summaryTableCurrentStatus; Time=$timeForTable }
+
+      ######## STOP REPOSITORY TIMER & DISPLAY ########
+      Stop-OperationTimer -Watch $repoTimer -RepoName $repoName
+
+      ######## RETURN HOME DIRECTORY ########
+      Set-Location -Path $HOME
+    }
   }
 
-  ######## STOP GLOBAL TIMER & DISPLAY ########
+  ######## STOP GLOBAL TIMER & DISPLAY SUMMARY TABLE ########
   if ($reposToProcess.Count -gt 1) {
+    Show-UpdateSummary -ReportData $summaryTableList
     Stop-OperationTimer -Watch $globalTimer -IsGlobal
   }
 }
 
 
-#------------------------------#
-# GIT PULL UTILITIES FUNCTIONS #
-#------------------------------#
+#--------------------------------------------------------------------------#
+#                        GIT PULL UTILITIES FUNCTIONS                      #
+#--------------------------------------------------------------------------#
+
 ##########---------- Get local repositories information ----------##########
 function Get-RepositoriesInfo {
   ######## DATA DEFINITION ########
@@ -1891,7 +1626,11 @@ function Show-MergeAdvice {
 
   ######## GUARD CLAUSE : DEV BRANCH NOT FOUND ########
   if (-not $devBranch) {
-    if ($DryRun) { return $false }
+    if ($DryRun) {
+      return $false
+    }
+
+    return
   }
 
   ######## LOGIC CHECK ########
@@ -2151,6 +1890,88 @@ function Show-MainSeparator {
   Write-Host ""
 }
 
+##########---------- Display update summary table ----------##########
+function Show-UpdateSummary {
+  param (
+    [array]$ReportData
+  )
+
+  # If no data, we don't do anything
+  if (-not $ReportData -or $ReportData.Count -eq 0) { return }
+
+  Show-MainSeparator
+
+  # Helper called to center table title nicely
+  $title = "📊 UPDATE SUMMARY REPORT 📊"
+  $padding = Get-CenteredPadding -RawMessage $title
+
+  # Display table title
+  Write-Host -NoNewline $padding
+  Write-Host $title -ForegroundColor Cyan
+  Write-Host ""
+
+  ######## TABLE CENTERING ########
+  $tableOuterPadding = " " * 8
+
+  # Headers (manual format for color control)
+  Write-Host -NoNewline $tableOuterPadding
+  Write-Host -NoNewline "Repository              " -ForegroundColor White -BackgroundColor DarkGray
+  Write-Host -NoNewline "         Status         " -ForegroundColor White -BackgroundColor DarkGray
+  Write-Host -NoNewline "    Duration    " -ForegroundColor White -BackgroundColor DarkGray
+  Write-Host ""
+
+  # Loop on results
+  foreach ($item in $ReportData) {
+    # Icon Definition + Color
+    $statusText = $item.Status
+    $statusColor = "White"
+
+    switch ($item.Status) {
+      "Updated"         { $statusText = "✅ Updated";         $statusColor = "Green" }
+      "Already-Updated" { $statusText = "✨ Already Updated"; $statusColor = "DarkCyan" }
+      "Skipped"         { $statusText = "⏩ Skipped";         $statusColor = "DarkYellow" }
+      "Ignored"         { $statusText = "🙈 Ignored";         $statusColor = "Magenta" }
+      "Failed"          { $statusText = "❌ Failed";          $statusColor = "Red" }
+    }
+
+    ######## STATUS CENTERING (Width 24) ########
+    $statLen = $statusText.Length
+    # Manual adjustment for emojis that count double on screen
+    if ($statusText -match "✅|✨|⏩|🙈|❌") {
+      $statLen += 1
+    }
+
+    $padStatLeft = [math]::Max(0, [int]((24 - $statLen) / 2))
+    $padStatStr = " " * $padStatLeft
+
+
+    ######## DURATION CENTERING (Width 16) ########
+    $timeLen = $item.Time.Length
+    $padTimeLeft = [math]::Max(0, [int]((16 - $timeLen) / 2))
+    $padTimeStr = " " * $padTimeLeft
+
+    ######## OVERALL MARGIN ########
+    Write-Host -NoNewline $tableOuterPadding
+
+    ######## COLUMN 1 (Width 24) ########
+    Write-Host -NoNewline ("{0,-24}" -f $item.Repo) -ForegroundColor Cyan
+
+    ######## COLUMN 2 (Width 24) ########
+    Write-Host -NoNewline $padStatStr
+    Write-Host -NoNewline $statusText -ForegroundColor $statusColor
+
+    # Calculating the remaining padding to align next column
+    $padStatRightLen = 24 - $padStatLeft - $statLen
+    if ($padStatRightLen -gt 0) {
+      Write-Host -NoNewline (" " * $padStatRightLen)
+    }
+
+    ######## COLUMN 3 (Width 16) ########
+    Write-Host -NoNewline $padTimeStr
+    Write-Host $item.Time -ForegroundColor Magenta
+  }
+}
+
 ##########---------- Start a stopwatch timer ----------##########
 function Start-OperationTimer {
   return [System.Diagnostics.Stopwatch]::StartNew()
@@ -2205,6 +2026,7 @@ function Stop-OperationTimer {
     $paddingStr = Get-CenteredPadding -RawMessage $msg
 
     # Display repository timer
+    Write-Host ""
     Write-Host -NoNewline $paddingStr
     Write-Host -NoNewline "⏱️ "
     Write-Host -NoNewline "$repoName" -ForegroundColor white -BackgroundColor DarkBlue
@@ -2240,9 +2062,10 @@ function Get-CenteredPadding {
 }
 
 
-#---------------------#
-# UTILITIES FUNCTIONS #
-#---------------------#
+#--------------------------------------------------------------------------#
+#                        UTILITIES FUNCTIONS                               #
+#--------------------------------------------------------------------------#
+
 ##########---------- Dictionary of functions and their objectives ----------##########
 function Get-GoalFunctionsDictionary {
   $goalFunctions = @{
@@ -2276,4 +2099,348 @@ function Get-ScriptInfo {
   Write-Host ""
 
   return @{ Path = $ScriptPath; FileName = $FileName }
+}
+
+##########---------- Get help ----------##########
+function help {
+  $scriptInfo = Get-ScriptInfo
+  $FileName = $scriptInfo.FileName
+
+  # Dictionary of help alias with definition
+  $aliasHelp = @{
+    custom_alias = "List of custom aliases"
+    custom_function = "List of custom functions"
+  }
+
+  # Convert dictionary to array of objects
+  $aliasArray = @()
+  foreach ($key in $aliasHelp.Keys) {
+    $aliasArray += [PSCustomObject]@{
+      Alias      = $key
+      Definition = $aliasHelp[$key]
+      FileName   = $FileName
+    }
+  }
+
+  # Sort array by alias name
+  $sortedAliasArray = $aliasArray | Sort-Object Alias
+
+  # Check if any aliases were found and display them
+  if ($sortedAliasArray.Count -gt 0) {
+    # Display headers
+    Write-Host ("{0,-20} {1,-30} {2,-34}" -f "Alias", "Definition", "File Name") -ForegroundColor White -BackgroundColor DarkGray
+
+    # Display each alias informations
+    foreach ($alias in $sortedAliasArray) {
+      Write-Host -NoNewline ("{0,-21}" -f "$($alias.Alias)") -ForegroundColor DarkCyan
+      Write-Host -NoNewline ("{0,-31}" -f "$($alias.Definition)") -ForegroundColor DarkMagenta
+      Write-Host ("{0,-30}" -f " $($alias.FileName)") -ForegroundColor DarkYellow
+    }
+    Write-Host ""
+  }
+  else {
+    Write-Host ""
+    Write-Host "⚠️ No help aliases found in script ⚠️" -ForegroundColor Red
+  }
+}
+
+##########---------- Get custom aliases ----------##########
+function custom_alias {
+  $scriptInfo = Get-ScriptInfo
+  $ScriptPath = $scriptInfo.Path
+  $FileName = $scriptInfo.FileName
+
+  # Read file content
+  $fileContent = Get-Content -Path $ScriptPath
+
+  # Search aliases defined in file (Set-Alias)
+  $aliasLines = $fileContent | Where-Object { $_ -match 'Set-Alias' }
+
+  # Extract alias names and definitions
+  $customAliases = $aliasLines | ForEach-Object {
+    if ($_ -match 'Set-Alias\s+(\S+)\s+(\S+)') {
+      [PSCustomObject]@{
+        Name     = $matches[1]
+        Alias    = $matches[2]
+        FileName = $FileName
+      }
+    }
+  }
+
+  if ($customAliases) {
+    # Display headers
+    Write-Host ("{0,-10} {1,-14} {2,-34}" -f "Alias", "Command", "FileName") -ForegroundColor White -BackGroundColor DarkGray
+
+    # Display each alias informations
+    foreach ($alias in $customAliases) {
+      Write-Host -NoNewline ("{0,-11}" -f "$($alias.Name)") -ForegroundColor DarkCyan
+      Write-Host -NoNewline ("{0,-15}" -f "$($alias.Alias)") -ForegroundColor DarkMagenta
+      Write-Host ("{0,-40}" -f " $($alias.FileName)") -ForegroundColor DarkYellow
+    }
+    Write-Host ""
+  }
+  else {
+    Write-Host ""
+    Write-Host "⚠️ No custom aliases found in script ⚠️" -ForegroundColor Red
+  }
+}
+
+##########---------- Get custom functions ----------##########
+function custom_function {
+  $scriptInfo = Get-ScriptInfo
+  $ScriptPath = $scriptInfo.Path
+  $FileName = $scriptInfo.FileName
+
+  # Read file content
+  $fileContent = Get-Content -Path $ScriptPath
+
+  # Search functions defined in file (function keyword)
+  $functionLines = $fileContent | Where-Object { $_ -match 'function\s+\w+\s*\(?.*\)?' }
+
+  # Extract function names and definitions
+  $customFunctions = $functionLines | ForEach-Object {
+    if ($_ -match 'function\s+(\w+)\s*\(?.*\)?') {
+      [PSCustomObject]@{
+        Alias    = $matches[1]
+        FileName = $FileName
+      }
+    }
+  }
+
+  # List of names to exclude
+  $excludedFunctions = @("Complete", "Get", "keyword", "names", "objective", "with", "in")
+
+  # Filter custom functions to exclude those from the list
+  $customFunctions = $customFunctions | Where-Object { -not ($excludedFunctions -contains $_.Alias) }
+
+  # Sort functions alphabetically
+  $sortedFunctions = $customFunctions | Sort-Object -Property Alias
+
+  # Get function objective
+  $goals = Get-GoalFunctionsDictionary
+
+  if ($sortedFunctions) {
+    # Display headers
+    Write-Host ("{0,-18} {1,-50} {2,-34}" -f "Alias", "Definition", "FileName") -ForegroundColor White -BackGroundColor DarkGray
+
+    # Display each function with informations
+    foreach ($function in $sortedFunctions) {
+      Write-Host -NoNewline ("{0,-19}" -f "$($function.Alias)") -ForegroundColor DarkCyan
+      $goal = $goals[$function.Alias]
+      Write-Host -NoNewline ("{0,-51}" -f "$goal") -ForegroundColor DarkMagenta
+      Write-Host ("{0,-50}" -f " $($function.FileName)") -ForegroundColor DarkYellow
+    }
+    Write-Host ""
+  }
+  else {
+    Write-Host ""
+    Write-Host "⚠️ No custom functions found in script ⚠️" -ForegroundColor Red
+  }
+}
+
+##########---------- Clear ----------##########
+function c {
+  clear
+}
+
+##########----------Display current directory path ----------##########
+function path {
+  Write-Host ""
+  $currentPath = Get-Location
+  Write-Host $currentPath -ForegroundColor DarkMagenta
+}
+
+##########---------- Navigate to specified folder passed as a parameter ----------##########
+##########---------- Or returns to parent directory if no paramater ----------##########
+function z {
+  param (
+    [string]$folder
+  )
+
+  # If no parameter is specified, returns to parent directory
+  if (!$folder) {
+    Set-Location ..
+    return
+  }
+
+  # Resolve relative or absolute folder path
+  $path = Resolve-Path -Path $folder -ErrorAction SilentlyContinue
+
+  if ($path) {
+    Set-Location -Path $path
+  }
+  else {
+    Write-Host -NoNewline "⚠️ Folder " -ForegroundColor Red
+    Write-Host -NoNewline "$folder" -ForegroundColor Magenta
+    Write-Host " not found ⚠️" -ForegroundColor Red
+  }
+}
+
+##########---------- Docker ----------##########
+function dc {
+  docker-compose up --build
+}
+
+function dr {
+  docker rm -f $(docker ps -aq)
+  docker volume rm $(docker volume ls -q)
+  docker network prune -f
+  docker builder prune -af
+  docker rmi -f $(docker images -q)
+}
+
+function dl {
+  docker compose logs -f
+}
+
+##########---------- Create a file ----------##########
+function touch {
+  param (
+    [string]$path
+  )
+
+  # If file does not exist, create it
+  if (-not (Test-Path -Path $path)) {
+    New-Item -Path $path -ItemType File
+  }
+  # Display message if file already exists
+  else {
+    Write-Host "⚠️ File always exists ⚠️" -ForegroundColor Red
+  }
+}
+
+##########---------- Jump to a specific directory ----------##########
+function go {
+  param (
+    [string]$location
+  )
+
+  # Check if the argument is empty
+  if (-not $location) {
+    Write-Host "⚠️ Invalid option! Type 'go help' ⚠️" -ForegroundColor Red
+    return
+  }
+
+  # List of valid options and their corresponding paths
+  $validOptions = @(
+    @{ Name = "aw";        Path = "$HOME\Desktop\Projets\ArtiWave" },
+    @{ Name = "cours";     Path = "$HOME\Desktop\Cours" },
+    @{ Name = "docs";      Path = "$HOME\Documents\Documentations" },
+    @{ Name = "dotfiles";  Path = "$HOME\Desktop\Dotfiles" },
+    @{ Name = "dwld";      Path = "$HOME\Downloads" },
+    @{ Name = "eg";        Path = "$HOME\Desktop\Projets\EasyGarden" },
+    @{ Name = "el";        Path = "$HOME\Desktop\Projets\EmmanuelLefevre" },
+    @{ Name = "home";      Path = "$HOME" },
+    @{ Name = "mdimg";     Path = "$HOME\Desktop\MarkdownImg" },
+    @{ Name = "nvim";      Path = "$HOME\AppData\Local\nvim" },
+    @{ Name = "profile";   Path = "$HOME\Documents\PowerShell" },
+    @{ Name = "projets";   Path = "$HOME\Desktop\Projets" },
+    @{ Name = "replica";   Path = "$HOME\Desktop\Projets\ReplicaMysql" },
+    @{ Name = "help";      Path = "Available paths" }
+  )
+
+  # Check if the passed argument is valid
+  if ($validOptions.Name -notcontains $location) {
+    Write-Host "⚠️ Invalid argument! Type 'go help' ⚠️" -ForegroundColor Red
+    return
+  }
+
+  Switch ($location) {
+    "aw" {
+      Set-Location -Path "$HOME\Desktop\Projets\ArtiWave"
+    }
+    "cours" {
+      Set-Location -Path "$HOME\Desktop\Cours"
+    }
+    "docs" {
+      Set-Location -Path "$HOME\Documents\Documentations"
+    }
+    "dotfiles" {
+      Set-Location -Path "$HOME\Desktop\Dotfiles"
+    }
+    "dwld" {
+      Set-Location -Path "$HOME\Downloads"
+    }
+    "eg" {
+      Set-Location -Path "$HOME\Desktop\Projets\EasyGarden"
+    }
+    "el" {
+      Set-Location -Path "$HOME\Desktop\Projets\EmmanuelLefevre"
+    }
+    "home" {
+      Set-Location -Path "$HOME"
+    }
+    "mdimg" {
+      Set-Location -Path "$HOME\Desktop\MarkdownImg"
+    }
+    "nvim" {
+      Set-Location -Path "$HOME\AppData\Local\nvim"
+    }
+    "profile" {
+      Set-Location -Path "$HOME\Documents\PowerShell"
+    }
+    "projets" {
+      Set-Location -Path "$HOME\Desktop\Projets"
+    }
+    "replica" {
+      Set-Location -Path "$HOME\Desktop\Projets\ReplicaMySQL"
+    }
+    "help" {
+      # Create a table of valid options
+      Write-Host ""
+      Write-Host ("{0,-20} {1,-50}" -f "Alias", "Path Direction") -ForegroundColor White -BackgroundColor DarkGray
+
+      foreach ($option in $validOptions) {
+        if ($option.Name -ne "help") {
+          Write-Host -NoNewline ("{0,-21}" -f "$($option.Name)") -ForegroundColor DarkCyan
+          Write-Host ("{0,-50}" -f " $($option.Path)") -ForegroundColor DarkYellow
+        }
+      }
+      Write-Host ""
+    }
+    default {
+      Write-Host "⚠️ Error occurred! ⚠️" -ForegroundColor Red
+    }
+  }
+}
+
+##########---------- Find path of a specified command/executable ----------##########
+function whereis ($comand) {
+  Get-Command -Name $comand -ErrorAction SilentlyContinue |
+  Select-Object -ExpandProperty Path -ErrorAction SilentlyContinue
+}
+
+##########---------- Test GitHub SSH connection with GPG keys ----------##########
+function ssh_github {
+  param (
+    [string]$hostname = "github.com",  # default host
+    [int]$port = 22                    # default port for SSH
+  )
+  Write-Host "🚀 Launch SSH connection with GPG keys 🚀" -ForegroundColor Green
+  # Test connection to SSH server
+  $connection = Test-NetConnection -ComputerName $hostname -Port $port
+  if ($connection.TcpTestSucceeded) {
+    Write-Host "The SSH connection to $hostname is open on $port!" -ForegroundColor Green
+    & "C:\Windows\System32\OpenSSH\ssh.exe" -T git@github.com
+  }
+  else {
+    Write-Host -NoNewline "⚠️ Unable to connect to " -ForegroundColor Red
+    Write-Host -NoNewline "$hostname" -ForegroundColor Magenta
+    Write-Host -NoNewline " on port " -ForegroundColor Red
+    Write-Host -NoNewline "$port" -ForegroundColor Magenta
+    Write-Host "! ⚠️" -ForegroundColor Red
+  }
+}
+
+##########---------- Display powershell colors in terminal ----------##########
+function colors {
+  $colors = [enum]::GetValues([System.ConsoleColor])
+
+  Foreach ($bgcolor in $colors) {
+    Foreach ($fgcolor in $colors) {
+      Write-Host "$fgcolor|" -ForegroundColor $fgcolor -BackgroundColor $bgcolor -NoNewLine
+    }
+
+  Write-Host " on $bgcolor"
+  }
 }
