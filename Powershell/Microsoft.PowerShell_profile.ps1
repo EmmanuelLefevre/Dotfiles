@@ -1000,7 +1000,7 @@ function Invoke-BotBranchSync {
   }
 
   # If it's a bot branch, we force synchronization.
-  Write-Host -NoNewline "🤖 Bot branch detected. Forcing sync... " -ForegroundColor Magenta
+  Write-Host "🤖 Bot branch detected. Forcing sync... " -ForegroundColor Magenta
 
   # We force a reset on the server version (upstream)
   git reset --hard "@{u}" *> $null
