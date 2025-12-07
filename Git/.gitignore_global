@@ -1,0 +1,279 @@
+# ======================================================================
+# SECURITY & IDENTIFICATION CREDENTIALS (CRITICAL)
+# ======================================================================
+# Certificates & Keys
+*.cert
+*.key
+*.pem
+*.pfx
+id_rsa
+id_rsa.pub
+
+# Environment Variables & Secrets
+*.private.php
+.env
+.env.*
+!.env.example
+secrets.json
+
+
+# ======================================================================
+# SPECIFIC OS
+# ======================================================================
+# Linux
+*~
+.directory
+.fuse_hidden*
+.Trash-*
+
+# macOS
+._*
+.AppleDouble
+.DS_Store
+.LSOverride
+.Spotlight-V100
+.Trashes
+
+# Windows
+$RECYCLE.BIN/
+Desktop.ini
+ehthumbs.db
+Thumbs.db
+
+
+# ======================================================================
+# CLOUD & INFRASTRUCTURE
+# ======================================================================
+# Docker
+*.docker.tar
+.docker/
+docker-compose.*.override.yml
+docker-compose.override.yml
+
+# Kubernetes / Helm
+.helm/
+.kube/
+
+# Terraform
+*.tfstate
+*.tfstate.backup
+.terraform/
+
+
+# ======================================================================
+# DEPLOYMENT
+# ======================================================================
+# Vercel
+.vercel
+
+
+# ======================================================================
+# LANGUAGES (Compilers & Binaries)
+# ======================================================================
+# C# / .NET (Build Output)
+[Bb]in/
+[Oo]bj/
+/out/
+Artifacts/
+
+# JavaScript / TypeScript (Build Output)
+/bazel-out
+/build
+/dist
+/out
+/out-tsc
+/tmp
+*.tsbuildinfo
+next-env.d.ts
+
+# Python (Bytecode)
+*.py[cod]
+*$py.class
+__pycache__/
+
+
+# ======================================================================
+# 6. PACKAGE MANAGERS
+# ======================================================================
+# Node.js
+/node_modules
+node_modules/
+
+# Node.js (Yarn Berry)
+.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# Npm
+npm-debug.log*
+
+# NuGet
+*.nupkg
+*.snupkg
+**/packages/
+!**/packages/build/
+
+# Composer
+/vendor/
+
+# PNPM
+.pnpm-debug.log*
+
+
+# Python (Pip / Venv)
+*.egg-info/
+.venv/
+env/
+venv/
+
+# Typings
+/typings
+
+# Yarn
+yarn-debug.log*
+yarn-error.log*
+
+
+# ======================================================================
+# FRAMEWORKS (Cache & Configs)
+# ======================================================================
+# .NET Core
+.store/
+
+# Angular
+.angular
+/.angular/cache
+
+# Expo / React Native
+/.expo/
+
+# Next.js
+/.next/
+
+# Sass (CSS)
+.sass-cache/
+
+# Symfony
+/public/bundles/
+/public/media/
+/var/
+/connect.lock
+
+
+# ======================================================================
+# TESTING (Tests & Coverage)
+# ======================================================================
+# General Coverage
+/coverage
+
+# Jest (JS)
+.jest-cache
+test-report.xml
+
+# NUnit / MSTest (.NET)
+*.trdx
+*.trx
+NUnitResults.xml
+TestResult.xml
+TestResults/
+
+# PHPUnit (PHP)
+.phpunit.result.cache
+/phpunit.xml
+
+# Testem
+testem.log
+
+
+# ======================================================================
+# QUALITY & AUDIT
+# ======================================================================
+# Checkmarx
+cx.*
+CxReports/
+
+# SonarQube
+.scannerwork/
+.sonar/
+sonar-project.properties
+sonar-report.json
+
+
+# ======================================================================
+# DOCUMENTATION
+# ======================================================================
+# Compodoc (Angular)
+/documentation/
+
+# Swagger / OpenAPI
+api-docs/
+swagger-ui/
+
+
+# ======================================================================
+# DATA SCIENCE & ML
+# ======================================================================
+# Data files
+*.csv
+*.parquet
+/data/
+
+# Jupyter
+.ipynb_checkpoints
+
+# MinIO / MLFlow
+mc-config/
+notebooks/mlruns
+
+
+# ======================================================================
+# IDEs & EDITORS
+# ======================================================================
+# Eclipse
+.classpath
+.project
+.settings/
+*.launch
+
+# JetBrains
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# Sublime Text
+*.sublime-workspace
+
+# Visual Studio (Classic)
+*.sln.docstates
+*.suo
+*.user
+*.VisualState.xml
+.vs/
+
+# Visual Studio Code
+.history/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/launch.json
+!.vscode/settings.json
+!.vscode/tasks.json
+
+
+# ======================================================================
+# 11. DIVERS & LOGS
+# ======================================================================
+*.log
+/libpeerconnection.log
+public/COM3
+
+
+# ----------------------------------------------------------------------
+# USER CUSTOMIZATIONS
+# ----------------------------------------------------------------------
+/Books/Ninja Squad/
+/Books/Supports Cours Formation/
