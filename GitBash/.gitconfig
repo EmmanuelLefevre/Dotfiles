@@ -1,19 +1,31 @@
-[user]
-	email = <YOUR_GITHUB_EMAIL>
-	name = <YOUR_GITHUB_USERNAME>
-[color]
-	diff = auto
-	status = auto
-	autobranch = auto
 [alias]
-	sw = switch
-	ci = commit
-	st = status
-	mg = merge
 	br = branch
+	ci = commit
 	ck = checkout
-[init]
-	defaultBranch = main
+	lg = log --graph --abbrev-commit --decorate --format=format:'%C(bold blue)%h%C(reset) - %C(bold green)(%ar)%C(reset) %C(white)%s%C(reset) %C(dim white)- %an%C(reset)%C(auto)%d%C(reset)' --all
+	mg = merge
+	st = status
+	sw = switch
+[color]
+	ui = auto
+[commit]
+  verbose = true
 [core]
 	autocrlf = true
 	editor = \"C:\\Users\\<YOUR_USERNAME>\\AppData\\Local\\Programs\\Microsoft VS Code\\bin\\code\" --wait
+	editor = code --wait
+[fetch]
+  prune = true
+[help]
+  autocorrect = 20
+[init]
+	defaultBranch = main
+[push]
+  autoSetupRemote = true
+[rerere]
+  enabled = true
+[tag]
+  sort = version:refname
+[user]
+	email = <YOUR_GITHUB_EMAIL>
+	name = <YOUR_GITHUB_USERNAME>
