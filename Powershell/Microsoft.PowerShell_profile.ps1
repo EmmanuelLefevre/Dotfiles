@@ -3007,7 +3007,7 @@ public/COM3
       Set-Content -Path $GlobalIgnorePath -Value $DefaultContent -Encoding UTF8 -Force
 
       $msg = "✅ .gitignore_global created successfully."
-      $paddingStr = Get-CenteredPaddingStr -RawMessage $msg
+      $paddingStr = Get-CenteredPadding -RawMessage $msg
 
       Write-Host -NoNewline $paddingStr
       Write-Host $msg -ForegroundColor Green
@@ -3015,7 +3015,7 @@ public/COM3
     }
     catch {
       $msg = "❌ Error creating .gitignore_global: $_"
-      $paddingStr = Get-CenteredPaddingStr -RawMessage $msg
+      $paddingStr = Get-CenteredPadding -RawMessage $msg
 
       Write-Host -NoNewline $paddingStr
       Write-Host $msg -ForegroundColor Red
