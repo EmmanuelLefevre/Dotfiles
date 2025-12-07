@@ -515,8 +515,7 @@ function Get-RepositoriesInfo {
     "ReplicaMySQL",
     "Schemas",
     "ScrapMate",
-    "Soutenances",
-    "Test"
+    "Soutenances"
   )
 
   # Dictionary containing local repositories path
@@ -538,7 +537,6 @@ function Get-RepositoriesInfo {
     "Schemas"                = "$env:USERPROFILE\Desktop\Schemas"
     "ScrapMate"              = "$env:USERPROFILE\Desktop\Projets\ScrapMate"
     "Soutenances"            = "$env:USERPROFILE\Desktop\Soutenances"
-    "Test"                   = "$env:USERPROFILE\Desktop\Projets\Test"
   }
 
   # Error message templates
