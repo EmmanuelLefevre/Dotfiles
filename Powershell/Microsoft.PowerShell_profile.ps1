@@ -500,8 +500,8 @@ function Get-RepositoriesInfo {
   $envVarMessageTemplate = "Check {0} in Windows Environment Variables..."
   $functionNameMessage = "in Get-RepositoriesInfo !"
 
-  ######## LOAD PATH CONFIG ########
-  $allLocations = Get-LocationConfig
+  ######## LOAD PATH LOCATION CONFIG ########
+  $allLocations = Get-LocationPathConfig
   $gitLocations = $allLocations | Where-Object { $_.IsRepo -eq $true }
 
   ######## GUARD CLAUSE : MISSING USERNAME ########
@@ -2522,7 +2522,7 @@ function go {
 
   ######## GUARD CLAUSE : MISSING ARGUMENT ########
   if (-not $location) {
-    Write-Host "⚠️ Invalid option! Type 'go help' ⚠️" -ForegroundColor Red
+    Write-Host "⚠️ Invalid option! Type 'go help'..." -ForegroundColor Red
     return
   }
 
@@ -2531,7 +2531,7 @@ function go {
 
   ######## GUARD CLAUSE : CONFIGURATION ERROR ########
   if (-not $allLocations) {
-    Write-Host "❌ Critical Error: Get-LocationPathConfig returned no data ! ❌" -ForegroundColor Red
+    Write-Host "❌ Critical Error : Get-LocationPathConfig array is empty !" -ForegroundColor Red
     return
   }
 
@@ -2564,7 +2564,7 @@ function go {
     Write-Host -NoNewline "⚠️ Alias " -ForegroundColor Red
     Write-Host -NoNewline "`"$($location)`"" -ForegroundColor Magenta
     Write-Host " not found in configuration !" -ForegroundColor Red
-    Write-Host "   └─> Type 'go help'to see available options..." -ForegroundColor DarkYellow
+    Write-Host "   └─> Type 'go help' to see available options..." -ForegroundColor DarkYellow
     return
   }
 
@@ -2575,7 +2575,7 @@ function go {
     Write-Host -NoNewline "⚠️ Path defined for alias " -ForegroundColor Red
     Write-Host -NoNewline "'$location'" -ForegroundColor Magenta
     Write-Host " does not exist on disk !" -ForegroundColor Red
-    Write-Host -NoNewline "   └─> Missing path : " -ForegroundColor DarkYellow
+    Write-Host -NoNewline "   └─> Non-existent path : " -ForegroundColor DarkYellow
     Write-Host -NoNewline "`"$($target.Path)`"" -ForegroundColor DarkCyan
   }
 }
