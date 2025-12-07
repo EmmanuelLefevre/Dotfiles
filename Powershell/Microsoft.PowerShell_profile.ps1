@@ -500,10 +500,6 @@ function Get-RepositoriesInfo {
   $envVarMessageTemplate = "Check {0} in Windows Environment Variables..."
   $functionNameMessage = "in Get-RepositoriesInfo !"
 
-  ######## LOAD PATH LOCATION CONFIG ########
-  $allLocations = Get-LocationPathConfig
-  $gitLocations = $allLocations | Where-Object { $_.IsRepo -eq $true }
-
   ######## GUARD CLAUSE : MISSING USERNAME ########
   if ([string]::IsNullOrWhiteSpace($gitHubUsername)) {
     # Helper called to center error message nicely
@@ -546,9 +542,23 @@ function Get-RepositoriesInfo {
     return $null
   }
 
-  ######## GUARD CLAUSE : EMPTY ORDER LIST ########
-  # Data preparation
+  ######## LOAD PATH LOCATION CONFIG ########
+  $allConfig = Get-LocationPathConfig
+
+  ######## GUARD CLAUSE : CONFIG RETURN NOTHING ########
+  if (-not $allConfig) {
+    $errMsg = "❌ Critical Error : Get-LocationPathConfig returned no data ! ❌"
+    $paddingErrStr = Get-CenteredPadding -RawMessage $errMsg
+    Write-Host -NoNewline $paddingErrStr
+    Write-Host $errMsg -ForegroundColor Red
+    return $null
+  }
+
+  ######## FILTER AND ORDER (CHECK IsRepo = true) ########
+  $gitConfig = $allConfig | Where-Object { $_.IsRepo -eq $true }
   $reposOrder = @($gitConfig.Name)
+
+  ######## GUARD CLAUSE : EMPTY ORDER LIST ########
   if (-not $reposOrder -or $reposOrder.Count -eq 0) {
     # Helper called to center error message nicely
     $errMsg = "❌ Local array repo order is empty ! ❌"
@@ -569,33 +579,43 @@ function Get-RepositoriesInfo {
     return $null
   }
 
-  ######## GUARD CLAUSE : EMPTY PATH DICTIONARY ########
-  # Data preparation
-  $repos = @{}
-  foreach ($item in $gitConfig) {
-    if (-not [string]::IsNullOrWhiteSpace($item.Path)) {
-      $repos[$item.Name] = $item.Path
-    }
+  ######## PATH VALIDATION (INTEGRITY CHECK) ########
+  $invalidItems = $gitConfig | Where-Object {
+    ([string]::IsNullOrWhiteSpace($_.Path)) -or (-not (Test-Path -Path $_.Path -ErrorAction SilentlyContinue))
   }
 
-  if (-not $repos -or $repos.Keys.Count -eq 0) {
-    # Helper called to center error message nicely
-    $errMsg = "❌ Local repository dictionary is empty ! ❌"
+  ######## GUARD CLAUSE : INVALID/NOT FOUND PATHS ########
+  if ($invalidItems) {
+    $errMsg = "❌ Local repositories dictionary contains invalid paths ! ❌"
     $paddingErrStr = Get-CenteredPadding -RawMessage $errMsg
 
-    # Display error message
     Write-Host -NoNewline $paddingErrStr
     Write-Host $errMsg -ForegroundColor Red
 
-    # Helper called to center info message nicely
-    $infoMsg = "ℹ️ Ensure repository dictionary has valid paths $functionNameMessage"
+    foreach ($bad in $invalidItems) {
+      if ([string]::IsNullOrWhiteSpace($bad.Path)) {
+        Write-Host -NoNewline "└─ Path is EMPTY for : " -ForegroundColor DarkYellow
+        Write-Host "📦 $($bad.Name)" -ForegroundColor DarkCyan
+      }
+      else {
+        Write-Host -NoNewline "└─ Path NOT FOUND on disk : " -ForegroundColor DarkYellow
+        Write-Host " $($bad.Path)" -ForegroundColor DarkCyan
+      }
+    }
+
+    $infoMsg = "ℹ️ Ensure repositories dictionary has valid paths $functionNameMessage"
     $paddingInfoStr = Get-CenteredPadding -RawMessage $infoMsg
 
-    # Display info message
     Write-Host -NoNewline $paddingInfoStr
     Write-Host $infoMsg -ForegroundColor DarkYellow
 
     return $null
+  }
+
+  ######## DICTIONARY CONSTRUCTION ########
+  $repos = @{}
+  foreach ($item in $gitConfig) {
+    $repos[$item.Name] = $item.Path
   }
 
   ######## RETURN SUCCESS ########
@@ -617,7 +637,7 @@ function Get-RepositoriesInfo {
   }
 }
 
-##########---------- Filter repository list (All vs Single) ----------##########
+##########---------- Filter repositories list (All vs Single) ----------##########
 function Get-RepoListToProcess {
   param (
     [array]$FullList,
@@ -2231,15 +2251,14 @@ function Get-LocationPathConfig {
   return @(
     ##########---------- REPOSITORIES (Important order for gpull() function) ----------##########
     [PSCustomObject]@{ Name = "ArtiWave";                 Path = "$env:USERPROFILE\Desktop\Projets\ArtiWave";                 IsRepo = $true },
-    [PSCustomObject]@{ Name = "AstroFall";                Path = "$env:USERPROFILE\Desktop\Projets\AstroFall";                IsRepo = $true },
     [PSCustomObject]@{ Name = "Cours";                    Path = "$env:USERPROFILE\Desktop\Cours";                            IsRepo = $true },
-    [PSCustomObject]@{ Name = "DailyPush";                Path = "$env:USERPROFILE\Desktop\Projets\DailyPush";                IsRepo = $true },
+    [PSCustomObject]@{ Name = "DailyPush";                Path = "$env:USERPROFILE\Desktop\DailyPush";                        IsRepo = $true },
     [PSCustomObject]@{ Name = "DataScrub";                Path = "$env:USERPROFILE\Desktop\Projets\DataScrub";                IsRepo = $true },
     [PSCustomObject]@{ Name = "Documentations";           Path = "$env:USERPROFILE\Documents\Documentations";                 IsRepo = $true },
     [PSCustomObject]@{ Name = "Dotfiles";                 Path = "$env:USERPROFILE\Desktop\Dotfiles";                         IsRepo = $true },
     [PSCustomObject]@{ Name = "EasyGarden";               Path = "$env:USERPROFILE\Desktop\Projets\EasyGarden";               IsRepo = $true },
-    [PSCustomObject]@{ Name = "Elexxion";                 Path = "$env:USERPROFILE\Desktop\Projets\Elexxion";                 IsRepo = $true },
     [PSCustomObject]@{ Name = "ElexxionData";             Path = "$env:USERPROFILE\Desktop\Projets\ElexxionData";             IsRepo = $true },
+    [PSCustomObject]@{ Name = "ElexxionMinio";            Path = "$env:USERPROFILE\Desktop\Projets\ElexxionMinio";            IsRepo = $true },
     [PSCustomObject]@{ Name = "EmmanuelLefevre";          Path = "$env:USERPROFILE\Desktop\Projets\EmmanuelLefevre";          IsRepo = $true },
     [PSCustomObject]@{ Name = "GestForm";                 Path = "$env:USERPROFILE\Desktop\Projets\GestForm";                 IsRepo = $true },
     [PSCustomObject]@{ Name = "GitHubProfileIcons";       Path = "$env:USERPROFILE\Pictures\GitHubProfileIcons";              IsRepo = $true },
@@ -2531,14 +2550,14 @@ function go {
 
   ######## GUARD CLAUSE : CONFIGURATION ERROR ########
   if (-not $allLocations) {
-    Write-Host "❌ Critical Error : Get-LocationPathConfig array is empty !" -ForegroundColor Red
+    Write-Host "❌ Critical Error : Get-LocationPathConfig returned no data !" -ForegroundColor Red
     return
   }
 
   ######## HELP MODE ########
   if ($location -eq "help") {
     Write-Host ""
-    Write-Host ("{0,-20} {1,-50}" -f "Alias", "Path Direction") -ForegroundColor White -BackgroundColor DarkGray
+    Write-Host ("{0,-27} {1,-60}" -f "Alias", "Path") -ForegroundColor White -BackgroundColor DarkGray
 
     # Alphabetical sorting
     foreach ($option in ($allLocations | Sort-Object Name)) {
@@ -2546,8 +2565,8 @@ function go {
       $icon = if($option.IsRepo){"󰊤"}else{""}
 
       if ($option.Name -ne "help") {
-        Write-Host -NoNewline ("{0,-21}" -f "$($option.Name)") -ForegroundColor Magenta
-        Write-Host ("{0,-50}" -f "$icon $($option.Path)") -ForegroundColor DarkCyan
+        Write-Host -NoNewline ("{0,-28}" -f "$($option.Name)") -ForegroundColor Magenta
+        Write-Host ("{0,-60}" -f "$icon $($option.Path)") -ForegroundColor DarkCyan
       }
     }
 
