@@ -2729,13 +2729,19 @@ function Set-GlobalGitIgnore {
   # Check if file exists
   if (-not (Test-Path $GitGlobalIgnorePath)) {
     $msgPart1 = " .gitignore_global"
-    $msgPart2 = " not found. Creating it with default template..."
+    $msgPart2 = " not found..."
 
     $paddingStr = Get-CenteredPadding -RawMessage ($msgPart1 + $msgPart2)
 
     Write-Host -NoNewline $paddingStr
     Write-Host -NoNewline $msgPart1 -ForegroundColor Cyan
     Write-Host $msgPart2 -ForegroundColor DarkYellow
+
+    $msg = "🔄 Creating it with default template 🔄"
+    $paddingStr2 = Get-CenteredPadding -RawMessage $msg
+
+    Write-Host -NoNewline $paddingStr2
+    Write-Host $msg -ForegroundColor Red
 
     # Default content (used ONLY during creation)
     $DefaultContent = @'
@@ -3009,28 +3015,21 @@ public/COM3
     try {
       Set-Content -Path $GitGlobalIgnorePath -Value $DefaultContent -Encoding UTF8 -Force
 
-      $msgPart1 = " .gitignore_global"
-      $msgPart2 = " created successfully ✅"
-
-      $paddingStr = Get-CenteredPadding -RawMessage ($msgPart1 + $msgPart2)
+      $msg = "✅ File created successfully ✅"
+      $paddingStr = Get-CenteredPadding -RawMessage $msg
 
       Write-Host -NoNewline $paddingStr
-      Write-Host -NoNewline $msgPart1 -ForegroundColor Cyan
-      Write-Host $msgPart2 -ForegroundColor Green
+      Write-Host $msg -ForegroundColor Green
       Write-Host ""
     }
     catch {
-      $msgPart1 = "❌ Error creating "
-      $msgPart2 = " .gitignore_global"
-      $msgPart3 = ": $_"
+      $msg = "❌ Error creating default template : "
+      $paddingStr = Get-CenteredPadding -RawMessage $msg
 
-      $paddingStr = Get-CenteredPadding -RawMessage ($msgPart1 + $msgPart2 + $msgPart3)
-
-      # Affichage
       Write-Host -NoNewline $paddingStr
-      Write-Host -NoNewline $msgPart1 -ForegroundColor Red
-      Write-Host -NoNewline $msgPart2 -ForegroundColor Cyan
-      Write-Host $msgPart3 -ForegroundColor Red
+      Write-Host $msg -ForegroundColor Red
+
+      Write-Host "$_" -ForegroundColor DarkBlue
       Write-Host ""
     }
   }
