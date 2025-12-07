@@ -2254,29 +2254,6 @@ function Stop-OperationTimer {
   }
 }
 
-##########---------- Calculate centered padding spaces ----------##########
-function Get-CenteredPadding {
-  param (
-    [int]$TotalWidth = 80,
-    [string]$RawMessage
-  )
-
-  # Removes invisible characters from "Variation Selector"
-  $cleanMsg = $RawMessage -replace "\uFE0F", ""
-
-  # Standard length in memory
-  $visualLength = $cleanMsg.Length
-
-  # If message contains "simple" BMP emojis (one character long but two characters wide on screen), we add 1
-  $bmpEmojis = ([regex]::Matches($cleanMsg, "[\u2300-\u23FF\u2600-\u27BF]")).Count
-  $visualLength += $bmpEmojis
-
-  # (Total Width - Message Length) / 2
-  # [math]::Max(0, ...) => prevents crash if message is longer than 80 characters
-  $paddingCount = [math]::Max(0, [int](($TotalWidth - $visualLength) / 2))
-
-  return " " * $paddingCount
-}
 
 #---------------------------------------------------------------------------#
 #                        LOCATION PATH CONFIG                               #
@@ -2324,6 +2301,7 @@ function Get-LocationPathConfig {
   )
 }
 
+
 #-----------------------------------------------------------------------#
 #                        SHARED FUNCTIONS                               #
 #-----------------------------------------------------------------------#
@@ -2353,6 +2331,30 @@ function Test-GitAvailability {
   Write-Host $Message -ForegroundColor Red
 
   return $false
+}
+
+##########---------- Calculate centered padding spaces ----------##########
+function Get-CenteredPadding {
+  param (
+    [int]$TotalWidth = 80,
+    [string]$RawMessage
+  )
+
+  # Removes invisible characters from "Variation Selector"
+  $cleanMsg = $RawMessage -replace "\uFE0F", ""
+
+  # Standard length in memory
+  $visualLength = $cleanMsg.Length
+
+  # If message contains "simple" BMP emojis (one character long but two characters wide on screen), we add 1
+  $bmpEmojis = ([regex]::Matches($cleanMsg, "[\u2300-\u23FF\u2600-\u27BF]")).Count
+  $visualLength += $bmpEmojis
+
+  # (Total Width - Message Length) / 2
+  # [math]::Max(0, ...) => prevents crash if message is longer than 80 characters
+  $paddingCount = [math]::Max(0, [int](($TotalWidth - $visualLength) / 2))
+
+  return " " * $paddingCount
 }
 
 
@@ -2718,15 +2720,19 @@ function colors {
 function Set-GlobalGitIgnore {
   $GlobalIgnorePath = "$HOME\.gitignore_global"
 
+  Write-Host ""
   ######## GUARD CLAUSE : GIT AVAILABILITY ########
-  if (-not (Test-GitAvailability -Message "⛔ Git for Windows is not installed (or not found in path). Global git ignore config skipped ! ⛔" -Center $false)) {
+  if (-not (Test-GitAvailability -Message "⛔ Git for Windows is not installed (or not found in path). Global git ignore config skipped ! ⛔")) {
     return
   }
 
   # Check if file exists
   if (-not (Test-Path $GlobalIgnorePath)) {
+    $msg = "⚠️ .gitignore_global not found. Creating it with default template..."
+    $paddingStr = Get-CenteredPadding -RawMessage $msg
 
-    Write-Host "⚠️ .gitignore_global not found. Creating it with default template..." -ForegroundColor Yellow
+    Write-Host -NoNewline $paddingStr
+    Write-Host $msg -ForegroundColor Yellow
 
     # Default content (used ONLY during creation)
     $DefaultContent = @'
@@ -2999,10 +3005,21 @@ public/COM3
 
     try {
       Set-Content -Path $GlobalIgnorePath -Value $DefaultContent -Encoding UTF8 -Force
-      Write-Host "✅ .gitignore_global created successfully." -ForegroundColor Green
+
+      $msg = "✅ .gitignore_global created successfully."
+      $paddingStr = Get-CenteredPaddingStr -RawMessage $msg
+
+      Write-Host -NoNewline $paddingStr
+      Write-Host $msg -ForegroundColor Green
+      Write-Host ""
     }
     catch {
-      Write-Host "❌ Error creating .gitignore_global: $_" -ForegroundColor Red
+      $msg = "❌ Error creating .gitignore_global: $_"
+      $paddingStr = Get-CenteredPaddingStr -RawMessage $msg
+
+      Write-Host -NoNewline $paddingStr
+      Write-Host $msg -ForegroundColor Red
+      Write-Host ""
     }
   }
 
@@ -3012,6 +3029,7 @@ public/COM3
 
   if ($CurrentConfig -ne $GlobalIgnorePath) {
     git config --global core.excludesfile $GlobalIgnorePath
+    # Write-Host "⚓ Git configured to use ~/.gitignore_global" -ForegroundColor Cyan
   }
 }
 
