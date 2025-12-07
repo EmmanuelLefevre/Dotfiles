@@ -2718,7 +2718,7 @@ function colors {
 #--------------------------------------------------------------------#
 
 function Set-GlobalGitIgnore {
-  $GlobalIgnorePath = "$HOME\.gitignore_global"
+  $GitGlobalIgnorePath = "$HOME\.gitignore_global"
 
   Write-Host ""
   ######## GUARD CLAUSE : GIT AVAILABILITY ########
@@ -2727,12 +2727,15 @@ function Set-GlobalGitIgnore {
   }
 
   # Check if file exists
-  if (-not (Test-Path $GlobalIgnorePath)) {
-    $msg = "⚠️ .gitignore_global not found. Creating it with default template..."
-    $paddingStr = Get-CenteredPadding -RawMessage $msg
+  if (-not (Test-Path $GitGlobalIgnorePath)) {
+    $msgPart1 = " .gitignore_global"
+    $msgPart2 = " not found. Creating it with default template..."
+
+    $paddingStr = Get-CenteredPadding -RawMessage ($msgPart1 + $msgPart2)
 
     Write-Host -NoNewline $paddingStr
-    Write-Host $msg -ForegroundColor Yellow
+    Write-Host -NoNewline $msgPart1 -ForegroundColor Cyan
+    Write-Host $msgPart2 -ForegroundColor DarkYellow
 
     # Default content (used ONLY during creation)
     $DefaultContent = @'
@@ -3004,21 +3007,30 @@ public/COM3
 '@
 
     try {
-      Set-Content -Path $GlobalIgnorePath -Value $DefaultContent -Encoding UTF8 -Force
+      Set-Content -Path $GitGlobalIgnorePath -Value $DefaultContent -Encoding UTF8 -Force
 
-      $msg = "✅ .gitignore_global created successfully."
-      $paddingStr = Get-CenteredPadding -RawMessage $msg
+      $msgPart1 = " .gitignore_global"
+      $msgPart2 = " created successfully ✅"
+
+      $paddingStr = Get-CenteredPadding -RawMessage ($msgPart1 + $msgPart2)
 
       Write-Host -NoNewline $paddingStr
-      Write-Host $msg -ForegroundColor Green
+      Write-Host -NoNewline $msgPart1 -ForegroundColor Cyan
+      Write-Host $msgPart2 -ForegroundColor Green
       Write-Host ""
     }
     catch {
-      $msg = "❌ Error creating .gitignore_global: $_"
-      $paddingStr = Get-CenteredPadding -RawMessage $msg
+      $msgPart1 = "❌ Error creating "
+      $msgPart2 = " .gitignore_global"
+      $msgPart3 = ": $_"
 
+      $paddingStr = Get-CenteredPadding -RawMessage ($msgPart1 + $msgPart2 + $msgPart3)
+
+      # Affichage
       Write-Host -NoNewline $paddingStr
-      Write-Host $msg -ForegroundColor Red
+      Write-Host -NoNewline $msgPart1 -ForegroundColor Red
+      Write-Host -NoNewline $msgPart2 -ForegroundColor Cyan
+      Write-Host $msgPart3 -ForegroundColor Red
       Write-Host ""
     }
   }
@@ -3027,8 +3039,8 @@ public/COM3
   # Git will read contents of file with each command, so your manual changes are taken into account immediately
   $CurrentConfig = git config --global core.excludesfile
 
-  if ($CurrentConfig -ne $GlobalIgnorePath) {
-    git config --global core.excludesfile $GlobalIgnorePath
+  if ($CurrentConfig -ne $GitGlobalIgnorePath) {
+    git config --global core.excludesfile $GitGlobalIgnorePath
     # Write-Host "⚓ Git configured to use ~/.gitignore_global" -ForegroundColor Cyan
   }
 }
