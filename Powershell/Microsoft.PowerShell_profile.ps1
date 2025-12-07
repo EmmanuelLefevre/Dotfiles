@@ -2532,18 +2532,38 @@ function go {
   # List of valid options and their corresponding paths
   $validOptions = @(
     @{ Name = "artiwave";                    Path = "$HOME\Desktop\Projets\ArtiWave" },
+    @{ Name = "astrofall";                   Path = "$HOME\Desktop\Projets\Astrofall" },
     @{ Name = "cours";                       Path = "$HOME\Desktop\Cours" },
-    @{ Name = "Documentations";              Path = "$HOME\Documents\Documentations" },
+    @{ Name = "dailypush";                   Path = "$HOME\Desktop\Projets\DailyPush" },
+    @{ Name = "datascrub";                   Path = "$HOME\Desktop\Projets\DataScrub" },
+    @{ Name = "documentations";              Path = "$HOME\Documents\Documentations" },
     @{ Name = "dotfiles";                    Path = "$HOME\Desktop\Dotfiles" },
     @{ Name = "dwld";                        Path = "$HOME\Downloads" },
-    @{ Name = "eg";                          Path = "$HOME\Desktop\Projets\EasyGarden" },
-    @{ Name = "el";                          Path = "$HOME\Desktop\Projets\EmmanuelLefevre" },
+    @{ Name = "easygarden";                  Path = "$HOME\Desktop\Projets\EasyGarden" },
+    @{ Name = "elexxion";                    Path = "$HOME\Desktop\Projets\Elexxion" },
+    @{ Name = "elexxiondata";                Path = "$HOME\Desktop\Projets\ElexxionData" },
+    @{ Name = "emmanuellefevre";             Path = "$HOME\Desktop\Projets\EmmanuelLefevre" },
+    @{ Name = "gestform";                    Path = "$HOME\Desktop\Projets\GestForm" },
+    @{ Name = "githubprofileicons";          Path = "$HOME\Pictures\GitHubProfileIcons" },
+    @{ Name = "googlesheets";                Path = "$HOME\Desktop\GoogleSheets" },
     @{ Name = "home";                        Path = "$HOME" },
-    @{ Name = "mdimg";                       Path = "$HOME\Desktop\MarkdownImg" },
+    @{ Name = "lecabinetdecuriosites";       Path = "$HOME\Desktop\Projets\LeCabinetDeCuriosites" },
+    @{ Name = "iamemmanuellefevre";          Path = "$HOME\Desktop\Projets\IAmEmmanuelLefevre" },
+    @{ Name = "markdownimg";                 Path = "$HOME\Desktop\MarkdownImg" },
+    @{ Name = "mflix";                       Path = "$HOME\Desktop\Projets\Mflix" },
     @{ Name = "nvim";                        Path = "$HOME\AppData\Local\nvim" },
+    @{ Name = "ombrearcane";                 Path = "$HOME\Desktop\Projets\OmbreArcane" },
+    @{ Name = "openscraper";                 Path = "$HOME\Desktop\Projets\OpenScraper" },
+    @{ Name = "parquetflow";                 Path = "$HOME\Desktop\Projets\ParquetFlow" },
     @{ Name = "profile";                     Path = "$HOME\Documents\PowerShell" },
     @{ Name = "projets";                     Path = "$HOME\Desktop\Projets" },
-    @{ Name = "replica";                     Path = "$HOME\Desktop\Projets\ReplicaMysql" },
+    @{ Name = "replicamysql";                Path = "$HOME\Desktop\Projets\ReplicaMysql" },
+    @{ Name = "schemas";                     Path = "$HOME\Desktop\Schemas" },
+    @{ Name = "replicamysql";                Path = "$HOME\Desktop\Projets\ReplicaMysql" },
+    @{ Name = "scrapmate";                   Path = "$HOME\Desktop\Projets\ScrapMate" },
+    @{ Name = "sortify";                     Path = "$HOME\Desktop\Projets\Sortify" },
+    @{ Name = "soutenances";                 Path = "$HOME\Desktop\Soutenances" },
+    @{ Name = "yam4";                        Path = "$HOME\Desktop\Projets\Yam4" },
     @{ Name = "help";                        Path = "Available paths" }
   )
 
@@ -2557,10 +2577,19 @@ function go {
     "artiwave" {
       Set-Location -Path "$HOME\Desktop\Projets\ArtiWave"
     }
+    "astrofall" {
+      Set-Location -Path "$HOME\Desktop\Projets\Astrofall"
+    }
     "cours" {
       Set-Location -Path "$HOME\Desktop\Cours"
     }
-    "docs" {
+    "dailypush" {
+      Set-Location -Path "$HOME\Desktop\Projets\DailyPush"
+    }
+    "datascrub" {
+      Set-Location -Path "$HOME\Desktop\Projets\DataScrub"
+    }
+    "documentations" {
       Set-Location -Path "$HOME\Documents\Documentations"
     }
     "dotfiles" {
@@ -2569,20 +2598,53 @@ function go {
     "dwld" {
       Set-Location -Path "$HOME\Downloads"
     }
-    "eg" {
+    "easygarden" {
       Set-Location -Path "$HOME\Desktop\Projets\EasyGarden"
     }
-    "el" {
+    "elexxion" {
+      Set-Location -Path "$HOME\Desktop\Projets\Elexxion"
+    }
+    "elexxiondata" {
+      Set-Location -Path "$HOME\Desktop\Projets\ElexxionData"
+    }
+    "emmanuellefevre" {
       Set-Location -Path "$HOME\Desktop\Projets\EmmanuelLefevre"
+    }
+    "gestform" {
+      Set-Location -Path "$HOME\Desktop\Projets\GestForm"
+    }
+    "githubprofileicons" {
+      Set-Location -Path "$HOME\Pictures\GitHubProfileIcons"
+    }
+    "googlesheets" {
+      Set-Location -Path "$HOME\Desktop\GoogleSheets"
     }
     "home" {
       Set-Location -Path "$HOME"
     }
-    "mdimg" {
+    "lecabinetdecuriosites" {
+      Set-Location -Path "$HOME\Desktop\Projets\LeCabinetDeCuriosites"
+    }
+    "iamemmanuellefevre" {
+      Set-Location -Path "$HOME\Desktop\Projets\IAmEmmanuelLefevre"
+    }
+    "markdownimg" {
       Set-Location -Path "$HOME\Desktop\MarkdownImg"
+    }
+    "mflix" {
+      Set-Location -Path "$HOME\Desktop\Projets\Mflix"
     }
     "nvim" {
       Set-Location -Path "$HOME\AppData\Local\nvim"
+    }
+    "ombrearcane" {
+      Set-Location -Path "$HOME\Desktop\Projets\OmbreArcane"
+    }
+    "openscraper" {
+      Set-Location -Path "$HOME\Desktop\Projets\OpenScraper"
+    }
+    "parquetflow" {
+      Set-Location -Path "$HOME\Desktop\Projets\ParquetFlow"
     }
     "profile" {
       Set-Location -Path "$HOME\Documents\PowerShell"
@@ -2590,8 +2652,23 @@ function go {
     "projets" {
       Set-Location -Path "$HOME\Desktop\Projets"
     }
-    "replica" {
+    "replicamysql" {
       Set-Location -Path "$HOME\Desktop\Projets\ReplicaMySQL"
+    }
+    "schemas" {
+      Set-Location -Path "$HOME\Desktop\Schemas"
+    }
+    "scrapmate" {
+      Set-Location -Path "$HOME\Desktop\Projets\ScrapMate"
+    }
+    "sortify" {
+      Set-Location -Path "$HOME\Desktop\Projets\Sortify"
+    }
+    "soutenances" {
+      Set-Location -Path "$HOME\Desktop\Soutenances"
+    }
+    "yam4" {
+      Set-Location -Path "$HOME\Desktop\Projets\Yam4"
     }
     "help" {
       # Create a table of valid options
@@ -2600,8 +2677,8 @@ function go {
 
       foreach ($option in $validOptions) {
         if ($option.Name -ne "help") {
-          Write-Host -NoNewline ("{0,-21}" -f "$($option.Name)") -ForegroundColor DarkCyan
-          Write-Host ("{0,-50}" -f " $($option.Path)") -ForegroundColor DarkYellow
+          Write-Host -NoNewline ("{0,-21}" -f "$($option.Name)") -ForegroundColor Magenta
+          Write-Host ("{0,-50}" -f " $($option.Path)") -ForegroundColor DarkCyan
         }
       }
       Write-Host ""
