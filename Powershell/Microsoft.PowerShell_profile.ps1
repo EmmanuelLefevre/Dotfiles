@@ -48,15 +48,7 @@ function gpull {
   )
 
   ######## GUARD CLAUSE : GIT AVAILABILITY ########
-  if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
-    # Helper called to center message nicely
-    $msg = "⛔ Git for Windows is not installed (or not found in path)... Install it before using this command ! ⛔"
-    $paddingStr = Get-CenteredPadding -RawMessage $msg
-
-    # Display message
-    Write-Host -NoNewline $paddingStr
-    Write-Host $msg -ForegroundColor Red
-
+  if (-not (Test-GitAvailability)) {
     return
   }
 
@@ -2336,6 +2328,32 @@ function Get-LocationPathConfig {
 #                        SHARED FUNCTIONS                               #
 #-----------------------------------------------------------------------#
 
+##########---------- Check if Git is installed and available ----------##########
+function Test-GitAvailability {
+  param (
+    # Default message
+    [string]$Message = "⛔ Git for Windows is not installed (or not found in path)... Install it before using this command ! ⛔",
+
+    # By default text is centered
+    [bool]$Center = $true
+  )
+
+  # Check command existence
+  if (Get-Command git -ErrorAction SilentlyContinue) {
+    return $true
+  }
+
+  # Display Logic
+  if ($Center) {
+    # Using existing helper to calculate padding
+    $paddingStr = Get-CenteredPadding -RawMessage $Message
+    Write-Host -NoNewline $paddingStr
+  }
+
+  Write-Host $Message -ForegroundColor Red
+
+  return $false
+}
 
 
 #--------------------------------------------------------------------------#
@@ -2691,3 +2709,311 @@ function colors {
   Write-Host " on $bgcolor"
   }
 }
+
+
+#--------------------------------------------------------------------#
+#                   GLOBAL GIT IGNORE CONFIG                         #
+#--------------------------------------------------------------------#
+
+function Set-GlobalGitIgnore {
+  $GlobalIgnorePath = "$HOME\.gitignore_global"
+
+  ######## GUARD CLAUSE : GIT AVAILABILITY ########
+  if (-not (Test-GitAvailability -Message "⛔ Git for Windows is not installed (or not found in path). Global git ignore config skipped ! ⛔" -Center $false)) {
+    return
+  }
+
+  # Check if file exists
+  if (-not (Test-Path $GlobalIgnorePath)) {
+
+    Write-Host "⚠️ .gitignore_global not found. Creating it with default template..." -ForegroundColor Yellow
+
+    # Default content (used ONLY during creation)
+    $DefaultContent = @'
+# ======================================================================
+# SECURITY & IDENTIFICATION CREDENTIALS (CRITICAL)
+# ======================================================================
+# Certificates & Keys
+*.cert
+*.key
+*.pem
+*.pfx
+id_rsa
+id_rsa.pub
+
+# Environment Variables & Secrets
+*.private.php
+.env
+.env.*
+!.env.example
+secrets.json
+
+# ======================================================================
+# SPECIFIC OS
+# ======================================================================
+# Linux
+*~
+.directory
+.fuse_hidden*
+.Trash-*
+
+# macOS
+._*
+.AppleDouble
+.DS_Store
+.LSOverride
+.Spotlight-V100
+.Trashes
+
+# Windows
+$RECYCLE.BIN/
+Desktop.ini
+ehthumbs.db
+Thumbs.db
+
+# ======================================================================
+# CLOUD & INFRASTRUCTURE
+# ======================================================================
+# Docker
+*.docker.tar
+.docker/
+docker-compose.*.override.yml
+docker-compose.override.yml
+
+# Kubernetes / Helm
+.helm/
+.kube/
+
+# Terraform
+*.tfstate
+*.tfstate.backup
+.terraform/
+
+# ======================================================================
+# DEPLOYMENT
+# ======================================================================
+# Vercel
+.vercel
+
+# ======================================================================
+# LANGUAGES (Compilers & Binaries)
+# ======================================================================
+# C# / .NET (Build Output)
+[Bb]in/
+[Oo]bj/
+/out/
+Artifacts/
+
+# JavaScript / TypeScript (Build Output)
+/bazel-out
+/build
+/dist
+/out
+/out-tsc
+/tmp
+*.tsbuildinfo
+next-env.d.ts
+
+# Python (Bytecode)
+*.py[cod]
+*$py.class
+__pycache__/
+
+# ======================================================================
+# PACKAGE MANAGERS
+# ======================================================================
+# Node.js
+/node_modules
+node_modules/
+
+# Node.js (Yarn Berry)
+.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# Npm
+npm-debug.log*
+
+# NuGet
+*.nupkg
+*.snupkg
+**/packages/
+!**/packages/build/
+
+# Composer
+/vendor/
+
+# PNPM
+.pnpm-debug.log*
+
+# Python (Pip / Venv)
+*.egg-info/
+.venv/
+env/
+venv/
+
+# Typings
+/typings
+
+# Yarn
+yarn-debug.log*
+yarn-error.log*
+
+# ======================================================================
+# FRAMEWORKS (Cache & Configs)
+# ======================================================================
+# .NET Core
+.store/
+
+# Angular
+.angular
+/.angular/cache
+
+# Expo / React Native
+/.expo/
+
+# Next.js
+/.next/
+
+# Sass (CSS)
+.sass-cache/
+
+# Symfony
+/public/bundles/
+/public/media/
+/var/
+/connect.lock
+
+# ======================================================================
+# TESTING (Tests & Coverage)
+# ======================================================================
+# General Coverage
+/coverage
+
+# Jest (JS)
+.jest-cache
+test-report.xml
+
+# NUnit / MSTest (.NET)
+*.trdx
+*.trx
+NUnitResults.xml
+TestResult.xml
+TestResults/
+
+# PHPUnit (PHP)
+.phpunit.result.cache
+/phpunit.xml
+
+# Testem
+testem.log
+
+# ======================================================================
+# QUALITY & AUDIT
+# ======================================================================
+# Checkmarx
+cx.*
+CxReports/
+
+# SonarQube
+.scannerwork/
+.sonar/
+sonar-project.properties
+sonar-report.json
+
+# ======================================================================
+# DOCUMENTATION
+# ======================================================================
+# Compodoc (Angular)
+/documentation/
+
+# Swagger / OpenAPI
+api-docs/
+swagger-ui/
+
+# ======================================================================
+# DATA SCIENCE & ML
+# ======================================================================
+# Data files
+*.csv
+*.parquet
+/data/
+
+# Jupyter
+.ipynb_checkpoints
+
+# MinIO / MLFlow
+mc-config/
+notebooks/mlruns
+
+# ======================================================================
+# IDEs & EDITORS
+# ======================================================================
+# Eclipse
+.classpath
+.project
+.settings/
+*.launch
+
+# JetBrains
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# Sublime Text
+*.sublime-workspace
+
+# Visual Studio (Classic)
+*.sln.docstates
+*.suo
+*.user
+*.VisualState.xml
+.vs/
+
+# Visual Studio Code
+.history/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/launch.json
+!.vscode/settings.json
+!.vscode/tasks.json
+
+# ======================================================================
+# DIVERS & LOGS
+# ======================================================================
+*.log
+/libpeerconnection.log
+public/COM3
+
+# ----------------------------------------------------------------------
+# USER CUSTOMIZATIONS
+# ----------------------------------------------------------------------
+/Books/Ninja Squad/
+/Books/Supports Cours Formation/
+'@
+
+    try {
+      Set-Content -Path $GlobalIgnorePath -Value $DefaultContent -Encoding UTF8 -Force
+      Write-Host "✅ .gitignore_global created successfully." -ForegroundColor Green
+    }
+    catch {
+      Write-Host "❌ Error creating .gitignore_global: $_" -ForegroundColor Red
+    }
+  }
+
+  # Git configuration, we just make sure link is established
+  # Git will read contents of file with each command, so your manual changes are taken into account immediately
+  $CurrentConfig = git config --global core.excludesfile
+
+  if ($CurrentConfig -ne $GlobalIgnorePath) {
+    git config --global core.excludesfile $GlobalIgnorePath
+  }
+}
+
+# Execute immediately on startup
+Set-GlobalGitIgnore
