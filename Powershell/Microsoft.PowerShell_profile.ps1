@@ -2531,20 +2531,20 @@ function go {
 
   # List of valid options and their corresponding paths
   $validOptions = @(
-    @{ Name = "aw";        Path = "$HOME\Desktop\Projets\ArtiWave" },
-    @{ Name = "cours";     Path = "$HOME\Desktop\Cours" },
-    @{ Name = "docs";      Path = "$HOME\Documents\Documentations" },
-    @{ Name = "dotfiles";  Path = "$HOME\Desktop\Dotfiles" },
-    @{ Name = "dwld";      Path = "$HOME\Downloads" },
-    @{ Name = "eg";        Path = "$HOME\Desktop\Projets\EasyGarden" },
-    @{ Name = "el";        Path = "$HOME\Desktop\Projets\EmmanuelLefevre" },
-    @{ Name = "home";      Path = "$HOME" },
-    @{ Name = "mdimg";     Path = "$HOME\Desktop\MarkdownImg" },
-    @{ Name = "nvim";      Path = "$HOME\AppData\Local\nvim" },
-    @{ Name = "profile";   Path = "$HOME\Documents\PowerShell" },
-    @{ Name = "projets";   Path = "$HOME\Desktop\Projets" },
-    @{ Name = "replica";   Path = "$HOME\Desktop\Projets\ReplicaMysql" },
-    @{ Name = "help";      Path = "Available paths" }
+    @{ Name = "artiwave";                    Path = "$HOME\Desktop\Projets\ArtiWave" },
+    @{ Name = "cours";                       Path = "$HOME\Desktop\Cours" },
+    @{ Name = "Documentations";              Path = "$HOME\Documents\Documentations" },
+    @{ Name = "dotfiles";                    Path = "$HOME\Desktop\Dotfiles" },
+    @{ Name = "dwld";                        Path = "$HOME\Downloads" },
+    @{ Name = "eg";                          Path = "$HOME\Desktop\Projets\EasyGarden" },
+    @{ Name = "el";                          Path = "$HOME\Desktop\Projets\EmmanuelLefevre" },
+    @{ Name = "home";                        Path = "$HOME" },
+    @{ Name = "mdimg";                       Path = "$HOME\Desktop\MarkdownImg" },
+    @{ Name = "nvim";                        Path = "$HOME\AppData\Local\nvim" },
+    @{ Name = "profile";                     Path = "$HOME\Documents\PowerShell" },
+    @{ Name = "projets";                     Path = "$HOME\Desktop\Projets" },
+    @{ Name = "replica";                     Path = "$HOME\Desktop\Projets\ReplicaMysql" },
+    @{ Name = "help";                        Path = "Available paths" }
   )
 
   # Check if the passed argument is valid
@@ -2554,7 +2554,7 @@ function go {
   }
 
   Switch ($location) {
-    "aw" {
+    "artiwave" {
       Set-Location -Path "$HOME\Desktop\Projets\ArtiWave"
     }
     "cours" {
