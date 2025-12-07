@@ -47,6 +47,8 @@ function gpull {
     [string]$Name
   )
 
+  Show-HeaderFrame -Title "UPDATE YOUR LOCAL REPOSITORIES"
+
   ######## GUARD CLAUSE : GIT AVAILABILITY ########
   if (-not (Test-GitAvailability)) {
     return
@@ -2357,6 +2359,35 @@ function Get-CenteredPadding {
   return " " * $paddingCount
 }
 
+##########---------- Display a frame header ----------##########
+function Show-HeaderFrame {
+  param (
+    [Parameter(Mandatory=$true)]
+    [string]$Title,
+
+    [ConsoleColor]$Color = "Cyan",
+
+    [int]$Padding = 14
+  )
+
+  # Definition of fixed left margin (8 spaces)
+  $leftMargin = " " * 8
+
+  # Preparing internal content with padding
+  $spaceString = " " * $Padding
+  $middleContent = "$spaceString$Title$spaceString"
+
+  # Calculating length for bar
+  $horizontalBar = "═" * $middleContent.Length
+
+  # Display frame
+  Write-Host ""
+  Write-Host "$leftMargin╔$horizontalBar╗" -ForegroundColor $Color
+  Write-Host "$leftMargin║$middleContent║" -ForegroundColor $Color
+  Write-Host "$leftMargin╚$horizontalBar╝" -ForegroundColor $Color
+  Write-Host ""
+}
+
 
 #--------------------------------------------------------------------------#
 #                        UTILITIES FUNCTIONS                               #
@@ -2720,7 +2751,8 @@ function colors {
 function Set-GlobalGitIgnore {
   $GitGlobalIgnorePath = "$HOME\.gitignore_global"
 
-  Write-Host ""
+  Show-HeaderFrame -Title "GLOBAL GIT IGNORE CONFIGURATION"
+
   ######## GUARD CLAUSE : GIT AVAILABILITY ########
   if (-not (Test-GitAvailability -Message "⛔ Git for Windows is not installed (or not found in path). Global git ignore config skipped ! ⛔")) {
     return
