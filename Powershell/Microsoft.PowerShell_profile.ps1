@@ -1888,7 +1888,7 @@ function Show-StashWarning {
 
             if (-not [string]::IsNullOrWhiteSpace($fileString)) {
               # Display files
-              Write-Host "    $fileString" -ForegroundColor Gray
+              Write-Host "   $fileString" -ForegroundColor Gray
             }
           }
         }
@@ -2542,7 +2542,7 @@ function go {
     # Alphabetical sorting
     foreach ($option in ($allLocations | Sort-Object Name)) {
       # Icon to differentiate Repo vs Folder
-      $icon = if($option.IsRepo){"📦"}else{"📂"}
+      $icon = if($option.IsRepo){"󰊤"}else{""}
 
       if ($option.Name -ne "help") {
         Write-Host -NoNewline ("{0,-21}" -f "$($option.Name)") -ForegroundColor Magenta
@@ -2562,8 +2562,8 @@ function go {
   if (-not $target) {
     Write-Host -NoNewline "⚠️ Alias " -ForegroundColor Red
     Write-Host -NoNewline "`"$($location)`"" -ForegroundColor Magenta
-    Write-Host " not found in configuration ! ⚠️" -ForegroundColor Red
-    Write-Host "   └─> Type 'go help' to see available options..." -ForegroundColor DarkYellow
+    Write-Host " not found in configuration !" -ForegroundColor Red
+    Write-Host "   └─> Type 'go help'to see available options..." -ForegroundColor DarkYellow
     return
   }
 
@@ -2573,7 +2573,7 @@ function go {
   else {
     Write-Host -NoNewline "⚠️ Path defined for alias " -ForegroundColor Red
     Write-Host -NoNewline "'$location'" -ForegroundColor Magenta
-    Write-Host " does not exist on disk! ⚠️" -ForegroundColor Red
+    Write-Host " does not exist on disk !" -ForegroundColor Red
     Write-Host -NoNewline "   └─> Missing path : " -ForegroundColor DarkYellow
     Write-Host -NoNewline "`"$($target.Path)`"" -ForegroundColor DarkCyan
   }
