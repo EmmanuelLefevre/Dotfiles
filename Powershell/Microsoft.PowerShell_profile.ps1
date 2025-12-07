@@ -1529,7 +1529,7 @@ function Invoke-OrphanedCleanup {
   $protectedBranches = @("dev", "develop", "main", "master")
 
   # Get current branch name to ensure we don't try to delete it
-  $currentBranch = (git rev-parse --abbrev-ref HEAD)
+  $currentBranch = (git rev-parse --abbrev-ref HEAD).Trim()
 
   # Find branches marked as ': gone]' in git verbose output
   $orphanedBranches = git branch -vv | Select-String -Pattern '\[.*: gone\]' | ForEach-Object {
