@@ -2223,6 +2223,7 @@ function Get-CenteredPadding {
 #---------------------------------------------------------------------------#
 #                        LOCATION PATH CONFIG                               #
 #---------------------------------------------------------------------------#
+
 function Get-LocationPathConfig {
   # IsRepo = $true => Included in gpull() process AND accessible via go()
   # IsRepo = $false=> Accessible ONLY via go()
