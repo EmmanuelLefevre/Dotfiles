@@ -490,78 +490,19 @@ function gpull {
 
 ##########---------- Get local repositories information ----------##########
 function Get-RepositoriesInfo {
-  ######## DATA DEFINITION ########
+  ######## ENVIRONMENTS VARIABLES DEFINITION ########
+  # GitHub token
+  $gitHubToken = $env:GITHUB_TOKEN
   # GitHub username
   $gitHubUsername = $env:GITHUB_USERNAME
 
-  # GitHub token
-  $gitHubToken = $env:GITHUB_TOKEN
-
-  # Array to define the order of repositories
-  $reposOrder = @(
-    "ArtiWave",
-    "AstroFall",
-    "Cours",
-    "DailyPush",
-    "DataScrub",
-    "Documentations",
-    "Dotfiles",
-    "EasyGarden",
-    "Elexxion",
-    "ElexxionData",
-    "EmmanuelLefevre",
-    "GestForm",
-    "GitHubProfileIcons",
-    "GoogleSheets",
-    "LeCabinetDeCuriosites",
-    "IAmEmmanuelLefevre",
-    "MarkdownImg",
-    "Mflix",
-    "OmbreArcane",
-    "OpenScraper",
-    "ParquetFlow",
-    "ReplicaMySQL",
-    "Schemas",
-    "ScrapMate",
-    "Sortify",
-    "Soutenances",
-    "Yam4"
-  )
-
-  # Dictionary containing local repositories path
-  $repos = @{
-    "ArtiWave"               = "$env:USERPROFILE\Desktop\Projets\ArtiWave"
-    "AstroFall"              = "$env:USERPROFILE\Desktop\Projets\AstroFall"
-    "Cours"                  = "$env:USERPROFILE\Desktop\Cours"
-    "DailyPush"              = "$env:USERPROFILE\Desktop\DailyPush"
-    "DataScrub"              = "$env:USERPROFILE\Desktop\Projets\DataScrub"
-    "Documentations"         = "$env:USERPROFILE\Documents\Documentations"
-    "Dotfiles"               = "$env:USERPROFILE\Desktop\Dotfiles"
-    "EasyGarden"             = "$env:USERPROFILE\Desktop\Projets\EasyGarden"
-    "Elexxion"               = "$env:USERPROFILE\Desktop\Projets\Elexxion"
-    "ElexxionData"           = "$env:USERPROFILE\Desktop\Projets\ElexxionData"
-    "EmmanuelLefevre"        = "$env:USERPROFILE\Desktop\Projets\EmmanuelLefevre"
-    "GestForm"               = "$env:USERPROFILE\Desktop\Projets\GestForm"
-    "GitHubProfileIcons"     = "$env:USERPROFILE\Pictures\GitHubProfileIcons"
-    "GoogleSheets"           = "$env:USERPROFILE\Desktop\GoogleSheets"
-    "LeCabinetDeCuriosites"  = "$env:USERPROFILE\Desktop\Projets\LeCabinetDeCuriosites"
-    "IAmEmmanuelLefevre"     = "$env:USERPROFILE\Desktop\Projets\IAmEmmanuelLefevre"
-    "MarkdownImg"            = "$env:USERPROFILE\Desktop\MarkdownImg"
-    "Mflix"                  = "$env:USERPROFILE\Desktop\Projets\Mflix"
-    "OmbreArcane"            = "$env:USERPROFILE\Desktop\Projets\OmbreArcane"
-    "OpenScraper"            = "$env:USERPROFILE\Desktop\Projets\OpenScraper"
-    "ParquetFlow"            = "$env:USERPROFILE\Desktop\Projets\ParquetFlow"
-    "ReplicaMySQL"           = "$env:USERPROFILE\Desktop\Projets\ReplicaMySQL"
-    "Schemas"                = "$env:USERPROFILE\Desktop\Schemas"
-    "ScrapMate"              = "$env:USERPROFILE\Desktop\Projets\ScrapMate"
-    "Sortify"                = "$env:USERPROFILE\Desktop\Projets\Sortify"
-    "Soutenances"            = "$env:USERPROFILE\Desktop\Soutenances"
-    "Yam4"                   = "$env:USERPROFILE\Desktop\Projets\Yam4"
-  }
-
-  # Error message templates
+  ######## WINDOWS ENVIRONMENTS VARIABLES MESSAGE CONFIG ########
   $envVarMessageTemplate = "Check {0} in Windows Environment Variables..."
   $functionNameMessage = "in Get-RepositoriesInfo !"
+
+  ######## LOAD PATH CONFIG ########
+  $allLocations = Get-LocationConfig
+  $gitLocations = $allLocations | Where-Object { $_.IsRepo -eq $true }
 
   ######## GUARD CLAUSE : MISSING USERNAME ########
   if ([string]::IsNullOrWhiteSpace($gitHubUsername)) {
@@ -606,6 +547,8 @@ function Get-RepositoriesInfo {
   }
 
   ######## GUARD CLAUSE : EMPTY ORDER LIST ########
+  # Data preparation
+  $reposOrder = @($gitConfig.Name)
   if (-not $reposOrder -or $reposOrder.Count -eq 0) {
     # Helper called to center error message nicely
     $errMsg = "❌ Local array repo order is empty ! ❌"
@@ -627,6 +570,14 @@ function Get-RepositoriesInfo {
   }
 
   ######## GUARD CLAUSE : EMPTY PATH DICTIONARY ########
+  # Data preparation
+  $repos = @{}
+  foreach ($item in $gitConfig) {
+    if (-not [string]::IsNullOrWhiteSpace($item.Path)) {
+      $repos[$item.Name] = $item.Path
+    }
+  }
+
   if (-not $repos -or $repos.Keys.Count -eq 0) {
     # Helper called to center error message nicely
     $errMsg = "❌ Local repository dictionary is empty ! ❌"
@@ -2269,6 +2220,51 @@ function Get-CenteredPadding {
   return " " * $paddingCount
 }
 
+#---------------------------------------------------------------------------#
+#                        LOCATION PATH CONFIG                               #
+#---------------------------------------------------------------------------#
+function Get-LocationPathConfig {
+  # IsRepo = $true => Included in gpull() process AND accessible via go()
+  # IsRepo = $false=> Accessible ONLY via go()
+
+  return @(
+    ##########---------- REPOSITORIES (Important order for gpull() function) ----------##########
+    [PSCustomObject]@{ Name = "ArtiWave";                 Path = "$env:USERPROFILE\Desktop\Projets\ArtiWave";                 IsRepo = $true },
+    [PSCustomObject]@{ Name = "AstroFall";                Path = "$env:USERPROFILE\Desktop\Projets\AstroFall";                IsRepo = $true },
+    [PSCustomObject]@{ Name = "Cours";                    Path = "$env:USERPROFILE\Desktop\Cours";                            IsRepo = $true },
+    [PSCustomObject]@{ Name = "DailyPush";                Path = "$env:USERPROFILE\Desktop\Projets\DailyPush";                IsRepo = $true },
+    [PSCustomObject]@{ Name = "DataScrub";                Path = "$env:USERPROFILE\Desktop\Projets\DataScrub";                IsRepo = $true },
+    [PSCustomObject]@{ Name = "Documentations";           Path = "$env:USERPROFILE\Documents\Documentations";                 IsRepo = $true },
+    [PSCustomObject]@{ Name = "Dotfiles";                 Path = "$env:USERPROFILE\Desktop\Dotfiles";                         IsRepo = $true },
+    [PSCustomObject]@{ Name = "EasyGarden";               Path = "$env:USERPROFILE\Desktop\Projets\EasyGarden";               IsRepo = $true },
+    [PSCustomObject]@{ Name = "Elexxion";                 Path = "$env:USERPROFILE\Desktop\Projets\Elexxion";                 IsRepo = $true },
+    [PSCustomObject]@{ Name = "ElexxionData";             Path = "$env:USERPROFILE\Desktop\Projets\ElexxionData";             IsRepo = $true },
+    [PSCustomObject]@{ Name = "EmmanuelLefevre";          Path = "$env:USERPROFILE\Desktop\Projets\EmmanuelLefevre";          IsRepo = $true },
+    [PSCustomObject]@{ Name = "GestForm";                 Path = "$env:USERPROFILE\Desktop\Projets\GestForm";                 IsRepo = $true },
+    [PSCustomObject]@{ Name = "GitHubProfileIcons";       Path = "$env:USERPROFILE\Pictures\GitHubProfileIcons";              IsRepo = $true },
+    [PSCustomObject]@{ Name = "GoogleSheets";             Path = "$env:USERPROFILE\Desktop\GoogleSheets";                     IsRepo = $true },
+    [PSCustomObject]@{ Name = "LeCabinetDeCuriosites";    Path = "$env:USERPROFILE\Desktop\Projets\LeCabinetDeCuriosites";    IsRepo = $true },
+    [PSCustomObject]@{ Name = "IAmEmmanuelLefevre";       Path = "$env:USERPROFILE\Desktop\Projets\IAmEmmanuelLefevre";       IsRepo = $true },
+    [PSCustomObject]@{ Name = "MarkdownImg";              Path = "$env:USERPROFILE\Desktop\MarkdownImg";                      IsRepo = $true },
+    [PSCustomObject]@{ Name = "Mflix";                    Path = "$env:USERPROFILE\Desktop\Projets\Mflix";                    IsRepo = $true },
+    [PSCustomObject]@{ Name = "OmbreArcane";              Path = "$env:USERPROFILE\Desktop\Projets\OmbreArcane";              IsRepo = $true },
+    [PSCustomObject]@{ Name = "OpenScraper";              Path = "$env:USERPROFILE\Desktop\Projets\OpenScraper";              IsRepo = $true },
+    [PSCustomObject]@{ Name = "ParquetFlow";              Path = "$env:USERPROFILE\Desktop\Projets\ParquetFlow";              IsRepo = $true },
+    [PSCustomObject]@{ Name = "ReplicaMySQL";             Path = "$env:USERPROFILE\Desktop\Projets\ReplicaMySQL";             IsRepo = $true },
+    [PSCustomObject]@{ Name = "Schemas";                  Path = "$env:USERPROFILE\Desktop\Schemas";                          IsRepo = $true },
+    [PSCustomObject]@{ Name = "ScrapMate";                Path = "$env:USERPROFILE\Desktop\Projets\ScrapMate";                IsRepo = $true },
+    [PSCustomObject]@{ Name = "Sortify";                  Path = "$env:USERPROFILE\Desktop\Projets\Sortify";                  IsRepo = $true },
+    [PSCustomObject]@{ Name = "Soutenances";              Path = "$env:USERPROFILE\Desktop\Soutenances";                      IsRepo = $true },
+    [PSCustomObject]@{ Name = "Yam4";                     Path = "$env:USERPROFILE\Desktop\Projets\Yam4";                     IsRepo = $true },
+
+    ##########---------- NAVIGATION ONLY ----------##########
+    [PSCustomObject]@{ Name = "home";                     Path = "$env:USERPROFILE";                                          IsRepo = $false },
+    [PSCustomObject]@{ Name = "dwld";                     Path = "$env:USERPROFILE\Downloads";                                IsRepo = $false },
+    [PSCustomObject]@{ Name = "projets";                  Path = "$env:USERPROFILE\Desktop\Projets";                          IsRepo = $false },
+    [PSCustomObject]@{ Name = "nvim";                     Path = "$env:USERPROFILE\AppData\Local\nvim";                       IsRepo = $false },
+    [PSCustomObject]@{ Name = "profile";                  Path = "$env:USERPROFILE\Documents\PowerShell";                     IsRepo = $false }
+  )
+}
 
 #--------------------------------------------------------------------------#
 #                        UTILITIES FUNCTIONS                               #
@@ -2523,169 +2519,63 @@ function go {
     [string]$location
   )
 
-  # Check if the argument is empty
+  ######## GUARD CLAUSE : MISSING ARGUMENT ########
   if (-not $location) {
     Write-Host "⚠️ Invalid option! Type 'go help' ⚠️" -ForegroundColor Red
     return
   }
 
-  # List of valid options and their corresponding paths
-  $validOptions = @(
-    @{ Name = "artiwave";                    Path = "$HOME\Desktop\Projets\ArtiWave" },
-    @{ Name = "astrofall";                   Path = "$HOME\Desktop\Projets\Astrofall" },
-    @{ Name = "cours";                       Path = "$HOME\Desktop\Cours" },
-    @{ Name = "dailypush";                   Path = "$HOME\Desktop\Projets\DailyPush" },
-    @{ Name = "datascrub";                   Path = "$HOME\Desktop\Projets\DataScrub" },
-    @{ Name = "documentations";              Path = "$HOME\Documents\Documentations" },
-    @{ Name = "dotfiles";                    Path = "$HOME\Desktop\Dotfiles" },
-    @{ Name = "dwld";                        Path = "$HOME\Downloads" },
-    @{ Name = "easygarden";                  Path = "$HOME\Desktop\Projets\EasyGarden" },
-    @{ Name = "elexxion";                    Path = "$HOME\Desktop\Projets\Elexxion" },
-    @{ Name = "elexxiondata";                Path = "$HOME\Desktop\Projets\ElexxionData" },
-    @{ Name = "emmanuellefevre";             Path = "$HOME\Desktop\Projets\EmmanuelLefevre" },
-    @{ Name = "gestform";                    Path = "$HOME\Desktop\Projets\GestForm" },
-    @{ Name = "githubprofileicons";          Path = "$HOME\Pictures\GitHubProfileIcons" },
-    @{ Name = "googlesheets";                Path = "$HOME\Desktop\GoogleSheets" },
-    @{ Name = "home";                        Path = "$HOME" },
-    @{ Name = "lecabinetdecuriosites";       Path = "$HOME\Desktop\Projets\LeCabinetDeCuriosites" },
-    @{ Name = "iamemmanuellefevre";          Path = "$HOME\Desktop\Projets\IAmEmmanuelLefevre" },
-    @{ Name = "markdownimg";                 Path = "$HOME\Desktop\MarkdownImg" },
-    @{ Name = "mflix";                       Path = "$HOME\Desktop\Projets\Mflix" },
-    @{ Name = "nvim";                        Path = "$HOME\AppData\Local\nvim" },
-    @{ Name = "ombrearcane";                 Path = "$HOME\Desktop\Projets\OmbreArcane" },
-    @{ Name = "openscraper";                 Path = "$HOME\Desktop\Projets\OpenScraper" },
-    @{ Name = "parquetflow";                 Path = "$HOME\Desktop\Projets\ParquetFlow" },
-    @{ Name = "profile";                     Path = "$HOME\Documents\PowerShell" },
-    @{ Name = "projets";                     Path = "$HOME\Desktop\Projets" },
-    @{ Name = "replicamysql";                Path = "$HOME\Desktop\Projets\ReplicaMysql" },
-    @{ Name = "schemas";                     Path = "$HOME\Desktop\Schemas" },
-    @{ Name = "replicamysql";                Path = "$HOME\Desktop\Projets\ReplicaMysql" },
-    @{ Name = "scrapmate";                   Path = "$HOME\Desktop\Projets\ScrapMate" },
-    @{ Name = "sortify";                     Path = "$HOME\Desktop\Projets\Sortify" },
-    @{ Name = "soutenances";                 Path = "$HOME\Desktop\Soutenances" },
-    @{ Name = "yam4";                        Path = "$HOME\Desktop\Projets\Yam4" },
-    @{ Name = "help";                        Path = "Available paths" }
-  )
+  ######## LOAD CONFIG ########
+  $allLocations = Get-LocationPathConfig
 
-  # Check if the passed argument is valid
-  if ($validOptions.Name -notcontains $location) {
-    Write-Host "⚠️ Invalid argument! Type 'go help' ⚠️" -ForegroundColor Red
+  ######## GUARD CLAUSE : CONFIGURATION ERROR ########
+  if (-not $allLocations) {
+    Write-Host "❌ Critical Error: Get-LocationPathConfig returned no data ! ❌" -ForegroundColor Red
     return
   }
 
-  Switch ($location) {
-    "artiwave" {
-      Set-Location -Path "$HOME\Desktop\Projets\ArtiWave"
-    }
-    "astrofall" {
-      Set-Location -Path "$HOME\Desktop\Projets\Astrofall"
-    }
-    "cours" {
-      Set-Location -Path "$HOME\Desktop\Cours"
-    }
-    "dailypush" {
-      Set-Location -Path "$HOME\Desktop\Projets\DailyPush"
-    }
-    "datascrub" {
-      Set-Location -Path "$HOME\Desktop\Projets\DataScrub"
-    }
-    "documentations" {
-      Set-Location -Path "$HOME\Documents\Documentations"
-    }
-    "dotfiles" {
-      Set-Location -Path "$HOME\Desktop\Dotfiles"
-    }
-    "dwld" {
-      Set-Location -Path "$HOME\Downloads"
-    }
-    "easygarden" {
-      Set-Location -Path "$HOME\Desktop\Projets\EasyGarden"
-    }
-    "elexxion" {
-      Set-Location -Path "$HOME\Desktop\Projets\Elexxion"
-    }
-    "elexxiondata" {
-      Set-Location -Path "$HOME\Desktop\Projets\ElexxionData"
-    }
-    "emmanuellefevre" {
-      Set-Location -Path "$HOME\Desktop\Projets\EmmanuelLefevre"
-    }
-    "gestform" {
-      Set-Location -Path "$HOME\Desktop\Projets\GestForm"
-    }
-    "githubprofileicons" {
-      Set-Location -Path "$HOME\Pictures\GitHubProfileIcons"
-    }
-    "googlesheets" {
-      Set-Location -Path "$HOME\Desktop\GoogleSheets"
-    }
-    "home" {
-      Set-Location -Path "$HOME"
-    }
-    "lecabinetdecuriosites" {
-      Set-Location -Path "$HOME\Desktop\Projets\LeCabinetDeCuriosites"
-    }
-    "iamemmanuellefevre" {
-      Set-Location -Path "$HOME\Desktop\Projets\IAmEmmanuelLefevre"
-    }
-    "markdownimg" {
-      Set-Location -Path "$HOME\Desktop\MarkdownImg"
-    }
-    "mflix" {
-      Set-Location -Path "$HOME\Desktop\Projets\Mflix"
-    }
-    "nvim" {
-      Set-Location -Path "$HOME\AppData\Local\nvim"
-    }
-    "ombrearcane" {
-      Set-Location -Path "$HOME\Desktop\Projets\OmbreArcane"
-    }
-    "openscraper" {
-      Set-Location -Path "$HOME\Desktop\Projets\OpenScraper"
-    }
-    "parquetflow" {
-      Set-Location -Path "$HOME\Desktop\Projets\ParquetFlow"
-    }
-    "profile" {
-      Set-Location -Path "$HOME\Documents\PowerShell"
-    }
-    "projets" {
-      Set-Location -Path "$HOME\Desktop\Projets"
-    }
-    "replicamysql" {
-      Set-Location -Path "$HOME\Desktop\Projets\ReplicaMySQL"
-    }
-    "schemas" {
-      Set-Location -Path "$HOME\Desktop\Schemas"
-    }
-    "scrapmate" {
-      Set-Location -Path "$HOME\Desktop\Projets\ScrapMate"
-    }
-    "sortify" {
-      Set-Location -Path "$HOME\Desktop\Projets\Sortify"
-    }
-    "soutenances" {
-      Set-Location -Path "$HOME\Desktop\Soutenances"
-    }
-    "yam4" {
-      Set-Location -Path "$HOME\Desktop\Projets\Yam4"
-    }
-    "help" {
-      # Create a table of valid options
-      Write-Host ""
-      Write-Host ("{0,-20} {1,-50}" -f "Alias", "Path Direction") -ForegroundColor White -BackgroundColor DarkGray
+  ######## HELP MODE ########
+  if ($location -eq "help") {
+    Write-Host ""
+    Write-Host ("{0,-20} {1,-50}" -f "Alias", "Path Direction") -ForegroundColor White -BackgroundColor DarkGray
 
-      foreach ($option in $validOptions) {
-        if ($option.Name -ne "help") {
-          Write-Host -NoNewline ("{0,-21}" -f "$($option.Name)") -ForegroundColor Magenta
-          Write-Host ("{0,-50}" -f " $($option.Path)") -ForegroundColor DarkCyan
-        }
+    # Alphabetical sorting
+    foreach ($option in ($allLocations | Sort-Object Name)) {
+      # Icon to differentiate Repo vs Folder
+      $icon = if($option.IsRepo){"📦"}else{"📂"}
+
+      if ($option.Name -ne "help") {
+        Write-Host -NoNewline ("{0,-21}" -f "$($option.Name)") -ForegroundColor Magenta
+        Write-Host ("{0,-50}" -f "$icon $($option.Path)") -ForegroundColor DarkCyan
       }
-      Write-Host ""
     }
-    default {
-      Write-Host "⚠️ Error occurred! ⚠️" -ForegroundColor Red
-    }
+
+    Write-Host ""
+    return
+  }
+
+  ######## NAVIGATION MODE ########
+  # Search (Case Insensitive by default in PowerShell)
+  $target = $allLocations | Where-Object { $_.Name -eq $location } | Select-Object -First 1
+
+  ######## GUARD CLAUSE : ALIAS NOT FOUND ########
+  if (-not $target) {
+    Write-Host -NoNewline "⚠️ Alias " -ForegroundColor Red
+    Write-Host -NoNewline "`"$($location)`"" -ForegroundColor Magenta
+    Write-Host " not found in configuration ! ⚠️" -ForegroundColor Red
+    Write-Host "   └─> Type 'go help' to see available options..." -ForegroundColor DarkYellow
+    return
+  }
+
+  if (Test-Path -Path $target.Path) {
+    Set-Location -Path $target.Path
+  }
+  else {
+    Write-Host -NoNewline "⚠️ Path defined for alias " -ForegroundColor Red
+    Write-Host -NoNewline "'$location'" -ForegroundColor Magenta
+    Write-Host " does not exist on disk! ⚠️" -ForegroundColor Red
+    Write-Host -NoNewline "   └─> Missing path : " -ForegroundColor DarkYellow
+    Write-Host -NoNewline "`"$($target.Path)`"" -ForegroundColor DarkCyan
   }
 }
 
