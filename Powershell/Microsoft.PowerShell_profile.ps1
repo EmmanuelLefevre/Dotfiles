@@ -1539,15 +1539,15 @@ function Invoke-OrphanedCleanup {
     }
   }
 
-  # Filter, remove protected branches and current branch from list
+  # Filter, remove protected branches
   $branchesToClean = $orphanedBranches | Where-Object {
-    ($_ -ne $currentBranch) -and (-not ($protectedBranches -icontains $_))
+    (-not ($protectedBranches -icontains $_))
   }
 
   ######## GUARD CLAUSE : NOTHING TO CLEAN ########
   # Original branch was NOT deleted (or empty list)
   if (-not $branchesToClean -or $branchesToClean.Count -eq 0) {
-    return $false
+    return [PSCustomObject]@{ OriginalDeleted = $false; HasError = $false }
   }
 
   Show-Separator -Length 80 -ForegroundColor DarkGray
@@ -1566,8 +1566,54 @@ function Invoke-OrphanedCleanup {
       Show-Separator -Length 80 -ForegroundColor DarkGray
     }
 
+    # Refresh current branch status (in case we moved in previous loop)
+    $realTimeCurrentBranch = (git rev-parse --abbrev-ref HEAD).Trim()
+
+    if (-not $isFirstBranch) {
+      Show-Separator -Length 80 -ForegroundColor DarkGray
+    }
     $isFirstBranch = $false
 
+    ######## DEAD BRANCH ########
+    if ($orphaned -eq $realTimeCurrentBranch) {
+      Write-Host -NoNewline "👻 You are currently on the orphaned branch " -ForegroundColor Cyan
+      Write-Host -NoNewline "`"$($orphaned)`"" -ForegroundColor Magenta
+      Write-Host " ..." -ForegroundColor Cyan
+
+      ######## GUARD CLAUSE : DIRTY WORKTREE ########
+      if (-not (Test-WorkingTreeClean -BranchName $orphaned)) {
+        Write-Host "⛔ Cannot switch branch automatically : uncommitted/unstagged changes detected ! ⛔" -ForegroundColor Red
+        Write-Host "   └─> Skipping cleanup for this branch." -ForegroundColor DarkYellow
+
+        continue
+      }
+
+      # Find safe branch
+      $safeBranch = "develop"
+      if (-not (git rev-parse --verify $safeBranch 2>$null)) { $safeBranch = "dev" }
+      if (-not (git rev-parse --verify $safeBranch 2>$null)) { $safeBranch = "main" }
+      if (-not (git rev-parse --verify $safeBranch 2>$null)) { $safeBranch = "master" }
+
+      # Evacuate on safe branch
+      Write-Host -NoNewline "🔄 Evacuating to " -ForegroundColor Cyan
+      Write-Host -NoNewline "`"$($safeBranch)`"" -ForegroundColor Magenta
+      Write-Host " to allow deletion 🔄" -ForegroundColor Cyan
+
+      git checkout $safeBranch 2>$null | Out-Null
+
+      if ($LASTEXITCODE -ne 0) {
+        Write-Host -NoNewline "❌ Failed to checkout " -ForegroundColor Red
+        Write-Host -NoNewline "`"$($safeBranch)`"" -ForegroundColor Magenta
+        Write-Host -NoNewline ". Deletion aborted." -ForegroundColor Red
+
+        $hasError = $true
+
+        continue
+      }
+      # Success : no longer on branch, we can proceed to delete it
+    }
+
+    ######## STANDARD DELETION LOGIC ########
     # Helper called for warn about stash on branch
     Show-StashWarning -BranchName $orphaned
 
@@ -2286,6 +2332,12 @@ function Get-LocationPathConfig {
   )
 }
 
+#-----------------------------------------------------------------------#
+#                        SHARED FUNCTIONS                               #
+#-----------------------------------------------------------------------#
+
+
+
 #--------------------------------------------------------------------------#
 #                        UTILITIES FUNCTIONS                               #
 #--------------------------------------------------------------------------#
@@ -2631,8 +2683,8 @@ function ssh_github {
 function colors {
   $colors = [enum]::GetValues([System.ConsoleColor])
 
-  Foreach ($bgcolor in $colors) {
-    Foreach ($fgcolor in $colors) {
+  foreach ($bgcolor in $colors) {
+    foreach ($fgcolor in $colors) {
       Write-Host "$fgcolor|" -ForegroundColor $fgcolor -BackgroundColor $bgcolor -NoNewLine
     }
 
