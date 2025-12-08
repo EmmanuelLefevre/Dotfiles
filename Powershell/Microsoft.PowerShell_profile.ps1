@@ -2365,25 +2365,52 @@ function Show-HeaderFrame {
     [Parameter(Mandatory=$true)]
     [string]$Title,
 
-    [ConsoleColor]$Color = "Cyan",
-
-    [int]$Padding = 14
+    [ConsoleColor]$Color = "Cyan"
   )
 
-  # Definition of fixed left margin (8 spaces)
-  $leftMargin = " " * 8
+  # Fixed constraints
+  $TerminalWidth = 80
+  $FrameWidth = 64
+  $FramePaddingLeft = ($TerminalWidth - $FrameWidth) / 2
 
-  # Preparing internal content with padding
-  $spaceString = " " * $Padding
-  $middleContent = "$spaceString$Title$spaceString"
+  # Frame margins
+  $leftMargin = " " * $FramePaddingLeft
 
-  # Calculating length for bar
-  $horizontalBar = "═" * $middleContent.Length
+  ######## INTERN CONTENT ########
+  # Space around title inside frame
+  $middleContentRaw = " $Title "
 
-  # Display frame
+  # Length of horizontal bar between borders ╔ and ╗
+  $horizontalBarLength = $FrameWidth - 2
+
+  # Title length
+  $TitleLength = $middleContentRaw.Length
+
+  # Total space available to center title
+  $TotalInternalSpace = $horizontalBarLength - $TitleLength
+
+  # Internal margin to center title (in 62 characters)
+  $InternalLeftSpaces = [System.Math]::Floor($TotalInternalSpace / 2)
+
+  if ($InternalLeftSpaces -lt 0) {
+    $InternalLeftSpaces = 0
+  }
+
+  $InternalLeftMargin = " " * $InternalLeftSpaces
+
+  # Title with internal left padding
+  $PaddedTitle = $InternalLeftMargin + $middleContentRaw
+
+  # Fill in remaining space
+  $PaddedTitle += " " * ($horizontalBarLength - $PaddedTitle.Length)
+
+  # Create 62-character border bar
+  $horizontalBar = "═" * $horizontalBarLength
+
+  # Display frame header
   Write-Host ""
   Write-Host "$leftMargin╔$horizontalBar╗" -ForegroundColor $Color
-  Write-Host "$leftMargin║$middleContent║" -ForegroundColor $Color
+  Write-Host "$leftMargin║$PaddedTitle║" -ForegroundColor $Color
   Write-Host "$leftMargin╚$horizontalBar╝" -ForegroundColor $Color
   Write-Host ""
 }
