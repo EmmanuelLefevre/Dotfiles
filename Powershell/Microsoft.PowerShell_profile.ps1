@@ -3471,7 +3471,6 @@ notebooks/mlruns
 *.log
 /libpeerconnection.log
 public/COM3
-.gg
 
 # ======================================================================
 # USER CUSTOMIZATIONS
