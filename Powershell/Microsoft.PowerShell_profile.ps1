@@ -145,6 +145,40 @@ function Show-HeaderFrame {
   Write-Host ""
 }
 
+##########---------- Display error message nicely ----------##########
+function Show-GracefulError {
+  param (
+    [Parameter(Mandatory=$true)]
+    [string]$Message,
+
+    [Parameter(Mandatory=$false)]
+    [System.Management.Automation.ErrorRecord]$ErrorDetails,
+
+    [switch]$NoCenter,
+
+    [switch]$NoTrailingNewline
+  )
+
+  if ($NoCenter) {
+    Write-Host $Message -ForegroundColor Red
+  }
+  else {
+    $paddingStr = Get-CenteredPadding -RawMessage $Message
+    Write-Host -NoNewline $paddingStr
+    Write-Host $Message -ForegroundColor Red
+  }
+
+  # Display technical details if provided
+  if ($ErrorDetails) {
+    Write-Host "$ErrorDetails" -ForegroundColor DarkBlue
+  }
+
+  # Adding final line break if requested
+  if (-not $NoTrailingNewline) {
+    Write-Host ""
+  }
+}
+
 
 #--------------------------------------------------------------------------#
 #                   UPDATE YOUR LOCAL REPOSITORIES                         #
@@ -2497,14 +2531,7 @@ function Initialize-GlobalGitIgnoreFile {
     Write-Host ""
   }
   catch {
-    $msg = "❌ Error creating default template : "
-    $paddingStr = Get-CenteredPadding -RawMessage $msg
-
-    Write-Host -NoNewline $paddingStr
-    Write-Host $msg -ForegroundColor Red
-
-    Write-Host "$_" -ForegroundColor DarkBlue
-    Write-Host ""
+    Show-GracefulError -Message "❌ Error creating default template : " -NoCenter -ErrorDetails $_
   }
 }
 
@@ -2605,14 +2632,7 @@ function Update-GlobalGitIgnoreFile {
     return $true
   }
   catch {
-    $msg = "❌ Error updating file : "
-    $paddingStr = Get-CenteredPadding -RawMessage $msg
-
-    Write-Host -NoNewline $paddingStr
-    Write-Host $msg -ForegroundColor Red
-
-    Write-Host "$_" -ForegroundColor DarkBlue
-    Write-Host ""
+    Show-GracefulError -Message "❌ Error updating file : " -NoCenter -ErrorDetails $_
 
     # Backup warning
     $msgPrefix = "⚠️ Backup saved at : "
