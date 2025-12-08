@@ -2771,11 +2771,11 @@ function colors {
 }
 
 
-#--------------------------------------------------------------------#
-#                   GLOBAL GIT IGNORE CONFIG                         #
-#--------------------------------------------------------------------#
+#-------------------------------------------------------------------------#
+#                   LOAD GLOBAL GIT IGNORE CONFIG                         #
+#-------------------------------------------------------------------------#
 
-function Set-GlobalGitIgnore {
+function Set-LoadGlobalGitIgnore {
   $GitGlobalIgnorePath = Join-Path -Path $HOME -ChildPath ".gitignore_global"
 
   # Flag created or updated
@@ -2818,7 +2818,7 @@ function Initialize-GlobalGitIgnoreFile {
     [string[]]$ContentLines
   )
 
-  Show-HeaderFrame -Title "GLOBAL GIT IGNORE CONFIGURATION"
+  Show-HeaderFrame -Title "LOAD GLOBAL GIT IGNORE CONFIGURATION"
 
   # Message 1 : Not Found
   $msgPrefix = " .gitignore_global"
@@ -2898,7 +2898,7 @@ function Update-GlobalGitIgnoreFile {
   }
 
   # If we are here, we have updates
-  Show-HeaderFrame -Title "GLOBAL GIT IGNORE CONFIGURATION"
+  Show-HeaderFrame -Title "UPDATE GLOBAL GIT IGNORE CONFIGURATION"
 
   # Display messages
   if ($ItemsToAdd.Count -gt 0) {
@@ -3484,4 +3484,4 @@ public/COM3
 }
 
 # Executed immediately on terminal startup
-Set-GlobalGitIgnore
+Set-LoadGlobalGitIgnore
