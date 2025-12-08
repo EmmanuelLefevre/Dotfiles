@@ -55,12 +55,11 @@ function Test-GitAvailability {
 
   # Display Logic
   if ($Center) {
-    # Using existing helper to calculate padding
-    $paddingStr = Get-CenteredPadding -RawMessage $Message
-    Write-Host -NoNewline $paddingStr
+    Show-GracefulError -Message $Message
   }
-
-  Write-Host $Message -ForegroundColor Red
+  else {
+    Show-GracefulError -Message $Message -NoCenter
+  }
 
   return $false
 }
@@ -1022,9 +1021,7 @@ function Test-GitFetchSuccess {
   ######## GUARD CLAUSE : FETCH FAILED ########
   # Check if the exit code indicates an error (non-zero)
   if ($ExitCode -ne 0) {
-    Write-Host -NoNewline "⚠️ "
-    Write-Host -NoNewline "'Git fetch' failed ! Check your Git access credentials (SSH keys/Credential Manager)... ⚠️" -ForegroundColor Red
-
+    Show-GracefulError -Message "⚠️ 'Git fetch' failed ! Check your Git access credentials... ⚠️" -NoCenter
     return $false
   }
 
@@ -3399,7 +3396,7 @@ function touch {
   }
   # Display message if file already exists
   else {
-    Write-Host "⚠️ File always exists ⚠️" -ForegroundColor Red
+    Show-GracefulError -Message "⚠️ File already exists ⚠️" -NoCenter
   }
 }
 
@@ -3411,7 +3408,7 @@ function go {
 
   ######## GUARD CLAUSE : MISSING ARGUMENT ########
   if (-not $location) {
-    Write-Host "⚠️ Invalid option! Type 'go help'..." -ForegroundColor Red
+    Show-GracefulError -Message "⚠️ Invalid option! Type 'go help'..." -NoCenter
     return
   }
 
@@ -3420,7 +3417,7 @@ function go {
 
   ######## GUARD CLAUSE : CONFIGURATION ERROR ########
   if (-not $allLocations) {
-    Write-Host "❌ Critical Error : Get-LocationPathConfig returned no data !" -ForegroundColor Red
+    Show-GracefulError -Message "❌ Critical Error : Get-LocationPathConfig returned no data !" -NoCenter
     return
   }
 
