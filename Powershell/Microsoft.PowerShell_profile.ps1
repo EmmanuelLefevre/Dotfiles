@@ -646,13 +646,7 @@ function Get-RepositoriesInfo {
 
   ######## GUARD CLAUSE : MISSING USERNAME ########
   if ([string]::IsNullOrWhiteSpace($gitHubUsername)) {
-    # Helper called to center error message nicely
-    $errMsg = "❌ GitHub username is missing or invalid ! ❌"
-    $paddingErrStr = Get-CenteredPadding -RawMessage $errMsg
-
-    # Display error message
-    Write-Host -NoNewline $paddingErrStr
-    Write-Host $errMsg -ForegroundColor Red
+    Show-GracefulError -Message "❌ GitHub username is missing or invalid ! ❌" -NoTrailingNewline
 
     # Helper called to center info message nicely
     $infoMsg = "ℹ️ " + ($envVarMessageTemplate -f "'GITHUB_USERNAME'")
@@ -667,13 +661,7 @@ function Get-RepositoriesInfo {
 
   ######## GUARD CLAUSE : MISSING TOKEN ########
   if ([string]::IsNullOrWhiteSpace($gitHubToken)) {
-    # Helper called to center error message nicely
-    $errMsg = "❌ GitHub token is missing or invalid ! ❌"
-    $paddingErrStr = Get-CenteredPadding -RawMessage $errMsg
-
-    # Display error message
-    Write-Host -NoNewline $paddingErrStr
-    Write-Host $errMsg -ForegroundColor Red
+    Show-GracefulError -Message "❌ GitHub token is missing or invalid ! ❌" -NoTrailingNewline
 
     # Helper called to center info message nicely
     $infoMsg = "ℹ️ " + ($envVarMessageTemplate -f "'GITHUB_TOKEN'")
@@ -691,10 +679,7 @@ function Get-RepositoriesInfo {
 
   ######## GUARD CLAUSE : CONFIG RETURN NOTHING ########
   if (-not $allConfig) {
-    $errMsg = "❌ Critical Error : Get-LocationPathConfig returned no data ! ❌"
-    $paddingErrStr = Get-CenteredPadding -RawMessage $errMsg
-    Write-Host -NoNewline $paddingErrStr
-    Write-Host $errMsg -ForegroundColor Red
+    Show-GracefulError -Message "❌ Critical Error : Get-LocationPathConfig returned no data ! ❌"
     return $null
   }
 
@@ -704,13 +689,7 @@ function Get-RepositoriesInfo {
 
   ######## GUARD CLAUSE : EMPTY ORDER LIST ########
   if (-not $reposOrder -or $reposOrder.Count -eq 0) {
-    # Helper called to center error message nicely
-    $errMsg = "❌ Local array repo order is empty ! ❌"
-    $paddingErrStr = Get-CenteredPadding -RawMessage $errMsg
-
-    # Display error message
-    Write-Host -NoNewline $paddingErrStr
-    Write-Host $errMsg -ForegroundColor Red
+    Show-GracefulError -Message "❌ Local array repo order is empty ! ❌" -NoTrailingNewline
 
     # Helper called to center info message nicely
     $infoMsg = "ℹ️ Define at least one repository $functionNameMessage (order array)"
@@ -730,11 +709,7 @@ function Get-RepositoriesInfo {
 
   ######## GUARD CLAUSE : INVALID/NOT FOUND PATHS ########
   if ($invalidItems) {
-    $errMsg = "❌ Local repositories dictionary contains invalid paths ! ❌"
-    $paddingErrStr = Get-CenteredPadding -RawMessage $errMsg
-
-    Write-Host -NoNewline $paddingErrStr
-    Write-Host $errMsg -ForegroundColor Red
+    Show-GracefulError -Message "❌ Local repositories dictionary contains invalid paths ! ❌" -NoTrailingNewline
 
     foreach ($bad in $invalidItems) {
       if ([string]::IsNullOrWhiteSpace($bad.Path)) {
