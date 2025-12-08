@@ -34,6 +34,118 @@ Set-PSReadLineKeyHandler -Key Tab -Function Complete
 Set-PSReadLineOption -PredictionViewStyle ListView
 
 
+#-----------------------------------------------------------------------#
+#                        SHARED FUNCTIONS                               #
+#-----------------------------------------------------------------------#
+
+##########---------- Check if Git is installed and available ----------##########
+function Test-GitAvailability {
+  param (
+    # Default message
+    [string]$Message = "⛔ Git for Windows is not installed (or not found in path)... Install it before using this command ! ⛔",
+
+    # By default text is centered
+    [bool]$Center = $true
+  )
+
+  # Check command existence
+  if (Get-Command git -ErrorAction SilentlyContinue) {
+    return $true
+  }
+
+  # Display Logic
+  if ($Center) {
+    # Using existing helper to calculate padding
+    $paddingStr = Get-CenteredPadding -RawMessage $Message
+    Write-Host -NoNewline $paddingStr
+  }
+
+  Write-Host $Message -ForegroundColor Red
+
+  return $false
+}
+
+##########---------- Calculate centered padding spaces ----------##########
+function Get-CenteredPadding {
+  param (
+    [int]$TotalWidth = 80,
+    [string]$RawMessage
+  )
+
+  # Removes invisible characters from "Variation Selector"
+  $cleanMsg = $RawMessage -replace "\uFE0F", ""
+
+  # Standard length in memory
+  $visualLength = $cleanMsg.Length
+
+  # If message contains "simple" BMP emojis (one character long but two characters wide on screen), we add 1
+  $bmpEmojis = ([regex]::Matches($cleanMsg, "[\u2300-\u23FF\u2600-\u27BF]")).Count
+  $visualLength += $bmpEmojis
+
+  # (Total Width - Message Length) / 2
+  # [math]::Max(0, ...) => prevents crash if message is longer than 80 characters
+  $paddingCount = [math]::Max(0, [int](($TotalWidth - $visualLength) / 2))
+
+  return " " * $paddingCount
+}
+
+##########---------- Display a frame header ----------##########
+function Show-HeaderFrame {
+  param (
+    [Parameter(Mandatory=$true)]
+    [string]$Title,
+
+    [ConsoleColor]$Color = "Cyan"
+  )
+
+  # Fixed constraints
+  $TerminalWidth = 80
+  $FrameWidth = 64
+  $FramePaddingLeft = ($TerminalWidth - $FrameWidth) / 2
+
+  # Frame margins
+  $leftMargin = " " * $FramePaddingLeft
+
+  ######## INTERN CONTENT ########
+  # Space around title inside frame
+  $middleContentRaw = " $Title "
+
+  # Length of horizontal bar between borders ╔ and ╗
+  $horizontalBarLength = $FrameWidth - 2
+
+  # Title length
+  $TitleLength = $middleContentRaw.Length
+
+  # Total space available to center title
+  $TotalInternalSpace = $horizontalBarLength - $TitleLength
+
+  # Internal margin to center title (in 62 characters)
+  $InternalLeftSpaces = [System.Math]::Floor($TotalInternalSpace / 2)
+
+  if ($InternalLeftSpaces -lt 0) {
+    $InternalLeftSpaces = 0
+  }
+
+  $InternalLeftMargin = " " * $InternalLeftSpaces
+
+  # Title with internal left padding
+  $PaddedTitle = $InternalLeftMargin + $middleContentRaw
+
+  # Fill in remaining space
+  $PaddedTitle += " " * ($horizontalBarLength - $PaddedTitle.Length)
+
+  # Create 62-character border bar
+  $horizontalBar = "═" * $horizontalBarLength
+
+  # Display frame header
+  Write-Host ""
+  Write-Host "$leftMargin╔$horizontalBar╗" -ForegroundColor $Color
+  Write-Host "$leftMargin║$PaddedTitle║" -ForegroundColor $Color
+  Write-Host "$leftMargin╚$horizontalBar╝" -ForegroundColor $Color
+  Write-Host ""
+}
+
+
 #--------------------------------------------------------------------------#
 #                   UPDATE YOUR LOCAL REPOSITORIES                         #
 #--------------------------------------------------------------------------#
@@ -3018,118 +3130,6 @@ public/COM3
 
 # Executed immediately on terminal startup
 Set-LoadGlobalGitIgnore
-
-
-#-----------------------------------------------------------------------#
-#                        SHARED FUNCTIONS                               #
-#-----------------------------------------------------------------------#
-
-##########---------- Check if Git is installed and available ----------##########
-function Test-GitAvailability {
-  param (
-    # Default message
-    [string]$Message = "⛔ Git for Windows is not installed (or not found in path)... Install it before using this command ! ⛔",
-
-    # By default text is centered
-    [bool]$Center = $true
-  )
-
-  # Check command existence
-  if (Get-Command git -ErrorAction SilentlyContinue) {
-    return $true
-  }
-
-  # Display Logic
-  if ($Center) {
-    # Using existing helper to calculate padding
-    $paddingStr = Get-CenteredPadding -RawMessage $Message
-    Write-Host -NoNewline $paddingStr
-  }
-
-  Write-Host $Message -ForegroundColor Red
-
-  return $false
-}
-
-##########---------- Calculate centered padding spaces ----------##########
-function Get-CenteredPadding {
-  param (
-    [int]$TotalWidth = 80,
-    [string]$RawMessage
-  )
-
-  # Removes invisible characters from "Variation Selector"
-  $cleanMsg = $RawMessage -replace "\uFE0F", ""
-
-  # Standard length in memory
-  $visualLength = $cleanMsg.Length
-
-  # If message contains "simple" BMP emojis (one character long but two characters wide on screen), we add 1
-  $bmpEmojis = ([regex]::Matches($cleanMsg, "[\u2300-\u23FF\u2600-\u27BF]")).Count
-  $visualLength += $bmpEmojis
-
-  # (Total Width - Message Length) / 2
-  # [math]::Max(0, ...) => prevents crash if message is longer than 80 characters
-  $paddingCount = [math]::Max(0, [int](($TotalWidth - $visualLength) / 2))
-
-  return " " * $paddingCount
-}
-
-##########---------- Display a frame header ----------##########
-function Show-HeaderFrame {
-  param (
-    [Parameter(Mandatory=$true)]
-    [string]$Title,
-
-    [ConsoleColor]$Color = "Cyan"
-  )
-
-  # Fixed constraints
-  $TerminalWidth = 80
-  $FrameWidth = 64
-  $FramePaddingLeft = ($TerminalWidth - $FrameWidth) / 2
-
-  # Frame margins
-  $leftMargin = " " * $FramePaddingLeft
-
-  ######## INTERN CONTENT ########
-  # Space around title inside frame
-  $middleContentRaw = " $Title "
-
-  # Length of horizontal bar between borders ╔ and ╗
-  $horizontalBarLength = $FrameWidth - 2
-
-  # Title length
-  $TitleLength = $middleContentRaw.Length
-
-  # Total space available to center title
-  $TotalInternalSpace = $horizontalBarLength - $TitleLength
-
-  # Internal margin to center title (in 62 characters)
-  $InternalLeftSpaces = [System.Math]::Floor($TotalInternalSpace / 2)
-
-  if ($InternalLeftSpaces -lt 0) {
-    $InternalLeftSpaces = 0
-  }
-
-  $InternalLeftMargin = " " * $InternalLeftSpaces
-
-  # Title with internal left padding
-  $PaddedTitle = $InternalLeftMargin + $middleContentRaw
-
-  # Fill in remaining space
-  $PaddedTitle += " " * ($horizontalBarLength - $PaddedTitle.Length)
-
-  # Create 62-character border bar
-  $horizontalBar = "═" * $horizontalBarLength
-
-  # Display frame header
-  Write-Host ""
-  Write-Host "$leftMargin╔$horizontalBar╗" -ForegroundColor $Color
-  Write-Host "$leftMargin║$PaddedTitle║" -ForegroundColor $Color
-  Write-Host "$leftMargin╚$horizontalBar╝" -ForegroundColor $Color
-  Write-Host ""
-}
 
 
 #--------------------------------------------------------------------------#
