@@ -3122,7 +3122,6 @@ public/COM3
 # ======================================================================
 /Books/Ninja Squad/
 /Books/Supports Cours Formation/
-
 '@
   # Returns an array of strings, clean CR characters
   return $Content -split "`n" | ForEach-Object { $_.TrimEnd("`r") }
