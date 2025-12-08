@@ -2427,9 +2427,9 @@ function Get-LocationPathConfig {
 }
 
 
-#-------------------------------------------------------------------------#
-#                   LOAD GLOBAL GIT IGNORE CONFIG                         #
-#-------------------------------------------------------------------------#
+#---------------------------------------------------------------------#
+#                   GLOBAL GIT IGNORE MANAGER                         #
+#---------------------------------------------------------------------#
 
 function Set-LoadGlobalGitIgnore {
   $GitGlobalIgnorePath = Join-Path -Path $HOME -ChildPath ".gitignore_global"
