@@ -2776,34 +2776,442 @@ function colors {
 #--------------------------------------------------------------------#
 
 function Set-GlobalGitIgnore {
-  $GitGlobalIgnorePath = "$HOME\.gitignore_global"
+  $GitGlobalIgnorePath = Join-Path -Path $HOME -ChildPath ".gitignore_global"
 
-  Show-HeaderFrame -Title "GLOBAL GIT IGNORE CONFIGURATION"
+  # Flag created or updated
+  $WasUpdatedOrCreated = $false
 
   ######## GUARD CLAUSE : GIT AVAILABILITY ########
   if (-not (Test-GitAvailability -Message "⛔ Git for Windows is not installed (or not found in path). Global git ignore config skipped ! ⛔")) {
     return
   }
 
-  # Check if file exists
-  if (-not (Test-Path $GitGlobalIgnorePath)) {
-    $msgPart1 = " .gitignore_global"
-    $msgPart2 = " not found..."
+  # Load default template content
+  $DefaultLines = Get-DefaultGlobalGitIgnoreTemplate
 
-    $paddingStr = Get-CenteredPadding -RawMessage ($msgPart1 + $msgPart2)
+  ######## FILE CREATION/UPDATE ORCHESTRATION ########
+  if (-not (Test-Path $GitGlobalIgnorePath)) {
+    ######## CASE 1 : FILE DOESN'T EXIST (CREATION) ########
+    Initialize-GlobalGitIgnoreFile -Path $GitGlobalIgnorePath -ContentLines $DefaultLines
+
+    $WasUpdatedOrCreated = $true
+  }
+  ######## CASE 2 : FILE EXIST (UPDATE) ########
+  else {
+    $WasUpdatedOrCreated = Update-GlobalGitIgnoreFile -Path $GitGlobalIgnorePath -DefaultLines $DefaultLines
+  }
+
+  ######## GIT CONFIGURATION ########
+  # Only display if file was touched or config is wrong
+  Set-GlobalGitIgnoreReference -Path $GitGlobalIgnorePath -ShowMessage $WasUpdatedOrCreated
+}
+
+
+#--------------------------------------------------------------------------#
+#                   GLOBAL GIT IGNORE UTILITIES FUNCTIONS                  #
+#--------------------------------------------------------------------------#
+
+##########---------- Initialize .gitignore_global file if missing ----------##########
+function Initialize-GlobalGitIgnoreFile {
+  param (
+    [string]$Path,
+    [string[]]$ContentLines
+  )
+
+  Show-HeaderFrame -Title "GLOBAL GIT IGNORE CONFIGURATION"
+
+  # Message 1 : Not Found
+  $msgPrefix = " .gitignore_global"
+  $msgSuffix = " not found..."
+
+  $fullMsg = $msgPrefix + $msgSuffix
+
+  Write-Host -NoNewline (Get-CenteredPadding -RawMessage $fullMsg)
+  Write-Host -NoNewline $msgPrefix -ForegroundColor Cyan
+  Write-Host $msgSuffix -ForegroundColor DarkYellow
+  Write-Host ""
+
+  # Message 2 : Creating
+  $msg = "🔄 Creating it with default template 🔄"
+
+  Write-Host -NoNewline (Get-CenteredPadding -RawMessage $msg)
+  Write-Host $msg -ForegroundColor Red
+
+  try {
+    $ContentLines | Set-Content -Path $Path -Encoding UTF8 -Force
+
+    $msg = "✅ File created successfully ✅"
+
+    Write-Host -NoNewline (Get-CenteredPadding -RawMessage $msg)
+    Write-Host $msg -ForegroundColor Green
+    Write-Host ""
+  }
+  catch {
+    $msg = "❌ Error creating default template : "
+    $paddingStr = Get-CenteredPadding -RawMessage $msg
 
     Write-Host -NoNewline $paddingStr
-    Write-Host -NoNewline $msgPart1 -ForegroundColor Cyan
-    Write-Host $msgPart2 -ForegroundColor DarkYellow
-
-    $msg = "🔄 Creating it with default template 🔄"
-    $paddingStr2 = Get-CenteredPadding -RawMessage $msg
-
-    Write-Host -NoNewline $paddingStr2
     Write-Host $msg -ForegroundColor Red
 
-    # Default content (used ONLY during creation)
-    $DefaultContent = @'
+    Write-Host "$_" -ForegroundColor DarkBlue
+    Write-Host ""
+  }
+}
+
+##########---------- Update .gitignore_global file if exists ----------##########
+function Update-GlobalGitIgnoreFile {
+  param (
+    [string]$Path,
+    [string[]]$DefaultLines
+  )
+
+  ######## GUARD : FORCE ARRAY ########
+  $ExistingLines = @(Get-Content -Path $Path -Encoding UTF8) | ForEach-Object { $_.TrimEnd("`r") }
+
+  # Parse only valid rules from template
+  $ParsedTemplate = Get-ParsedDefaultRules -DefaultLines $DefaultLines
+
+  ######## SECURITY : GET FILE CONTENT WITHOUT GENERATED "NEW IGNIRE RULES" SECTION ########
+  # Avoid duplication if we run script multiple times
+  $CleanFileLines = Get-LinesWithoutNewRules -Lines $ExistingLines
+
+  ######## CALCULATE : MISSING ITEMS ########
+  # Ccheck if rules exist in CLEAN file content
+  $CleanFileContentForCheck = $CleanFileLines | Where-Object { -not [string]::IsNullOrWhiteSpace($_) -and -not $_.StartsWith('#') }
+
+  $ItemsToAdd = @()
+  foreach ($item in $ParsedTemplate) {
+    if ($CleanFileContentForCheck -notcontains $item.Rule) {
+      $ItemsToAdd += $item
+    }
+  }
+
+  # Build new content (clean file + new block at end)
+  $NewContent = Build-GlobalGitIgnoreUpdatedContent -BaseLines $CleanFileLines -ItemsToAdd $ItemsToAdd
+
+  # Check if content actually changed
+  $CurrentContentString = $ExistingLines -join "`n"
+  $NewContentString = $NewContent -join "`n"
+
+  if ($CurrentContentString -eq $NewContentString) {
+    return $false
+  }
+
+  # If we are here, we have updates
+  Show-HeaderFrame -Title "GLOBAL GIT IGNORE CONFIGURATION"
+
+  # Display messages
+  if ($ItemsToAdd.Count -gt 0) {
+    $msgPrefix = "📢 New exclusions added to "
+    $fileNameStr = " .gitignore_global"
+    $msgSuffix = " 📢"
+
+    $fullMsg = $msgPrefix + $fileNameStr + $msgSuffix
+
+    Write-Host -NoNewline (Get-CenteredPadding -RawMessage $fullMsg)
+    Write-Host -NoNewline $msgPrefix -ForegroundColor DarkYellow
+    Write-Host -NoNewline $fileNameStr -ForegroundColor Cyan
+    Write-Host $msgSuffix
+    Write-Host ""
+
+    Write-Host "New rules added =>" -ForegroundColor DarkBlue
+
+    foreach ($item in $ItemsToAdd) {
+      Write-Host "  $($item.Rule)" -ForegroundColor DarkCyan
+    }
+
+    Write-Host ""
+  }
+  else {
+    $msgPrefix = "♻️ Synchronizing "
+    $fileNameStr = " .gitignore_global"
+    $msgSuffix = " structure ♻️"
+
+    $fullMsg = $msgPrefix + $fileNameStr + $msgSuffix
+
+    Write-Host -NoNewline (Get-CenteredPadding -RawMessage $fullMsg)
+    Write-Host -NoNewline $msgPrefix -ForegroundColor DarkYellow
+    Write-Host -NoNewline $fileNameStr -ForegroundColor Cyan
+    Write-Host -NoNewline $msgSuffix -ForegroundColor DarkYellow
+    Write-Host ""
+  }
+
+  ######## SECURITY : CREATE BACKUP ########
+  Sync-GlobalGitIgnoreBackup -Path $Path -Action "Create"
+
+  # Write changes
+  try {
+    $NewContent | Set-Content -Path $Path -Encoding UTF8 -Force
+
+    ######## CLEANUP: DELETE BACKUP ON SUCCESS ########
+    Sync-GlobalGitIgnoreBackup -Path $Path -Action "Delete"
+
+    $msgSuccess = "✅ File updated successfully ✅"
+
+    Write-Host -NoNewline (Get-CenteredPadding -RawMessage $msgSuccess)
+    Write-Host $msgSuccess -ForegroundColor Green
+    Write-Host ""
+
+    return $true
+  }
+  catch {
+    $msg = "❌ Error updating file : "
+    $paddingStr = Get-CenteredPadding -RawMessage $msg
+
+    Write-Host -NoNewline $paddingStr
+    Write-Host $msg -ForegroundColor Red
+
+    Write-Host "$_" -ForegroundColor DarkBlue
+    Write-Host ""
+
+    # Backup warning
+    $msgPrefix = "⚠️ Backup saved at : "
+    $msgSuffix = " $Path.bak"
+
+    $fullMsg = $msgPrefix + $msgSuffix
+
+    Write-Host -NoNewline (Get-CenteredPadding -RawMessage $fullMsg)
+    Write-Host -NoNewline $msgPrefix -ForegroundColor DarkYellow
+    Write-Host $msgSuffix -ForegroundColor DarkCyan
+    Write-Host ""
+
+    return $false
+  }
+}
+
+##########---------- Configure .gitignore_global reference ----------##########
+function Set-GlobalGitIgnoreReference {
+  param (
+    [string]$Path,
+    [bool]$ShowMessage
+  )
+
+  # Get actual config
+  $CurrentConfig = git config --global core.excludesfile
+
+  # Normalize paths for comparison
+  $NormCurrent = if ($CurrentConfig) { $CurrentConfig.Replace('/', '\').Trim() } else { "" }
+  $NormPath = $Path.Replace('/', '\').Trim()
+
+  ######## GUARD CLAUSE : CURRENT CONFIG IS NULL OR DIFFERENT ########
+  if ([string]::IsNullOrEmpty($CurrentConfig) -or ($NormCurrent -ne $NormPath)) {
+
+    git config --global core.excludesfile $Path
+
+    # Only show if we are in an active context (header already shown)
+    if ($ShowMessage) {
+      $msgPrefix = "⚓ Git configured to use "
+      $msgSuffix = " .gitignore_global"
+
+      $fullMsg = $msgPrefix + $msgSuffix
+
+      Write-Host -NoNewline (Get-CenteredPadding -RawMessage $fullMsg)
+      Write-Host -NoNewline $msgPrefix -ForegroundColor DarkYellow
+      Write-Host -NoNewline $msgSuffix -ForegroundColor Cyan
+      Write-Host ""
+    }
+  }
+}
+
+##########---------- Build updated content for .gitignore_global ----------##########
+function Build-GlobalGitIgnoreUpdatedContent {
+  param (
+    [string[]]$BaseLines,
+    [array]$ItemsToAdd
+  )
+
+  # Start with clean base
+  $NewContent = [System.Collections.ArrayList]@($BaseLines)
+
+  # If no new items to add, just return cleaned file (removes old "NEW IGNORE RULES" block)
+  if ($ItemsToAdd.Count -eq 0) {
+    return $NewContent
+  }
+
+  # Add new rules block at end
+  if ($NewContent.Count -gt 0 -and $NewContent[-1] -ne "") { $NewContent.Add("") }
+
+  $NewContent.Add("# ======================================================================") | Out-Null
+  $NewContent.Add("# NEW IGNORE RULES") | Out-Null
+  $NewContent.Add("# ======================================================================") | Out-Null
+
+  # Format and sort rules
+  $FormattedBlock = Get-FormattedNewRulesBlock -Items $ItemsToAdd
+  $NewContent.AddRange($FormattedBlock)
+
+  return $NewContent
+}
+
+##########---------- Get formatted new rules block (sorting + grouping) ----------##########
+function Get-FormattedNewRulesBlock {
+  param (
+    [array]$Items
+  )
+
+  $BlockContent = @()
+
+  # Group missing items by category
+  $GroupedRules = $Items | Group-Object Category
+
+  foreach ($group in $GroupedRules) {
+    $CategoryName = $group.Name
+
+    # If no category (null or empty), we force "# Others"
+    if ([string]::IsNullOrWhiteSpace($CategoryName)) {
+      $CategoryName = "# Others"
+    }
+    # Otherwise, make sure it's properly formatted (double security)
+    else {
+      $CategoryName = Format-GitIgnoreComment -RawComment $CategoryName
+    }
+
+    # Add blank line before new category (if not immediately after header)
+    if ($BlockContent.Count -gt 0) {
+      $BlockContent += ""
+    }
+
+    # Add category title
+    $BlockContent += $CategoryName
+
+    # Adding rules for this group (sorted alphbetically)
+    foreach ($item in ($group.Group | Sort-Object Rule)) {
+      $BlockContent += $item.Rule
+    }
+  }
+
+  return $BlockContent
+}
+
+##########---------- Get lines ignoring the new rules section ----------##########
+function Get-LinesWithoutNewRules {
+  param (
+    [string[]]$Lines
+  )
+
+  $CleanLines = @()
+  $Skipping = $false
+
+  # Scan the file
+  for ($i = 0; $i -lt $Lines.Length; $i++) {
+    $line = $Lines[$i]
+
+    ######## DETECTION : START OF GENERATED BLOCK ########
+    # Look for decoration line followed by "NEW IGNORE RULES"
+    if ($line.StartsWith("# ======================================================================") -and
+      ($i + 1 -lt $Lines.Length) -and
+      ($Lines[$i+1] -match "NEW IGNORE RULES")) {
+
+      $Skipping = $true
+    }
+
+    ######## DETECTION : END OF GENERATED BLOCK ########
+    if ($Skipping) {
+      if ($line -match "USER CUSTOMIZATIONS") {
+        # Found user customs (if accidentally placed after), stop skipping
+        $Skipping = $false
+      }
+    }
+
+    if (-not $Skipping) {
+      $CleanLines += $line
+    }
+  }
+
+  # Trim trailing empty lines from clean content
+  while ($CleanLines.Count -gt 0 -and [string]::IsNullOrWhiteSpace($CleanLines[-1])) {
+    $CleanLines = $CleanLines[0..($CleanLines.Count - 2)]
+  }
+
+  return $CleanLines
+}
+
+##########---------- Manage Backup (Create/Delete) ----------##########
+function Sync-GlobalGitIgnoreBackup {
+  param (
+    [string]$Path,
+    [ValidateSet("Create", "Delete")]
+    [string]$Action
+  )
+
+  $BackupPath = "$Path.bak"
+
+  if ($Action -eq "Create") {
+    Copy-Item -Path $Path -Destination $BackupPath -Force
+  }
+  elseif ($Action -eq "Delete") {
+    if (Test-Path $BackupPath) {
+      Remove-Item -Path $BackupPath -Force
+    }
+  }
+}
+
+##########---------- Format comment (capitalize + space) ----------##########
+function Format-GitIgnoreComment {
+  param (
+    [string]$RawComment
+  )
+
+  # If not a comment, send it back as is
+  if (-not $RawComment.StartsWith("#")) { return $RawComment }
+
+  # Remove "#"" symbol(s) and spaces from beginning
+  $CleanText = $RawComment -replace "^#+\s*", ""
+
+  # If empty after cleaning ("#"), simply return "#"
+  if ([string]::IsNullOrWhiteSpace($CleanText)) { return "#" }
+
+  # Capitalize first letter
+  $FirstLetter = $CleanText.Substring(0, 1).ToUpper()
+  $RestOfText = $CleanText.Substring(1)
+
+  # Rebuilt with single guaranteed space
+  return "# $FirstLetter$RestOfText"
+}
+
+##########---------- Parse template to associate rules with categories ----------##########
+function Get-ParsedDefaultRules {
+  param (
+    [string[]]$DefaultLines
+  )
+
+  $RulesCollection = @()
+  $CurrentCategory = $null
+
+  foreach ($line in $DefaultLines) {
+    # "USER CUSTOMIZATIONS" section of template isn't readable
+    if ($line -match "USER CUSTOMIZATIONS") { break }
+
+    # If line is empty, category is reset
+    if ([string]::IsNullOrWhiteSpace($line)) {
+      $CurrentCategory = $null
+
+      continue
+    }
+
+    if ($line.StartsWith("#")) {
+      # If comment, it's a category to include
+      if ($line -match "====") {
+        $CurrentCategory = $null
+      }
+      else {
+        $CurrentCategory = Format-GitIgnoreComment -RawComment $line
+      }
+    }
+    else {
+      # If no category defined, go into "Others" category
+      $RulesCollection += [PSCustomObject]@{
+        Rule     = $line
+        Category = $CurrentCategory
+      }
+    }
+  }
+
+  return $RulesCollection
+}
+
+##########---------- Provide default .gitignore_global template ----------##########
+function Get-DefaultGlobalGitIgnoreTemplate {
+  $Content = @'
 # ======================================================================
 # SECURITY & IDENTIFICATION CREDENTIALS (CRITICAL)
 # ======================================================================
@@ -2896,6 +3304,9 @@ __pycache__/
 # ======================================================================
 # PACKAGE MANAGERS
 # ======================================================================
+# Composer
+/vendor/
+
 # Node.js
 /node_modules
 node_modules/
@@ -2917,9 +3328,6 @@ npm-debug.log*
 *.snupkg
 **/packages/
 !**/packages/build/
-
-# Composer
-/vendor/
 
 # PNPM
 .pnpm-debug.log*
@@ -3063,45 +3471,18 @@ notebooks/mlruns
 *.log
 /libpeerconnection.log
 public/COM3
+.gg
 
-# ----------------------------------------------------------------------
+# ======================================================================
 # USER CUSTOMIZATIONS
-# ----------------------------------------------------------------------
+# ======================================================================
 /Books/Ninja Squad/
 /Books/Supports Cours Formation/
+
 '@
-
-    try {
-      Set-Content -Path $GitGlobalIgnorePath -Value $DefaultContent -Encoding UTF8 -Force
-
-      $msg = "✅ File created successfully ✅"
-      $paddingStr = Get-CenteredPadding -RawMessage $msg
-
-      Write-Host -NoNewline $paddingStr
-      Write-Host $msg -ForegroundColor Green
-      Write-Host ""
-    }
-    catch {
-      $msg = "❌ Error creating default template : "
-      $paddingStr = Get-CenteredPadding -RawMessage $msg
-
-      Write-Host -NoNewline $paddingStr
-      Write-Host $msg -ForegroundColor Red
-
-      Write-Host "$_" -ForegroundColor DarkBlue
-      Write-Host ""
-    }
-  }
-
-  # Git configuration, we just make sure link is established
-  # Git will read contents of file with each command, so your manual changes are taken into account immediately
-  $CurrentConfig = git config --global core.excludesfile
-
-  if ($CurrentConfig -ne $GitGlobalIgnorePath) {
-    git config --global core.excludesfile $GitGlobalIgnorePath
-    # Write-Host "⚓ Git configured to use ~/.gitignore_global" -ForegroundColor Cyan
-  }
+  # Returns an array of strings, clean CR characters
+  return $Content -split "`n" | ForEach-Object { $_.TrimEnd("`r") }
 }
 
-# Execute immediately on startup
+# Executed immediately on terminal startup
 Set-GlobalGitIgnore
