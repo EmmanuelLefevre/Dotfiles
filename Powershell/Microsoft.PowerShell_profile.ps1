@@ -36,10 +36,6 @@ Set-PSReadLineKeyHandler -Key Tab -Function Complete
 Set-PSReadLineOption -PredictionViewStyle ListView
 
 
-#-----------------------------------------------------------------------#
-#                        SHARED FUNCTIONS                               #
-#-----------------------------------------------------------------------#
-
 #---------------------------------------------------------------------------#
 #                        LOCATION PATH CONFIG                               #
 #---------------------------------------------------------------------------#
@@ -85,6 +81,11 @@ function Get-LocationPathConfig {
     [PSCustomObject]@{ Name = "profile";                  Path = "$env:USERPROFILE\Documents\PowerShell";                     IsRepo = $false }
   )
 }
+
+
+#-----------------------------------------------------------------------#
+#                        SHARED FUNCTIONS                               #
+#-----------------------------------------------------------------------#
 
 ##########---------- Check if Git is installed and available ----------##########
 function Test-GitAvailability {
