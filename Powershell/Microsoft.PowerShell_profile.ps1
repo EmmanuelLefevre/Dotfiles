@@ -2564,7 +2564,7 @@ function Show-UpdateSummary {
 
     switch ($item.Status) {
       "Already-Updated"   { $statusText = "✨ Already Updated";    $statusColor = "DarkCyan"   }
-      "Cloned"            { $statusText = "✨ Cloned";             $statusColor = "Cyan"       }
+      "Cloned"            { $statusText = "🐙 Cloned";             $statusColor = "Cyan"       }
       "Failed"            { $statusText = "❌ Failed";             $statusColor = "Red"        }
       "Ignored"           { $statusText = "🙈 Ignored";            $statusColor = "Magenta"    }
       "Skipped"           { $statusText = "⏩ Skipped";            $statusColor = "DarkYellow" }
