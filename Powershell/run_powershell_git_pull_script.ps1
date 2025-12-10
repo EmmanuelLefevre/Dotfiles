@@ -1,8 +1,8 @@
-# Load PowerShell Profile
-. "$env:USERPROFILE\Documents\PowerShell\Microsoft.PowerShell_profile.ps1"
+# Load PowerShell Profile dynamically (works on all OS paths)
+. $PROFILE
 
 # Call function
-gpull
+Update-GitRepositories
 
 # Close terminal
 Write-Host ""
