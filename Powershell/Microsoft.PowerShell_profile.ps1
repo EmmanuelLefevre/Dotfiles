@@ -44,41 +44,59 @@ function Get-LocationPathConfig {
   # IsRepo = $true => Included in gpull() process AND accessible via go()
   # IsRepo = $false=> Accessible ONLY via go()
 
+  # Get system context
+  $Sys = Get-SystemContext
+
+  # Definition of universal root folders
+  # Join-Path automatically handles "/"" or "\"" depending on specific OS
+  $DesktopPath   = Join-Path $HOME "Desktop"
+  $ProjetsPath   = Join-Path $DesktopPath "Projets"
+  $DocumentsPath = Join-Path $HOME "Documents"
+  $PicturesPath = Join-Path $HOME "Pictures"
+
+  # For nvim, path changes depending on OS
+  if ($Sys.IsMacOS -or $Sys.IsLinux) {
+    $NvimPath = Join-Path $HOME ".config/nvim"
+  }
+  else {
+    $NvimPath = Join-Path $env:LOCALAPPDATA "nvim"
+  }
+
   return @(
     ##########---------- REPOSITORIES (Important order for gpull() function) ----------##########
-    [PSCustomObject]@{ Name = "ArtiWave";                 Path = "$env:USERPROFILE\Desktop\Projets\ArtiWave";                 IsRepo = $true },
-    [PSCustomObject]@{ Name = "Cours";                    Path = "$env:USERPROFILE\Desktop\Cours";                            IsRepo = $true },
-    [PSCustomObject]@{ Name = "DailyPush";                Path = "$env:USERPROFILE\Desktop\DailyPush";                        IsRepo = $true },
-    [PSCustomObject]@{ Name = "DataScrub";                Path = "$env:USERPROFILE\Desktop\Projets\DataScrub";                IsRepo = $true },
-    [PSCustomObject]@{ Name = "Documentations";           Path = "$env:USERPROFILE\Documents\Documentations";                 IsRepo = $true },
-    [PSCustomObject]@{ Name = "Dotfiles";                 Path = "$env:USERPROFILE\Desktop\Dotfiles";                         IsRepo = $true },
-    [PSCustomObject]@{ Name = "EasyGarden";               Path = "$env:USERPROFILE\Desktop\Projets\EasyGarden";               IsRepo = $true },
-    [PSCustomObject]@{ Name = "ElexxionData";             Path = "$env:USERPROFILE\Desktop\Projets\ElexxionData";             IsRepo = $true },
-    [PSCustomObject]@{ Name = "ElexxionMinio";            Path = "$env:USERPROFILE\Desktop\Projets\ElexxionMinio";            IsRepo = $true },
-    [PSCustomObject]@{ Name = "EmmanuelLefevre";          Path = "$env:USERPROFILE\Desktop\Projets\EmmanuelLefevre";          IsRepo = $true },
-    [PSCustomObject]@{ Name = "GestForm";                 Path = "$env:USERPROFILE\Desktop\Projets\GestForm";                 IsRepo = $true },
-    [PSCustomObject]@{ Name = "GitHubProfileIcons";       Path = "$env:USERPROFILE\Pictures\GitHubProfileIcons";              IsRepo = $true },
-    [PSCustomObject]@{ Name = "GoogleSheets";             Path = "$env:USERPROFILE\Desktop\GoogleSheets";                     IsRepo = $true },
-    [PSCustomObject]@{ Name = "LeCabinetDeCuriosites";    Path = "$env:USERPROFILE\Desktop\Projets\LeCabinetDeCuriosites";    IsRepo = $true },
-    [PSCustomObject]@{ Name = "IAmEmmanuelLefevre";       Path = "$env:USERPROFILE\Desktop\Projets\IAmEmmanuelLefevre";       IsRepo = $true },
-    [PSCustomObject]@{ Name = "MarkdownImg";              Path = "$env:USERPROFILE\Desktop\MarkdownImg";                      IsRepo = $true },
-    [PSCustomObject]@{ Name = "Mflix";                    Path = "$env:USERPROFILE\Desktop\Projets\Mflix";                    IsRepo = $true },
-    [PSCustomObject]@{ Name = "OmbreArcane";              Path = "$env:USERPROFILE\Desktop\Projets\OmbreArcane";              IsRepo = $true },
-    [PSCustomObject]@{ Name = "OpenScraper";              Path = "$env:USERPROFILE\Desktop\Projets\OpenScraper";              IsRepo = $true },
-    [PSCustomObject]@{ Name = "ParquetFlow";              Path = "$env:USERPROFILE\Desktop\Projets\ParquetFlow";              IsRepo = $true },
-    [PSCustomObject]@{ Name = "ReplicaMySQL";             Path = "$env:USERPROFILE\Desktop\Projets\ReplicaMySQL";             IsRepo = $true },
-    [PSCustomObject]@{ Name = "Schemas";                  Path = "$env:USERPROFILE\Desktop\Schemas";                          IsRepo = $true },
-    [PSCustomObject]@{ Name = "ScrapMate";                Path = "$env:USERPROFILE\Desktop\Projets\ScrapMate";                IsRepo = $true },
-    [PSCustomObject]@{ Name = "Sortify";                  Path = "$env:USERPROFILE\Desktop\Projets\Sortify";                  IsRepo = $true },
-    [PSCustomObject]@{ Name = "Soutenances";              Path = "$env:USERPROFILE\Desktop\Soutenances";                      IsRepo = $true },
-    [PSCustomObject]@{ Name = "Yam4";                     Path = "$env:USERPROFILE\Desktop\Projets\Yam4";                     IsRepo = $true },
+    [PSCustomObject]@{ Name = "ArtiWave";                 Path = Join-Path $ProjetsPath "ArtiWave";                         IsRepo = $true },
+    [PSCustomObject]@{ Name = "Cours";                    Path = Join-Path $DesktopPath "Cours";                            IsRepo = $true },
+    [PSCustomObject]@{ Name = "DailyPush";                Path = Join-Path $DesktopPath "DailyPush";                        IsRepo = $true },
+    [PSCustomObject]@{ Name = "DataScrub";                Path = Join-Path $ProjetsPath "DataScrub";                        IsRepo = $true },
+    [PSCustomObject]@{ Name = "Documentations";           Path = Join-Path $DocumentsPath "Documentations";                 IsRepo = $true },
+    [PSCustomObject]@{ Name = "Dotfiles";                 Path = Join-Path $DesktopPath "Dotfiles";                         IsRepo = $true },
+    [PSCustomObject]@{ Name = "EasyGarden";               Path = Join-Path $ProjetsPath "EasyGarden";                       IsRepo = $true },
+    [PSCustomObject]@{ Name = "ElexxionData";             Path = Join-Path $ProjetsPath "ElexxionData";                     IsRepo = $true },
+    [PSCustomObject]@{ Name = "ElexxionMinio";            Path = Join-Path $ProjetsPath "ElexxionMinio";                    IsRepo = $true },
+    [PSCustomObject]@{ Name = "EmmanuelLefevre";          Path = Join-Path $ProjetsPath "EmmanuelLefevre";                  IsRepo = $true },
+    [PSCustomObject]@{ Name = "GestForm";                 Path = Join-Path $ProjetsPath "GestForm";                         IsRepo = $true },
+    [PSCustomObject]@{ Name = "GitHubProfileIcons";       Path = Join-Path $PicturesPath "GitHubProfileIcons";              IsRepo = $true },
+    [PSCustomObject]@{ Name = "GoogleSheets";             Path = Join-Path $DesktopPath "GoogleSheets";                     IsRepo = $true },
+    [PSCustomObject]@{ Name = "LeCabinetDeCuriosites";    Path = Join-Path $ProjetsPath "LeCabinetDeCuriosites";            IsRepo = $true },
+    [PSCustomObject]@{ Name = "IAmEmmanuelLefevre";       Path = Join-Path $ProjetsPath "IAmEmmanuelLefevre";               IsRepo = $true },
+    [PSCustomObject]@{ Name = "MarkdownImg";              Path = Join-Path $DesktopPath "MarkdownImg";                      IsRepo = $true },
+    [PSCustomObject]@{ Name = "Mflix";                    Path = Join-Path $ProjetsPath "Mflix";                            IsRepo = $true },
+    [PSCustomObject]@{ Name = "OmbreArcane";              Path = Join-Path $ProjetsPath "OmbreArcane";                      IsRepo = $true },
+    [PSCustomObject]@{ Name = "OpenScraper";              Path = Join-Path $ProjetsPath "OpenScraper";                      IsRepo = $true },
+    [PSCustomObject]@{ Name = "ParquetFlow";              Path = Join-Path $ProjetsPath "ParquetFlow";                      IsRepo = $true },
+    [PSCustomObject]@{ Name = "ReplicaMySQL";             Path = Join-Path $ProjetsPath "ReplicaMySQL";                     IsRepo = $true },
+    [PSCustomObject]@{ Name = "Schemas";                  Path = Join-Path $DesktopPath "Schemas";                          IsRepo = $true },
+    [PSCustomObject]@{ Name = "ScrapMate";                Path = Join-Path $ProjetsPath "ScrapMate";                        IsRepo = $true },
+    [PSCustomObject]@{ Name = "Sortify";                  Path = Join-Path $ProjetsPath "Sortify";                          IsRepo = $true },
+    [PSCustomObject]@{ Name = "Soutenances";              Path = Join-Path $DesktopPath "Soutenances";                      IsRepo = $true },
+    [PSCustomObject]@{ Name = "Yam4";                     Path = Join-Path $ProjetsPath "Yam4";                             IsRepo = $true },
 
     ##########---------- NAVIGATION ONLY ----------##########
-    [PSCustomObject]@{ Name = "home";                     Path = "$env:USERPROFILE";                                          IsRepo = $false },
-    [PSCustomObject]@{ Name = "dwld";                     Path = "$env:USERPROFILE\Downloads";                                IsRepo = $false },
-    [PSCustomObject]@{ Name = "projets";                  Path = "$env:USERPROFILE\Desktop\Projets";                          IsRepo = $false },
-    [PSCustomObject]@{ Name = "nvim";                     Path = "$env:USERPROFILE\AppData\Local\nvim";                       IsRepo = $false },
-    [PSCustomObject]@{ Name = "profile";                  Path = "$env:USERPROFILE\Documents\PowerShell";                     IsRepo = $false }
+    [PSCustomObject]@{ Name = "home";                     Path = $HOME;                                                     IsRepo = $false },
+    [PSCustomObject]@{ Name = "dwld";                     Path = Join-Path $HOME "Downloads";                               IsRepo = $false },
+    [PSCustomObject]@{ Name = "nvim";                     Path = $NvimPath;                                                 IsRepo = $false },
+    [PSCustomObject]@{ Name = "profile";                  Path = Split-Path $PROFILE;                                       IsRepo = $false },
+    [PSCustomObject]@{ Name = "projets";                  Path = $ProjetsPath;                                              IsRepo = $false }
   )
 }
 
@@ -86,6 +104,37 @@ function Get-LocationPathConfig {
 #-----------------------------------------------------------------------#
 #                        SHARED FUNCTIONS                               #
 #-----------------------------------------------------------------------#
+
+##########---------- Get system environment context ----------##########
+function Get-SystemContext {
+  # PowerShell editing detection (the engine)
+  # Desktop = PowerShell 5.1 (old Windows)
+  # Core    = PowerShell 7+ (modern : Windows, Linux, Mac)
+  $IsCore = $PSVersionTable.PSEdition -ne 'Desktop'
+
+  # OS detection
+  # In older PowerShell 5.1 versions, variables $IsLinux/$IsMacOS not exist => assume Windows
+  # Also, use different names ($detect...) to avoid conflicts with system reserved variables
+  $detectLinux   = $false
+  $detectMacOS   = $false
+  $detectWindows = $true
+
+  if ($IsCore) {
+    # In PowerShell we simply read native variables
+    # If $IsLinux exists and is true, we update our internal variable
+    if ($IsLinux) { $detectLinux = $true; $detectWindows = $false }
+    if ($IsMacOS) { $detectMacOS = $true; $detectWindows = $false }
+  }
+
+  # Clean/easy-to-use item
+  return [PSCustomObject]@{
+    IsCore    = $IsCore
+    IsDesktop = -not $IsCore
+    IsLinux   = $detectLinux
+    IsMacOS   = $detectMacOS
+    IsWindows = $detectWindows
+  }
+}
 
 ##########---------- Write file content safely (Cross-Platform encoding) ----------##########
 function Set-FileContentCrossPlatform {
@@ -98,11 +147,14 @@ function Set-FileContentCrossPlatform {
     [object]$Content
   )
 
-  # Desktop = Windows PowerShell 5.1 (Legacy) -> only support "UTF8" (with BOM)
-  # Core    = PowerShell 7+, Linux, macOS     -> support "utf8NoBOM" (Linux standard)
+  # Retrieves system context
+  $Context = Get-SystemContext
+
+  # By default, remain cautious (UTF8 with BOM for maximum compatibility)
   $EncodingConfig = "UTF8"
 
-  if ($PSVersionTable.PSEdition -ne 'Desktop') {
+  # MODERN version of PowerShell (whether Linux, Mac or Windows 7+), uses standard without BOM
+  if ($Context.IsCore) {
     $EncodingConfig = "utf8NoBOM"
   }
 
@@ -4023,13 +4075,13 @@ function Get-GoalFunctionsDictionary {
 ##########---------- Get script path and name ----------##########
 function Get-ScriptInfo {
   param (
-    [string]$FileName = "Microsoft.PowerShell_profile.ps1",
-    [string]$ScriptPath = "$HOME\Documents\PowerShell\Microsoft.PowerShell_profile.ps1"
+    [string]$FileName   = $(Split-Path $PROFILE -Leaf),
+    [string]$ScriptPath = $PROFILE
   )
 
   # Display script path
   Write-Host ""
-  Write-Host "ScriptPath: " -ForegroundColor DarkGray -NoNewline
+  Write-Host -NoNewline "ScriptPath : " -ForegroundColor DarkGray
   Write-Host "$ScriptPath" -ForegroundColor DarkMagenta
   Write-Host ""
 
@@ -4319,22 +4371,57 @@ function whereis ($comand) {
 ##########---------- Test GitHub SSH connection with GPG keys ----------##########
 function ssh_github {
   param (
-    [string]$hostname = "github.com",  # default host
-    [int]$port = 22                    # default port for SSH
+    [string]$hostname = "github.com",    # default host
+    [int]$port        = 22               # default port for SSH
   )
-  Write-Host "🚀 Launch SSH connection with GPG keys 🚀" -ForegroundColor Green
+
+  $msg = "🚀 Launch 󰣀 SSH connection with GPG keys 🚀"
+
+  Write-Host ""
+  Write-Host -NoNewline (Get-CenteredPadding -RawMessage $msg)
+  Write-Host $msg -ForegroundColor Green
+
   # Test connection to SSH server
   $connection = Test-NetConnection -ComputerName $hostname -Port $port
+
   if ($connection.TcpTestSucceeded) {
-    Write-Host "The SSH connection to $hostname is open on $port!" -ForegroundColor Green
-    & "C:\Windows\System32\OpenSSH\ssh.exe" -T git@github.com
+    $msgPrefix = "󰣀 SSH connection to "
+    $msgMiddle = " is open on port "
+    $msgSuffix = " ✅"
+
+    $fullMsg = $msgPrefix + $hostname + $msgMiddle + $port + $msgSuffix
+
+    Write-Host -NoNewline (Get-CenteredPadding -RawMessage $fullMsg)
+    Write-Host -NoNewline $msgPrefix -ForegroundColor Green
+    Write-Host -NoNewline "`"$($hostname)`"" -ForegroundColor Magenta
+    Write-Host -NoNewline $msgMiddle -ForegroundColor Green
+    Write-Host -NoNewline $port -ForegroundColor Magenta
+    Write-Host $msgSuffix -ForegroundColor Green
+    Write-Host ""
+
+    ########## CROSS-PLATFORM ##########
+    # On Linux/Mac, simply call 'ssh'. On Windows, also prefer 'ssh' if it's in PATH
+    if (Get-Command ssh -ErrorAction SilentlyContinue) {
+      ssh -T git@github.com
+    }
+    else {
+      # Fallback old Windows
+      & "C:\Windows\System32\OpenSSH\ssh.exe" -T git@github.com
+    }
   }
   else {
-    Write-Host -NoNewline "⚠️ Unable to connect to " -ForegroundColor Red
-    Write-Host -NoNewline "$hostname" -ForegroundColor Magenta
-    Write-Host -NoNewline " on port " -ForegroundColor Red
-    Write-Host -NoNewline "$port" -ForegroundColor Magenta
-    Write-Host "! ⚠️" -ForegroundColor Red
+    $msgPrefix = "❌ Unable to connect to "
+    $msgMiddle = " on port "
+    $msgSuffix = " ❌"
+
+    $fullMsg = $msgPrefix + $hostname + $msgMiddle + $port + $msgSuffix
+
+    Write-Host -NoNewline $msgPrefix -ForegroundColor Red
+    Write-Host -NoNewline "`"$($hostname)`"" -ForegroundColor Magenta
+    Write-Host -NoNewline $msgMiddle -ForegroundColor Red
+    Write-Host -NoNewline $port -ForegroundColor Magenta
+    Write-Host $msgSuffix -ForegroundColor Red
+    Write-Host ""
   }
 }
 
