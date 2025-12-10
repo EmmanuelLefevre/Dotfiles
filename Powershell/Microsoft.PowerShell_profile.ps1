@@ -20,7 +20,8 @@ Set-Alias ll ls
 Set-Alias neo nvim
 Set-Alias tt tree
 
-Set-Alias gir Copy-GlobalGitIgnoreToRepo
+Set-Alias -Name gir -Value Copy-GlobalGitIgnoreToRepo
+Set-Alias -Name gpull -Value Update-GitRepositories
 
 
 #--------------------------------------------------------------------------#
@@ -41,7 +42,7 @@ Set-PSReadLineOption -PredictionViewStyle ListView
 #---------------------------------------------------------------------------#
 
 function Get-LocationPathConfig {
-  # IsRepo = $true => Included in gpull() process AND accessible via go()
+  # IsRepo = $true => Included in Update-GitRepositories() process AND accessible via go()
   # IsRepo = $false=> Accessible ONLY via go()
 
   # Get system context
@@ -52,7 +53,7 @@ function Get-LocationPathConfig {
   $DesktopPath   = Join-Path $HOME "Desktop"
   $ProjetsPath   = Join-Path $DesktopPath "Projets"
   $DocumentsPath = Join-Path $HOME "Documents"
-  $PicturesPath  = Join-Path $HOME "Pictures"
+  $PicturesPath = Join-Path $HOME "Pictures"
 
   # For nvim, path changes depending on OS
   if ($Sys.IsMacOS -or $Sys.IsLinux) {
@@ -63,7 +64,7 @@ function Get-LocationPathConfig {
   }
 
   return @(
-    ##########---------- REPOSITORIES (Important order for gpull() function) ----------##########
+    ##########---------- REPOSITORIES (Important order for Update-GitRepositories() function) ----------##########
     [PSCustomObject]@{ Name = "ArtiWave";                 Path = Join-Path $ProjetsPath "ArtiWave";                         IsRepo = $true },
     [PSCustomObject]@{ Name = "Cours";                    Path = Join-Path $DesktopPath "Cours";                            IsRepo = $true },
     [PSCustomObject]@{ Name = "DailyPush";                Path = Join-Path $DesktopPath "DailyPush";                        IsRepo = $true },
@@ -378,7 +379,7 @@ function Show-GracefulError {
 #                   UPDATE YOUR LOCAL REPOSITORIES                         #
 #--------------------------------------------------------------------------#
 
-function gpull {
+function Update-GitRepositories {
   [CmdletBinding()]
   param (
     # Force repository information reloading
@@ -404,7 +405,7 @@ function gpull {
 
   ######## CACHE MANAGEMENT ########
   # If cache doesn't exist or if a refresh is forced
-  if (-not $Global:GPullCache -or $RefreshCache) {
+  if (-not $Global:GitReposCache -or $RefreshCache) {
     # Helper called to center message nicely
     $msg = "🔄 Updating repositories informations... 🔄"
     $paddingStr = Get-CenteredPadding -RawMessage $msg
@@ -433,14 +434,14 @@ function gpull {
     }
 
     # If everything is valid cache is created
-    $Global:GPullCache = @{
+    $Global:GitReposCache = @{
       ReposInfo = $tempReposInfo
     }
   }
 
   ######## DATA RETRIEVAL ########
   # Retrieve repositories information from cache
-  $reposInfo  = $Global:GPullCache.ReposInfo
+  $reposInfo  = $Global:GitReposCache.ReposInfo
 
   $reposOrder = $reposInfo.Order
   $repos      = $reposInfo.Paths
@@ -4061,6 +4062,7 @@ function Get-GoalFunctionsDictionary {
     custom_function  = "Get custom functions"
     dc = "Create containers and launch thems"
     gpull = "Update all your local repositories"
+    gir = "Copy your .gitignore_global in the current repository"
     go = "Jump to a specific directory"
     help = "Get help"
     path = "Display the current directory path"
