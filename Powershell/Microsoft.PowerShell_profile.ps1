@@ -52,7 +52,7 @@ function Get-LocationPathConfig {
   $DesktopPath   = Join-Path $HOME "Desktop"
   $ProjetsPath   = Join-Path $DesktopPath "Projets"
   $DocumentsPath = Join-Path $HOME "Documents"
-  $PicturesPath = Join-Path $HOME "Pictures"
+  $PicturesPath  = Join-Path $HOME "Pictures"
 
   # For nvim, path changes depending on OS
   if ($Sys.IsMacOS -or $Sys.IsLinux) {
