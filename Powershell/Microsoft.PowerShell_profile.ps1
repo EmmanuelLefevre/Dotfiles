@@ -1040,8 +1040,11 @@ function Get-RepoListToProcess {
     return $FullList
   }
 
+  # Use Where-Object to find original entry in $FullList (which is $reposOrder)
+  $OriginalRepoName = $FullList | Where-Object { $_ -ieq $TargetName } | Select-Object -First 1
+
   # Name specified, check if it exists (case-insensitive)
-  if ($FullList -contains $TargetName) {
+  if ($OriginalRepoName) {
     # Helper called to center message nicely
     $msg = "🔎 Pull targeted on single repository 🔎"
     $paddingStr = Get-CenteredPadding -RawMessage $msg
@@ -1052,7 +1055,8 @@ function Get-RepoListToProcess {
 
     Show-Separator -Length $Global:TerminalWidth -ForegroundColor DarkGray
 
-    return @($TargetName)
+    # Returns repository name with original capitalization
+    return @($OriginalRepoName)
   }
 
   # Name not found
