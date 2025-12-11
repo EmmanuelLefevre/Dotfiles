@@ -12,8 +12,8 @@
   verbose = true
 [core]
 	autocrlf = true
-	editor = \"C:\\Users\\<YOUR_USERNAME>\\AppData\\Local\\Programs\\Microsoft VS Code\\bin\\code\" --wait
 	editor = code --wait
+	excludesfile = C:\\Users\\Darka\\.gitignore_global
 [fetch]
   prune = true
 [help]
@@ -26,6 +26,56 @@
   enabled = true
 [tag]
   sort = version:refname
-[user]
-	email = <YOUR_GITHUB_EMAIL>
-	name = <YOUR_GITHUB_USERNAME>
+[include]
+	path = .gitconfig.local
+
+
+# ==============================================================================
+# DETAILED EXPLANATION OF CONFIGURATIONS
+# ==============================================================================
+#
+# --- [alias] (Shortcuts) ---
+# lg : Displays a sophisticated graphical history
+#      - Show the tree structure (--graph)
+#      - Uses color codes (blue for the hash, green for the relative date)
+#      - Displays the author and references (branches/tags)
+#
+# --- [color] ---
+# ui = auto : Enables syntax highlighting in the terminal for better readability.
+#
+# --- [commit] ---
+# verbose = true : Displays the "diff" (the changes) at the bottom of the commit message
+#                  in the editor, to verify what you are committing.
+#
+# --- [core] (System Settings) ---
+# autocrlf = true : Handles line breaks Windows (CRLF) vs Linux/Mac (LF).
+#                   Converts to LF on commit, and to CRLF on checkout (essential under Windows).
+# editor : Sets VS Code as the default editor
+#          The '--wait' option forces the terminal to wait for the file to close.
+# excludesfile : Path to a global .gitignore file (to ignore files on ALL your projects).
+#
+# --- [fetch] ---
+# prune = true : Automatically removes remote branches from your local list
+#                that have been deleted on the server (e.g., GitHub/GitLab).
+#
+# --- [help] ---
+# autocorrect = 20 : If you make a typo (e.g., 'git stats'), Git waits 2.0 seconds
+#                    (20 tenths) and then automatically executes the correct command.
+#
+# --- [init] ---
+# defaultBranch = main : Use 'main' instead of 'master' when creating a new repository (`git init`).
+#
+# --- [push] ---
+# autoSetupRemote = true : Allows you to perform a 'git push' on a new branch without having to
+#                          type the command '--set-upstream origin <branch-name>'.
+#
+# --- [rerere] (Reuse Recorded Resolution) ---
+# enabled = true : If you resolve a merge conflict, Git remembers it. If the same conflict
+#                  occurs later, Git will automatically apply your solution.
+#
+# --- [tag] ---
+# sort = version:refname : Sorts tags in an "intelligent" way (e.g., v1.10 will appear AFTER v1.2,
+#                          instead of a purely alphabetical sort).
+#
+# --- [include] ---
+# Identity [user] is loaded dynamically from the [.gitconfig.local] file above.
