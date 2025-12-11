@@ -3174,6 +3174,7 @@ local_settings.py
 # Git
 /.git-credentials
 .git-credentials.local
+.gitconfig.local
 
 # GitHub Actions
 .env.ci
