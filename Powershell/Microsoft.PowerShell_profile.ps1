@@ -570,7 +570,6 @@ function Update-GitRepositories {
       if ($reposSettings[$repoName] -eq $true) {
         # Keep only branches strictly named "main" or "master"
         $branchesToUpdate = @($branchesToUpdate | Where-Object { $_.Local -match '^(main|master)$' })
-        # $branchesToUpdate = $branchesToUpdate | Where-Object { $_.Local -match '^(main|master)$' }
 
         if ($branchesToUpdate) {
           Write-Host "ℹ️ Configured to pull MAIN branch only ℹ️" -ForegroundColor DarkYellow
@@ -1395,7 +1394,7 @@ function Get-SortedBranches {
     [array]$Branches
   )
 
-  # CORRECTION : S'assurer que $Branches est au moins un tableau vide pour les filtres
+  # Ensure that $Branches is at least an empty array for filters
   if ($null -eq $Branches) { $Branches = @() }
 
   ######## CONFIGURATION ########
@@ -1412,11 +1411,10 @@ function Get-SortedBranches {
   $allPriorityNames = $mainBranchNames + $devBranchNames
 
   # Sort other branches alphabetically
-  # $otherList  = $Branches | Where-Object { -not ($allPriorityNames -icontains $_.Local) } | Sort-Object Local
   $otherList  = @($Branches | Where-Object { -not ($allPriorityNames -icontains $_.Local) } | Sort-Object Local)
 
   ######## MERGE & RETURN ########
-  # CORRECTION : Utiliser l'opérateur virgule pour fusionner les tableaux, garantissant un tableau de sortie
+  # Use comma operator to merge arrays, ensuring an output array
   return ,($mainList + $devList + $otherList)
 }
 
@@ -2516,11 +2514,11 @@ function Show-NetworkOrSystemError {
   ######## ERROR TYPE : INTERNAL/SCRIPT ########
   # Script or Git processing error (fallback)
   else {
-    Write-Host "💥 Internal Script/Git processing error 💥" -ForegroundColor Red
+    Show-GracefulError -Message "💥 Internal Script/Git processing error 💥" -NoTrailingNewline
 
     # Display technical message for debugging
-    Write-Host -NoNewline "Details 👉 " -ForegroundColor Magenta
-    Write-Host "$Message" -ForegroundColor Red
+    Write-Host "Error message => " -ForegroundColor Red
+    Write-Host $Message -ForegroundColor DarkBlue
   }
 }
 
