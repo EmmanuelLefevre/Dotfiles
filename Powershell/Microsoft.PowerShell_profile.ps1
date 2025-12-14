@@ -75,7 +75,9 @@ function Get-LocationPathConfig {
 
   return @(
     ##########---------- REPOSITORIES (Important order for Update-GitRepositories() function) ----------##########
+    [PSCustomObject]@{ Name = "AngularTemplate";          Path = Join-Path $ProjectsPath   "AngularTemplate";                  IsRepo = $true;     IsOnlyMain = $true  },
     [PSCustomObject]@{ Name = "ArtiWave";                 Path = Join-Path $ProjectsPath   "ArtiWave";                         IsRepo = $true;     IsOnlyMain = $false },
+    [PSCustomObject]@{ Name = "Astrofalls";               Path = Join-Path $ProjectsPath   "Astrofalls";                       IsRepo = $true;     IsOnlyMain = $true  },
     [PSCustomObject]@{ Name = "Cours";                    Path = Join-Path $DesktopPath    "Cours";                            IsRepo = $true;     IsOnlyMain = $true  },
     [PSCustomObject]@{ Name = "DailyPush";                Path = Join-Path $DesktopPath    "DailyPush";                        IsRepo = $true;     IsOnlyMain = $false },
     [PSCustomObject]@{ Name = "DataScrub";                Path = Join-Path $ProjectsPath   "DataScrub";                        IsRepo = $true;     IsOnlyMain = $false },
@@ -2774,7 +2776,7 @@ function Initialize-GlobalGitIgnoreFile {
   $msg = "🔄 Creating it with default template 🔄"
 
   Write-Host -NoNewline (Get-CenteredPadding -RawMessage $msg)
-  Write-Host $msg -ForegroundColor Red
+  Write-Host $msg -ForegroundColor Green
 
   try {
     # Initialize content
