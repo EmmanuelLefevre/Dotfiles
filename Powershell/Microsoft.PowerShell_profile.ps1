@@ -77,7 +77,7 @@ function Get-LocationPathConfig {
     ##########---------- REPOSITORIES (Important order for Update-GitRepositories() function) ----------##########
     [PSCustomObject]@{ Name = "AngularTemplate";          Path = Join-Path $ProjectsPath   "AngularTemplate";                  IsRepo = $true;     IsOnlyMain = $false },
     [PSCustomObject]@{ Name = "ArtiWave";                 Path = Join-Path $ProjectsPath   "ArtiWave";                         IsRepo = $true;     IsOnlyMain = $false },
-    [PSCustomObject]@{ Name = "Astrofalls";               Path = Join-Path $ProjectsPath   "Astrofalls";                       IsRepo = $true;     IsOnlyMain = $false },
+    [PSCustomObject]@{ Name = "Astrofall";                Path = Join-Path $ProjectsPath   "Astrofall";                        IsRepo = $true;     IsOnlyMain = $false },
     [PSCustomObject]@{ Name = "CotonShop";                Path = Join-Path $ProjectsPath   "CotonShop";                        IsRepo = $true;     IsOnlyMain = $false },
     [PSCustomObject]@{ Name = "Cours";                    Path = Join-Path $DesktopPath    "Cours";                            IsRepo = $true;     IsOnlyMain = $true  },
     [PSCustomObject]@{ Name = "DailyPush";                Path = Join-Path $DesktopPath    "DailyPush";                        IsRepo = $true;     IsOnlyMain = $false },
