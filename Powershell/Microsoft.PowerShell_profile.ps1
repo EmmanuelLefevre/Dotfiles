@@ -2625,7 +2625,7 @@ function Show-UpdateSummary {
     ######## STATUS CENTERING ########
     $statLen = $statusText.Length
     # Manual adjustment for emojis that count double on screen
-    if ($statusText -match "✅|✨|⏩|🙈|❌|🐙") {
+    if ($statusText -match "✅|✨|⏩|❌") {
       $statLen += 1
     }
 
