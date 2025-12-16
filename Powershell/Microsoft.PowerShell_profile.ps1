@@ -601,7 +601,7 @@ function Update-GitRepositories {
           $fullMsg = $msgPrefix + $msgBranch + $msgSuffix
 
           Write-Host -NoNewline (Get-CenteredPadding -RawMessage $fullMsg)
-          Write-Host -NoNewline $msgMainBranch -ForegroundColor Magenta
+          Write-Host -NoNewline $msgPrefix -ForegroundColor Magenta
           Write-Host -NoNewline $msgBranch -ForegroundColor DarkYellow
           Write-Host -NoNewline $msgSuffix -ForegroundColor DarkYellow
           Write-Host ""
