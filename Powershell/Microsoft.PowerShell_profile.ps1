@@ -1,5 +1,5 @@
 # PROMPT THEMES  --------------------------------------
-oh-my-posh init pwsh --config "$env:USERPROFILE/Documents/PowerShell/powershell_profile_darka.json" | Invoke-Expression
+oh-my-posh init pwsh --config "$env:USERPROFILE/Documents/PowerShell/powershell_profile.json" | Invoke-Expression
 
 
 # USE SECURITY PROTOCOL TLS 1.2  --------------------------------------
