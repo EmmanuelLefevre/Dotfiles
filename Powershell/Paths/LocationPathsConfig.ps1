@@ -57,11 +57,11 @@ function Get-LocationPathConfig {
     [PSCustomObject]@{ Name = "Yam4";                     Path = Join-Path $ProjectsPath   "Yam4";                    IsRepo = $true;   IsOnlyMain = $false },
 
     ##########---------- NAVIGATION ONLY (go() function) ----------##########
-    [PSCustomObject]@{ Name = "desktop";                  Path = $DesktopPath;                  IsRepo = $false },
-    [PSCustomObject]@{ Name = "dwld";                     Path = Join-Path $HOME "Downloads";   IsRepo = $false },
-    [PSCustomObject]@{ Name = "home";                     Path = $HOME;                         IsRepo = $false },
-    [PSCustomObject]@{ Name = "nvim";                     Path = $NvimPath;                     IsRepo = $false },
-    [PSCustomObject]@{ Name = "profile";                  Path = Split-Path $PROFILE -Parent;   IsRepo = $false },
-    [PSCustomObject]@{ Name = "projects";                 Path = $ProjectsPath;                 IsRepo = $false }
+    [PSCustomObject]@{ Name = "desktop";               Path = $DesktopPath;                  IsRepo = $false },
+    [PSCustomObject]@{ Name = "dwld";                  Path = Join-Path $HOME "Downloads";   IsRepo = $false },
+    [PSCustomObject]@{ Name = "home";                  Path = $HOME;                         IsRepo = $false },
+    [PSCustomObject]@{ Name = "nvim";                  Path = $NvimPath;                     IsRepo = $false },
+    [PSCustomObject]@{ Name = "prof";                  Path = Split-Path $PROFILE -Parent;   IsRepo = $false },
+    [PSCustomObject]@{ Name = "prj";                   Path = $ProjectsPath;                 IsRepo = $false }
   )
 }
