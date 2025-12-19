@@ -30,7 +30,7 @@ $Global:TerminalWidth = 100
 
 
 # BOOTSTRAP & INITIALIZATION --------------------------------------
-$BootstrapFolders = "Paths", "Template", "Utils", "Services"
+$BootstrapFolders = "Paths", "Templates", "Utils", "Services"
 
 foreach ($Folder in $BootstrapFolders) {
   $FolderPath = Join-Path $PSScriptRoot $Folder

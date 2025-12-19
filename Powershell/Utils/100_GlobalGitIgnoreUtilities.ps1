@@ -394,7 +394,7 @@ function Get-DefaultGlobalGitIgnoreTemplate {
   # Silent verification of dependence
   if (-not (Get-Command Get-LocationPathConfig -ErrorAction SilentlyContinue)) { return @() }
 
-  $Config = Get-LocationPathConfig | Where-Object { $_.Name -eq "profile" }
+  $Config = Get-LocationPathConfig | Where-Object { $_.Name -eq "prof" }
   if ($null -eq $Config -or [string]::IsNullOrWhiteSpace($Config.Path)) { return @() }
 
   $TemplatePath = Join-Path $Config.Path "Templates"
