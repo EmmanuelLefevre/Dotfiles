@@ -11,6 +11,7 @@ Set-Alias ll ls
 Set-Alias neo nvim
 Set-Alias tt tree
 
+Set-Alias -Name gcg -Value Invoke-GitCleanGarbage
 Set-Alias -Name gir -Value Copy-GlobalGitIgnoreToRepo
 Set-Alias -Name gpull -Value Update-GitRepositories
 

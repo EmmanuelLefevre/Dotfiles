@@ -383,3 +383,33 @@ function colors {
   Write-Host " on $bgcolor"
   }
 }
+
+##########---------- clean .git folder (garbage collection) ----------##########
+function Invoke-GitCleanGarbage {
+  $msgPrefix= "🧹 Initiating cleanup of "
+  $msgFolder = ".git"
+  $msgSuffix = " folder..."
+
+  $fullMsg = $msgPrefix + $msgFolder + $msgSuffix
+
+  Write-Host ""
+  Write-Host -NoNewline (Get-CenteredPadding -RawMessage $fullMsg)
+  Write-Host $msgPrefix -ForegroundColor DarkCyan
+  Write-Host $msgFolder -ForegroundColor Magenta
+  Write-Host $msgSuffix -ForegroundColor DarkCyan
+
+  git gc --prune=now --aggressive
+
+  $msgPrefix= "✅ Complete. Your "
+  $msgFolder = ".git"
+  $msgSuffix = " folder is clean and fast again."
+
+  $fullMsg = $msgPrefix + $msgFolder + $msgSuffix
+
+  Write-Host ""
+  Write-Host -NoNewline (Get-CenteredPadding -RawMessage $fullMsg)
+  Write-Host $msgPrefix -ForegroundColor DarkCyan
+  Write-Host $msgFolder -ForegroundColor Magenta
+  Write-Host $msgSuffix -ForegroundColor DarkCyan
+  Write-Host ""
+}
