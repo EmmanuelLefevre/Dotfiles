@@ -580,7 +580,7 @@ function Invoke-SafeCheckout {
 
   ######## GUARD CLAUSE : CHECKOUT FAILED ########
   if ($LASTEXITCODE -ne 0) {
-    Write-Host "⚠️ "
+    Write-Host -NoNewline "⚠️ "
     Write-Host -NoNewline "Could not checkout " -ForegroundColor Magenta
     Write-Host -NoNewline "$TargetBranch" -ForegroundColor Red
     Write-Host " !!! ⚠️" -ForegroundColor Magenta
