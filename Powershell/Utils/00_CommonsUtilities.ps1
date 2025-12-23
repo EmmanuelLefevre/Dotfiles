@@ -242,6 +242,34 @@ function touch {
   }
 }
 
+##########---------- Remove item smart ----------##########
+function Remove-ItemSmart {
+  param (
+    [Parameter(Mandatory=$true, ValueFromPipeline=$true)]
+    [string]$Path,
+
+    # Add a -rf switch to mimic Unix behavior (Recursive + Force)
+    [switch]$rf
+  )
+
+  if (Test-Path $Path) {
+    try {
+      if ($rf) {
+        Remove-Item -Path $Path -Force -Recurse -ErrorAction Stop
+      }
+      else {
+        Remove-Item -Path $Path -ErrorAction Stop
+      }
+    }
+    catch {
+      Show-GracefulError -Message "❌ Unable to delete : $Path ❌" -ErrorDetails $_ -NoCenter
+    }
+  }
+  else {
+    Show-GracefulError -Message "⚠️ Path not found : $Path ⚠️" -NoCenter
+  }
+}
+
 ##########---------- Jump to a specific directory ----------##########
 function go {
   param (
