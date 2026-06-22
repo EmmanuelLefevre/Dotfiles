@@ -41,6 +41,7 @@ function Get-LocationPathConfig {
     [PSCustomObject]@{ Name = "GestForm";                 Path = Join-Path $ProjectsPath   "GestForm";                IsRepo = $true;   IsOnlyMain = $false },
     [PSCustomObject]@{ Name = "GitHubProfileIcons";       Path = Join-Path $PicturesPath   "GitHubProfileIcons";      IsRepo = $true;   IsOnlyMain = $true  },
     [PSCustomObject]@{ Name = "GoogleSheets";             Path = Join-Path $DesktopPath    "GoogleSheets";            IsRepo = $true;   IsOnlyMain = $true  },
+    [PSCustomObject]@{ Name = "GrowLogic";                Path = Join-Path $ProjectsPath   "GrowLogic";               IsRepo = $true;   IsOnlyMain = $false },
     [PSCustomObject]@{ Name = "GPull";                    Path = Join-Path $ProjectsPath   "GPull";                   IsRepo = $true;   IsOnlyMain = $false },
     [PSCustomObject]@{ Name = "LeCabinetDeCuriosites";    Path = Join-Path $ProjectsPath   "LeCabinetDeCuriosites";   IsRepo = $true;   IsOnlyMain = $false },
     [PSCustomObject]@{ Name = "IAmEmmanuelLefevre";       Path = Join-Path $ProjectsPath   "IAmEmmanuelLefevre";      IsRepo = $true;   IsOnlyMain = $false },
