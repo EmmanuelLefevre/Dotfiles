@@ -10,17 +10,19 @@ function Get-LocationPathConfig {
 
   # Definition of universal root folders
   # Join-Path automatically handles "/"" or "\"" depending on specific OS
-  $DesktopPath   = Join-Path $HOME "Desktop"
-  $ProjectsPath  = Join-Path $DesktopPath "Projects"
-  $DocumentsPath = Join-Path $HOME "Documents"
-  $PicturesPath  = Join-Path $HOME "Pictures"
+  $DesktopPath    = Join-Path $HOME "Desktop"
+  $ProjectsPath   = Join-Path $DesktopPath "Projects"
+  $DocumentsPath  = Join-Path $HOME "Documents"
+  $PicturesPath   = Join-Path $HOME "Pictures"
 
   # For nvim, path changes depending on OS
   if ($Sys.IsMacOS -or $Sys.IsLinux) {
     $NvimPath = Join-Path $HOME ".config/nvim"
+    $PowershellPath = Join-Path $HOME ".config/powershell"
   }
   else {
     $NvimPath = Join-Path $env:LOCALAPPDATA "nvim"
+    $PowershellPath = Join-Path $DocumentsPath "PowerShell"
   }
 
   return @(
@@ -42,6 +44,7 @@ function Get-LocationPathConfig {
     [PSCustomObject]@{ Name = "GitHubProfileIcons";       Path = Join-Path $PicturesPath   "GitHubProfileIcons";      IsRepo = $true;   IsOnlyMain = $true  },
     [PSCustomObject]@{ Name = "GoogleSheets";             Path = Join-Path $DesktopPath    "GoogleSheets";            IsRepo = $true;   IsOnlyMain = $true  },
     [PSCustomObject]@{ Name = "GPull";                    Path = Join-Path $ProjectsPath   "GPull";                   IsRepo = $true;   IsOnlyMain = $false },
+    [PSCustomObject]@{ Name = "GrowLogic";                Path = Join-Path $ProjectsPath   "GrowLogic";               IsRepo = $true;   IsOnlyMain = $false },
     [PSCustomObject]@{ Name = "LeCabinetDeCuriosites";    Path = Join-Path $ProjectsPath   "LeCabinetDeCuriosites";   IsRepo = $true;   IsOnlyMain = $false },
     [PSCustomObject]@{ Name = "IAmEmmanuelLefevre";       Path = Join-Path $ProjectsPath   "IAmEmmanuelLefevre";      IsRepo = $true;   IsOnlyMain = $false },
     [PSCustomObject]@{ Name = "MarkdownImg";              Path = Join-Path $DesktopPath    "MarkdownImg";             IsRepo = $true;   IsOnlyMain = $true  },
@@ -62,6 +65,7 @@ function Get-LocationPathConfig {
     [PSCustomObject]@{ Name = "home";                     Path = $HOME;                         IsRepo = $false },
     [PSCustomObject]@{ Name = "nvim";                     Path = $NvimPath;                     IsRepo = $false },
     [PSCustomObject]@{ Name = "prof";                     Path = Split-Path $PROFILE -Parent;   IsRepo = $false },
-    [PSCustomObject]@{ Name = "prj";                      Path = $ProjectsPath;                 IsRepo = $false }
+    [PSCustomObject]@{ Name = "prj";                      Path = $ProjectsPath;                 IsRepo = $false },
+    [PSCustomObject]@{ Name = "pwsh";                     Path = $PowershellPath;               IsRepo = $false }
   )
 }
