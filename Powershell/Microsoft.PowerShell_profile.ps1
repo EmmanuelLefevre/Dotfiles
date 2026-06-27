@@ -46,3 +46,4 @@ foreach ($Folder in $BootstrapFolders) {
 
 # STARTUP LOGIC --------------------------------------
 Set-LoadGlobalGitIgnore
+Sync-Dotfiles
